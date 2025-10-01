@@ -53,7 +53,12 @@ export interface UseCase extends DeliveryElement {
  * ユースケースのステップ（段階的詳細化対応）
  */
 export interface UseCaseStep {
-  stepNumber: number;
+  // オプショナルなstepId（開発者が指定、戻り先参照に使用）
+  stepId?: string;
+  
+  // 実行時に配列インデックスから自動計算される
+  readonly stepNumber?: number;
+  
   actor: string | ActorRef;
   action: string;
   expectedResult: string;
@@ -66,17 +71,6 @@ export interface UseCaseStep {
 }
 
 /**
- * stepId拡張されたUseCaseStep（stepNumber自動管理用）
- */
-export interface EnhancedUseCaseStep extends Omit<UseCaseStep, 'stepNumber'> {
-  // オプショナルなstepId（開発者が指定、戻り先参照に使用）
-  stepId?: string;
-  
-  // 実行時に配列インデックスから自動計算される
-  readonly stepNumber?: number;
-}
-
-/**
  * 代替フロー（段階的詳細化対応）
  */
 export interface AlternativeFlow {
@@ -84,21 +78,14 @@ export interface AlternativeFlow {
   name: string;
   condition: string;
   steps: UseCaseStep[];
-  returnToStep?: number;
+  
+  // stepIdベースの戻り先指定（統一）
+  returnToStepId?: string;
+  
   // 詳細化フィールド（オプション）
   probability?: 'high' | 'medium' | 'low';
   impact?: 'critical' | 'major' | 'minor';
   mitigation?: string[];
-}
-
-/**
- * stepId対応の代替フロー
- */
-export interface EnhancedAlternativeFlow extends Omit<AlternativeFlow, 'steps' | 'returnToStep'> {
-  steps: EnhancedUseCaseStep[];
-  
-  // stepIdベースの戻り先指定（統一）
-  returnToStepId?: string;
 }
 
 /**
@@ -107,14 +94,6 @@ export interface EnhancedAlternativeFlow extends Omit<AlternativeFlow, 'steps' |
 export interface ActorRef {
   readonly actorId: string;
   readonly type: 'actor-ref';
-}
-
-/**
- * 拡張されたUseCase（stepId対応）
- */
-export interface EnhancedUseCase extends Omit<UseCase, 'mainFlow' | 'alternativeFlows'> {
-  mainFlow: EnhancedUseCaseStep[];
-  alternativeFlows?: EnhancedAlternativeFlow[];
 }
 
 /**

@@ -68,44 +68,32 @@ export const userLogin: UseCase = {
     'セキュリティログが記録される'
   ],
   mainFlow: [
-    {
-      stepNumber: 1,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: 'トップページまたは商品ページで「ログイン」ボタンをクリック',
       expectedResult: 'ログイン画面が表示される',
       notes: 'ログイン画面への遷移'
     },
-    {
-      stepNumber: 2,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: 'メールアドレスとパスワードを入力し、「ログイン」ボタンをクリック',
       expectedResult: '入力された認証情報がサーバーに送信される',
       notes: '認証情報の入力'
     },
-    {
-      stepNumber: 3,
-      actor: typedActorRef('validation-service'),
+    {      actor: typedActorRef('validation-service'),
       action: '入力値の形式チェック（メールアドレス形式、パスワード長など）を実行',
       expectedResult: '入力値が正しい形式であることが確認される',
       notes: '入力値バリデーション'
     },
-    {
-      stepNumber: 4,
-      actor: typedActorRef('security-service'),
+    {      actor: typedActorRef('security-service'),
       action: 'データベースの認証情報と照合し、パスワードハッシュを検証',
       expectedResult: '認証が成功または失敗の結果が返される',
       notes: '認証処理の実行'
     },
-    {
-      stepNumber: 5,
-      actor: typedActorRef('security-service'),
+    {      actor: typedActorRef('security-service'),
       action: '認証成功時にセッショントークンを生成し、セッション情報をデータベースに保存',
       expectedResult: 'セキュアなセッションが確立される',
       notes: 'セッション確立'
     },
-    {
-      stepNumber: 6,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: 'ログイン成功画面を確認し、元のページまたはマイページに遷移',
       expectedResult: 'ログイン状態でサイト内を利用できるようになる',
       notes: 'ログイン完了'
@@ -117,130 +105,100 @@ export const userLogin: UseCase = {
       name: '認証情報不正',
       condition: 'メールアドレスまたはパスワードが間違っている',
       steps: [
-        {
-          stepNumber: 1,
-          actor: typedActorRef('security-service'),
+        {          actor: typedActorRef('security-service'),
           action: '認証失敗をログに記録し、試行回数をカウント',
           expectedResult: '認証失敗が安全に処理され、セキュリティログが更新される'
         },
-        {
-          stepNumber: 2,
-          actor: typedActorRef('customer'),
+        {          actor: typedActorRef('customer'),
           action: 'エラーメッセージを確認し、正しい認証情報を再入力',
           expectedResult: '「メールアドレスまたはパスワードが正しくありません」というメッセージが表示'
         },
-        {
-          stepNumber: 3,
-          actor: typedActorRef('security-service'),
+        {          actor: typedActorRef('security-service'),
           action: '連続失敗回数が閾値（3回）に近づいた場合は警告を表示',
           expectedResult: 'アカウントロック直前であることが警告される'
         }
       ],
-      returnToStep: 2
+      returnToStepId: 'execute-search'
     },
     {
       id: 'account-locked',
       name: 'アカウントロック',
       condition: '連続ログイン失敗によりアカウントがロックされている',
       steps: [
-        {
-          stepNumber: 1,
-          actor: typedActorRef('security-service'),
+        {          actor: typedActorRef('security-service'),
           action: 'アカウントロック状態を確認し、ロック解除時刻を算出',
           expectedResult: 'ロック状態とロック解除予定時刻が明確になる'
         },
-        {
-          stepNumber: 2,
-          actor: typedActorRef('email-service'),
+        {          actor: typedActorRef('email-service'),
           action: 'アカウントロック通知メールを送信（不正アクセス対策の説明付き）',
           expectedResult: '本人にセキュリティ対策が通知される'
         },
-        {
-          stepNumber: 3,
-          actor: typedActorRef('customer'),
+        {          actor: typedActorRef('customer'),
           action: 'パスワードリセット手続きまたは時間経過後の再試行を選択',
           expectedResult: 'アカウント復旧手順が明確に案内される'
         }
       ],
-      returnToStep: 1
+      returnToStepId: 'enter-search-keyword'
     },
     {
       id: 'suspicious-login',
       name: '不審なログイン',
       condition: '普段と異なるデバイス・IPアドレスからのアクセス',
       steps: [
-        {
-          stepNumber: 1,
-          actor: typedActorRef('security-service'),
+        {          actor: typedActorRef('security-service'),
           action: 'デバイス・地理的位置・アクセス時間の異常を検知',
           expectedResult: '不審なアクセスパターンが特定される'
         },
-        {
-          stepNumber: 2,
-          actor: typedActorRef('sms-service'),
+        {          actor: typedActorRef('sms-service'),
           action: '登録済み電話番号にSMS認証コードを送信',
           expectedResult: '追加認証のためのSMSが送信される'
         },
-        {
-          stepNumber: 3,
-          actor: typedActorRef('customer'),
+        {          actor: typedActorRef('customer'),
           action: 'SMS認証コードを入力して本人確認を完了',
           expectedResult: '追加認証により安全にログインが完了される'
         },
-        {
-          stepNumber: 4,
-          actor: typedActorRef('email-service'),
+        {          actor: typedActorRef('email-service'),
           action: '新しいデバイスからのログイン通知メールを送信',
           expectedResult: '本人に新デバイスでのアクセスが通知される'
         }
       ],
-      returnToStep: 6
+      returnToStepId: 'filter-results'
     },
     {
       id: 'session-conflict',
       name: 'セッション競合',
       condition: '同一アカウントが上限を超える数のデバイスでログイン試行',
       steps: [
-        {
-          stepNumber: 1,
-          actor: typedActorRef('security-service'),
+        {          actor: typedActorRef('security-service'),
           action: '既存セッション数を確認し、上限超過を検知',
           expectedResult: 'セッション数の制限が適切に管理される'
         },
-        {
-          stepNumber: 2,
-          actor: typedActorRef('customer'),
+        {          actor: typedActorRef('customer'),
           action: '既存セッションの終了または新しいログインの拒否を選択',
           expectedResult: 'セッション管理画面で既存ログインの状況が確認できる'
         },
-        {
-          stepNumber: 3,
-          actor: typedActorRef('security-service'),
+        {          actor: typedActorRef('security-service'),
           action: '選択されたセッションを終了し、新しいセッションを開始',
           expectedResult: 'セッション数の制限内で適切にログインが管理される'
         }
       ],
-      returnToStep: 5
+      returnToStepId: 'generate-recommendations'
     },
     {
       id: 'maintenance-mode',
       name: 'メンテナンスモード',
       condition: 'システムメンテナンス中のためログイン機能が制限されている',
       steps: [
-        {
-          stepNumber: 1,
-          actor: typedActorRef('database-system'),
+        {          actor: typedActorRef('database-system'),
           action: 'メンテナンス状態を確認し、終了予定時刻を取得',
           expectedResult: 'メンテナンス情報が正確に取得される'
         },
-        {
-          stepNumber: 2,
-          actor: typedActorRef('customer'),
+        {          actor: typedActorRef('customer'),
           action: 'メンテナンス情報を確認し、復旧後の再アクセスを計画',
           expectedResult: 'メンテナンス終了予定時刻と代替手段が案内される'
         }
       ],
-      returnToStep: 1
+      returnToStepId: 'enter-search-keyword'
     }
   ],
   businessValue: 'ユーザーの継続利用促進とセキュアな認証基盤の提供',
@@ -324,58 +282,42 @@ export const passwordReset: UseCase = {
     'セキュリティログが記録される'
   ],
   mainFlow: [
-    {
-      stepNumber: 1,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: 'ログイン画面で「パスワードを忘れた方」リンクをクリック',
       expectedResult: 'パスワードリセット申請画面が表示される',
       notes: 'パスワードリセット開始'
     },
-    {
-      stepNumber: 2,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: '登録済みメールアドレスを入力し、「リセット申請」ボタンをクリック',
       expectedResult: 'メールアドレスがサーバーに送信される',
       notes: 'メールアドレス入力'
     },
-    {
-      stepNumber: 3,
-      actor: typedActorRef('security-service'),
+    {      actor: typedActorRef('security-service'),
       action: 'メールアドレスの存在確認とリセットトークンの生成（有効期限30分）',
       expectedResult: 'セキュアなリセットトークンが生成される',
       notes: 'リセットトークン生成'
     },
-    {
-      stepNumber: 4,
-      actor: typedActorRef('email-service'),
+    {      actor: typedActorRef('email-service'),
       action: 'パスワードリセット用のリンクを含むメールを送信',
       expectedResult: 'ユーザーがパスワードリセットメールを受信する',
       notes: 'リセットメール送信'
     },
-    {
-      stepNumber: 5,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: 'メール内のリセットリンクをクリックして、新しいパスワード設定画面にアクセス',
       expectedResult: 'パスワード設定画面が表示される',
       notes: 'リセットリンクアクセス'
     },
-    {
-      stepNumber: 6,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: '新しいパスワードを2回入力し、「パスワード更新」ボタンをクリック',
       expectedResult: '新しいパスワードがサーバーに送信される',
       notes: '新パスワード設定'
     },
-    {
-      stepNumber: 7,
-      actor: typedActorRef('security-service'),
+    {      actor: typedActorRef('security-service'),
       action: 'パスワードをハッシュ化してデータベースを更新し、リセットトークンを無効化',
       expectedResult: 'パスワードが安全に更新される',
       notes: 'パスワード更新処理'
     },
-    {
-      stepNumber: 8,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: 'パスワード更新完了画面を確認し、新しいパスワードでログイン',
       expectedResult: '新しいパスワードでシステムにアクセスできる',
       notes: 'パスワードリセット完了'
@@ -387,40 +329,32 @@ export const passwordReset: UseCase = {
       name: 'メールアドレス未登録',
       condition: '入力されたメールアドレスがシステムに存在しない',
       steps: [
-        {
-          stepNumber: 1,
-          actor: typedActorRef('security-service'),
+        {          actor: typedActorRef('security-service'),
           action: 'セキュリティのため、存在しないメールアドレスでも成功メッセージを表示',
           expectedResult: '攻撃者にアカウント存在情報を与えない'
         },
-        {
-          stepNumber: 2,
-          actor: typedActorRef('customer'),
+        {          actor: typedActorRef('customer'),
           action: 'メール受信を待つが、実際にはメールは送信されない',
           expectedResult: 'アカウント列挙攻撃を防止'
         }
       ],
-      returnToStep: 1
+      returnToStepId: 'enter-search-keyword'
     },
     {
       id: 'token-expired',
       name: 'リセットトークン期限切れ',
       condition: 'リセットリンクをクリックしたが、トークンの有効期限（30分）が切れている',
       steps: [
-        {
-          stepNumber: 1,
-          actor: typedActorRef('security-service'),
+        {          actor: typedActorRef('security-service'),
           action: 'トークンの有効期限をチェックし、期限切れエラーを返す',
           expectedResult: 'セキュリティを保持してトークンを無効化'
         },
-        {
-          stepNumber: 2,
-          actor: typedActorRef('customer'),
+        {          actor: typedActorRef('customer'),
           action: '期限切れメッセージを確認し、新しいリセット申請を実行',
           expectedResult: '新しいパスワードリセット手続きを開始'
         }
       ],
-      returnToStep: 1
+      returnToStepId: 'enter-search-keyword'
     }
   ],
   businessValue: 'ユーザビリティ向上とアカウント復旧によるユーザー離脱防止',
@@ -495,30 +429,22 @@ export const userLogout: UseCase = {
     'ページがゲスト状態に更新される'
   ],
   mainFlow: [
-    {
-      stepNumber: 1,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: 'ヘッダーまたはメニューの「ログアウト」ボタンをクリック',
       expectedResult: 'ログアウト処理が開始される',
       notes: 'ログアウト開始'
     },
-    {
-      stepNumber: 2,
-      actor: typedActorRef('security-service'),
+    {      actor: typedActorRef('security-service'),
       action: '現在のセッションをデータベースから削除し、セッションを無効化',
       expectedResult: 'セッション情報が完全に削除される',
       notes: 'セッション無効化'
     },
-    {
-      stepNumber: 3,
-      actor: typedActorRef('security-service'),
+    {      actor: typedActorRef('security-service'),
       action: 'ログアウトログを記録し、セキュリティ監査証跡を作成',
       expectedResult: 'ログアウト履歴が安全に記録される',
       notes: 'ログアウトログ記録'
     },
-    {
-      stepNumber: 4,
-      actor: typedActorRef('customer'),
+    {      actor: typedActorRef('customer'),
       action: 'ログアウト完了画面またはトップページが表示されることを確認',
       expectedResult: 'ゲスト状態でページが表示され、ログイン専用機能にアクセスできない',
       notes: 'ログアウト完了'
@@ -530,20 +456,16 @@ export const userLogout: UseCase = {
       name: 'セッションタイムアウト',
       condition: 'セッションが自動的にタイムアウトした',
       steps: [
-        {
-          stepNumber: 1,
-          actor: typedActorRef('security-service'),
+        {          actor: typedActorRef('security-service'),
           action: 'タイムアウトしたセッションを自動削除し、ログを記録',
           expectedResult: '期限切れセッションが安全に処理される'
         },
-        {
-          stepNumber: 2,
-          actor: typedActorRef('customer'),
+        {          actor: typedActorRef('customer'),
           action: 'セッション期限切れメッセージを確認',
           expectedResult: '「セッションが期限切れです。再度ログインしてください」というメッセージが表示'
         }
       ],
-      returnToStep: 4
+      returnToStepId: 'fetch-product-data'
     }
   ],
   businessValue: 'セキュリティ強化と適切なセッション管理',

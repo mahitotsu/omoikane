@@ -4,46 +4,14 @@
  * 戻り先指定はstepIdに統一
  */
 
-import type { AlternativeFlow as BaseAlternativeFlow, UseCase as BaseUseCase, UseCaseStep as BaseUseCaseStep } from './delivery-elements';
-
-// ===== 推奨解決策: stepId拡張 + 自動番号生成 =====
-
-/**
- * stepIdを追加したUseCaseStep
- * stepNumberは配列位置から自動計算
- */
-export interface EnhancedUseCaseStep extends Omit<BaseUseCaseStep, 'stepNumber'> {
-  // オプショナルなstepId（開発者が指定、戻り先参照に使用）
-  stepId?: string;
-  
-  // 実行時に配列インデックスから自動計算される
-  readonly stepNumber?: number;
-}
-
-/**
- * stepId対応の代替フロー
- */
-export interface EnhancedAlternativeFlow extends Omit<BaseAlternativeFlow, 'steps' | 'returnToStep'> {
-  steps: EnhancedUseCaseStep[];
-  
-  // stepIdベースの戻り先指定（統一）
-  returnToStepId?: string;
-}
-
-/**
- * 拡張されたUseCase
- */
-export interface EnhancedUseCase extends Omit<BaseUseCase, 'mainFlow' | 'alternativeFlows'> {
-  mainFlow: EnhancedUseCaseStep[];
-  alternativeFlows?: EnhancedAlternativeFlow[];
-}
+import type { UseCase, UseCaseStep } from './delivery-elements';
 
 // ===== ユーティリティ関数 =====
 
 /**
  * stepNumberを自動計算してUseCaseStepを enrichする
  */
-export function enrichStepsWithNumbers(steps: EnhancedUseCaseStep[]): BaseUseCaseStep[] {
+export function enrichStepsWithNumbers(steps: UseCaseStep[]): UseCaseStep[] {
   return steps.map((step, index) => ({
     ...step,
     stepNumber: index + 1
@@ -51,46 +19,12 @@ export function enrichStepsWithNumbers(steps: EnhancedUseCaseStep[]): BaseUseCas
 }
 
 /**
- * UseCaseを enrichして実行可能な形式に変換
- */
-export function enrichUseCase(enhancedUseCase: EnhancedUseCase): BaseUseCase {
-  const enrichedMainFlow = enrichStepsWithNumbers(enhancedUseCase.mainFlow);
-  
-  const enrichedAlternativeFlows = enhancedUseCase.alternativeFlows?.map(flow => {
-    const enrichedSteps = enrichStepsWithNumbers(flow.steps);
-    
-    // returnToStepIdからstepNumberに変換
-    let returnToStep: number | undefined;
-    if (flow.returnToStepId) {
-      const targetStepIndex = enhancedUseCase.mainFlow.findIndex(
-        step => step.stepId === flow.returnToStepId
-      );
-      if (targetStepIndex >= 0) {
-        returnToStep = targetStepIndex + 1;
-      }
-    }
-    
-    return {
-      ...flow,
-      steps: enrichedSteps,
-      returnToStep
-    };
-  });
-  
-  return {
-    ...enhancedUseCase,
-    mainFlow: enrichedMainFlow,
-    alternativeFlows: enrichedAlternativeFlows
-  };
-}
-
-/**
  * stepIdまたはstepNumberでステップを検索
  */
 export function findStepByIdOrNumber(
-  useCase: EnhancedUseCase, 
+  useCase: UseCase, 
   identifier: string | number
-): { step: EnhancedUseCaseStep; stepNumber: number } | undefined {
+): { step: UseCaseStep; stepNumber: number } | undefined {
   for (let i = 0; i < useCase.mainFlow.length; i++) {
     const step = useCase.mainFlow[i];
     if (!step) continue;
@@ -113,7 +47,7 @@ export function findStepByIdOrNumber(
  * 改善された書き方の例
  * stepNumberを手動管理する必要がない
  */
-export const improvedOrderProcessing: EnhancedUseCase = {
+export const improvedOrderProcessing: UseCase = {
   id: 'order-processing',
   type: 'usecase', 
   owner: 'business-analyst',
@@ -191,6 +125,3 @@ export const improvedOrderProcessing: EnhancedUseCase = {
   businessValue: '顧客の購買体験向上',
   priority: 'high'
 };
-
-// 実際に使用する際は enrichして標準のUseCaseに変換
-export const standardOrderProcessing: BaseUseCase = enrichUseCase(improvedOrderProcessing);

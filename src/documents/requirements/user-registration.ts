@@ -2,7 +2,7 @@
  * EC サイト - ユーザー登録ユースケース定義
  */
 
-import type { Actor, UseCase } from '../../types/delivery-elements';
+import type { Actor } from '../../types/delivery-elements';
 import { typedActorRef } from '../../types/typed-references';
 
 // アクター定義
@@ -92,14 +92,14 @@ export const userRegistration: UseCase = {
   ],
   mainFlow: [
     {
-      stepNumber: 1,
+      stepId: 'access-registration',
       actor: typedActorRef('customer'),
       action: '新規登録ページにアクセスする',
       expectedResult: '登録フォームが表示される',
       performanceRequirement: '3秒以内にページ表示'
     },
     {
-      stepNumber: 2,
+      stepId: 'input-user-info',
       actor: typedActorRef('customer'),
       action: 'メールアドレス、パスワード、基本情報を入力する',
       expectedResult: '入力内容がリアルタイムでバリデーションされる',
@@ -113,7 +113,7 @@ export const userRegistration: UseCase = {
       errorHandling: ['入力エラー時は該当フィールドに赤枠表示', 'エラーメッセージをフィールド下に表示']
     },
     {
-      stepNumber: 3,
+      stepId: 'validate-data',
       actor: typedActorRef('validation-service'),
       action: '入力データの詳細バリデーションを実行する',
       expectedResult: 'バリデーション結果を返す',
@@ -125,7 +125,7 @@ export const userRegistration: UseCase = {
       errorHandling: ['重複時はエラーメッセージ表示', 'DB接続エラー時はシステムエラー画面']
     },
     {
-      stepNumber: 4,
+      stepId: 'agree-terms',
       actor: typedActorRef('customer'),
       action: '利用規約に同意し、「登録」ボタンをクリックする',
       expectedResult: 'アカウント作成処理が開始される',
@@ -133,7 +133,7 @@ export const userRegistration: UseCase = {
       errorHandling: ['未同意時は登録ボタン無効化']
     },
     {
-      stepNumber: 5,
+      stepId: 'save-user-data',
       actor: typedActorRef('database-system'),
       action: 'ユーザーデータを永続化する',
       expectedResult: 'ユーザーレコードが作成される',
@@ -141,7 +141,7 @@ export const userRegistration: UseCase = {
       errorHandling: ['DB障害時はロールバック', '一意制約違反時はエラー返却']
     },
     {
-      stepNumber: 6,
+      stepId: 'send-confirmation-email',
       actor: typedActorRef('email-service'),
       action: '確認メールを送信する',
       expectedResult: '顧客のメールアドレスに確認メールが届く',
@@ -149,7 +149,7 @@ export const userRegistration: UseCase = {
       errorHandling: ['メール送信失敗時はリトライ機構作動', '3回失敗時は管理者通知']
     },
     {
-      stepNumber: 7,
+      stepId: 'click-confirmation-link',
       actor: typedActorRef('customer'),
       action: 'メール内の確認リンクをクリックする',
       expectedResult: 'アカウントがアクティベートされる',
@@ -157,7 +157,7 @@ export const userRegistration: UseCase = {
       errorHandling: ['無効トークン時はエラーページ表示', '期限切れ時は再送信オプション提供']
     },
     {
-      stepNumber: 8,
+      stepId: 'auto-login',
       actor: typedActorRef('customer'),
       action: '自動的にログインされる',
       expectedResult: 'ユーザーダッシュボードが表示される',
@@ -171,25 +171,25 @@ export const userRegistration: UseCase = {
       condition: '入力されたメールアドレスが既に登録済み',
       steps: [
         {
-          stepNumber: 1,
+          stepId: 'detect-duplicate-email',
           actor: typedActorRef('validation-service'),
           action: 'メールアドレスの重複をデータベースで確認し、エラーを生成',
           expectedResult: '重複状態が安全に検知され、適切なエラーメッセージが作成される'
         },
         {
-          stepNumber: 2,
+          stepId: 'show-duplicate-options',
           actor: typedActorRef('customer'),
           action: '重複エラーメッセージを確認し、ログインページへの誘導または別メールアドレス入力を選択',
           expectedResult: '「このメールアドレスは既に登録されています。ログインしますか？」の選択肢が表示される'
         },
         {
-          stepNumber: 3,
+          stepId: 'password-reset-guidance',
           actor: typedActorRef('customer'),
           action: 'パスワード忘れの場合はパスワードリセット手続きを実行',
           expectedResult: 'パスワードリセットフローに適切に案内される'
         }
       ],
-      returnToStep: 2
+      returnToStepId: 'input-user-info'
     },
     {
       id: 'password-strength-failure',
@@ -197,25 +197,25 @@ export const userRegistration: UseCase = {
       condition: '入力されたパスワードが強度要件を満たしていない',
       steps: [
         {
-          stepNumber: 1,
+          stepId: 'check-password-strength',
           actor: typedActorRef('validation-service'),
           action: 'パスワード強度（長さ・複雑性・辞書攻撃耐性）を詳細チェック',
           expectedResult: '不足している要件が具体的に特定される'
         },
         {
-          stepNumber: 2,
+          stepId: 'retry-password-input',
           actor: typedActorRef('customer'),
           action: 'パスワード強度インジケーターを参考に、要件を満たすパスワードを再入力',
           expectedResult: 'リアルタイムで強度が表示され、要件クリアまで案内される'
         },
         {
-          stepNumber: 3,
+          stepId: 'suggest-secure-password',
           actor: typedActorRef('validation-service'),
           action: 'パスワード生成支援（安全なパスワードの提案）を提供',
           expectedResult: '強度要件を満たすパスワード例が提示される'
         }
       ],
-      returnToStep: 3
+      returnToStepId: 'validate-data'
     },
     {
       id: 'email-verification-timeout',
@@ -223,25 +223,25 @@ export const userRegistration: UseCase = {
       condition: 'メール認証の有効期限（24時間）が切れている',
       steps: [
         {
-          stepNumber: 1,
+          stepId: 'check-token-validity',
           actor: typedActorRef('email-service'),
           action: '認証リンクの有効期限を確認し、期限切れを検知',
           expectedResult: 'タイムアウト状態が適切に判定される'
         },
         {
-          stepNumber: 2,
+          stepId: 'request-resend-email',
           actor: typedActorRef('customer'),
           action: '認証メール再送信を要求し、新しい認証リンクで手続きを完了',
           expectedResult: '新しい認証メールが送信され、24時間の有効期限が設定される'
         },
         {
-          stepNumber: 3,
+          stepId: 'invalidate-old-token',
           actor: typedActorRef('database-system'),
           action: '期限切れの認証トークンを無効化し、新しいトークンを生成',
           expectedResult: 'セキュリティが保持され、新しい認証フローが開始される'
         }
       ],
-      returnToStep: 6
+      returnToStepId: 'send-confirmation-email'
     },
     {
       id: 'email-delivery-failure',
@@ -249,25 +249,25 @@ export const userRegistration: UseCase = {
       condition: '確認メールの送信が失敗または顧客に届かない',
       steps: [
         {
-          stepNumber: 1,
+          stepId: 'analyze-delivery-failure',
           actor: typedActorRef('email-service'),
           action: 'メール送信エラー（無効アドレス・サーバー障害・スパムフィルター）を分析',
           expectedResult: '配信失敗の具体的な原因が特定される'
         },
         {
-          stepNumber: 2,
+          stepId: 'choose-alternative-method',
           actor: typedActorRef('customer'),
           action: 'メールアドレスの修正または別の認証方法（SMS認証）を選択',
           expectedResult: '代替認証手段が利用可能になる'
         },
         {
-          stepNumber: 3,
+          stepId: 'resend-to-corrected-email',
           actor: typedActorRef('email-service'),
           action: '修正されたメールアドレスに認証メールを再送信',
           expectedResult: '正しいメールアドレスに確実に配信される'
         }
       ],
-      returnToStep: 5
+      returnToStepId: 'save-user-data'
     },
     {
       id: 'bot-registration-attempt',
@@ -275,25 +275,25 @@ export const userRegistration: UseCase = {
       condition: '自動化ツールやBotによる大量登録が検知された',
       steps: [
         {
-          stepNumber: 1,
+          stepId: 'detect-bot-activity',
           actor: typedActorRef('validation-service'),
           action: 'CAPTCHA失敗・異常な登録速度・疑わしいIPアドレスを検知',
           expectedResult: 'Bot活動が適切に特定される'
         },
         {
-          stepNumber: 2,
+          stepId: 'additional-verification',
           actor: typedActorRef('customer'),
           action: '追加認証（高度CAPTCHA・電話番号認証）を実行',
           expectedResult: '人間による操作であることが確認される'
         },
         {
-          stepNumber: 3,
+          stepId: 'continue-normal-flow',
           actor: typedActorRef('validation-service'),
           action: '認証成功後、通常の登録フローを継続',
           expectedResult: '正当なユーザーとして登録が完了される'
         }
       ],
-      returnToStep: 4
+      returnToStepId: 'agree-terms'
     },
     {
       id: 'system-overload',
@@ -301,25 +301,25 @@ export const userRegistration: UseCase = {
       condition: '登録者数が急増してシステムに負荷がかかっている',
       steps: [
         {
-          stepNumber: 1,
+          stepId: 'monitor-system-load',
           actor: typedActorRef('database-system'),
           action: 'システム負荷を監視し、登録処理の優先度を調整',
           expectedResult: '高負荷状態でも安定した処理が継続される'
         },
         {
-          stepNumber: 2,
+          stepId: 'wait-for-processing',
           actor: typedActorRef('customer'),
           action: '処理遅延の案内を確認し、登録完了まで待機',
           expectedResult: '遅延はあるが確実に登録が処理される'
         },
         {
-          stepNumber: 3,
+          stepId: 'throttle-email-sending',
           actor: typedActorRef('email-service'),
           action: '負荷軽減のため、確認メールの送信を段階的に実行',
           expectedResult: 'メール送信も遅延するが確実に配信される'
         }
       ],
-      returnToStep: 5
+      returnToStepId: 'save-user-data'
     },
     {
       id: 'underage-user',
@@ -327,25 +327,25 @@ export const userRegistration: UseCase = {
       condition: '年齢確認で未成年（18歳未満）であることが判明',
       steps: [
         {
-          stepNumber: 1,
+          stepId: 'calculate-age',
           actor: typedActorRef('validation-service'),
           action: '生年月日から年齢を計算し、未成年を検知',
           expectedResult: '法的制約に基づく処理が開始される'
         },
         {
-          stepNumber: 2,
+          stepId: 'get-parental-consent',
           actor: typedActorRef('customer'),
           action: '保護者同意書の提出または年齢制限商品の利用制限に同意',
           expectedResult: '未成年者向けの制限付きアカウントが提供される'
         },
         {
-          stepNumber: 3,
+          stepId: 'create-restricted-account',
           actor: typedActorRef('database-system'),
           action: 'アカウントに年齢制限フラグを設定し、制限付きで登録完了',
           expectedResult: '適切な制限下でサービス利用が可能になる'
         }
       ],
-      returnToStep: 8
+      returnToStepId: 'auto-login'
     }
   ],
   businessValue: '新規顧客の獲得により売上拡大とユーザーベース拡充を実現',
