@@ -1,0 +1,38 @@
+{
+  "name": "omoikane-metamodel",
+  "version": "1.0.0",
+  "description": "Omoikane ITDelivery Metamodel - ユースケース・要件定義のためのTypeScriptメタモデル",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "omoikane-auto-build": "./scripts/auto-build.ts",
+    "omoikane-generate-references": "./scripts/generate-typed-references.ts",
+    "omoikane-convert-references": "./scripts/convert-references.ts"
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "dev": "bun --watch src/index.ts",
+    "type-check": "bun --bun tsc --noEmit",
+    "test": "bun test"
+  },
+  "keywords": [
+    "typescript",
+    "usecase",
+    "requirements",
+    "itdelivery",
+    "metamodel",
+    "omoikane"
+  ],
+  "author": "omoikane",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "scripts/**/*",
+    "README.md"
+  ]
+}

@@ -1,5 +1,5 @@
-import type { Actor, UseCase } from '../../types/delivery-elements';
-import { typedActorRef } from '../../types/typed-references';
+import type { Actor, UseCase } from "omoikane-metamodel";
+import { typedActorRef } from "../typed-references.js";
 
 /**
  * 商品検索・閲覧関連ユースケース

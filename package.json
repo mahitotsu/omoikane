@@ -1,20 +1,24 @@
 {
-  "name": "omoikane",
-  "module": "index.ts",
-  "type": "module",
+  "name": "omoikane-workspace",
+  "version": "1.0.0",
+  "description": "Omoikane Workspace - ITDelivery メタモデルとECサイト実例",
   "private": true,
+  "workspaces": [
+    "omoikane-metamodel",
+    "omoikane-example-ecsite"
+  ],
   "scripts": {
-    "generate-types": "bun run scripts/generate-typed-references.ts",
-    "convert-refs": "bun run scripts/convert-to-typed-refs.ts",
-    "migrate": "bun run generate-types && bun run convert-refs",
-    "auto-build": "bun run scripts/auto-build.ts",
-    "build": "bun run auto-build",
-    "dev": "bun run auto-build && bun run examples/showcase.ts"
+    "build": "bun run --filter='*' build",
+    "dev": "bun run --filter='*' dev", 
+    "type-check": "bun run --filter='*' type-check",
+    "test": "bun run --filter='*' test",
+    "install-all": "bun install"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "engines": {
+    "bun": ">=1.0.0"
   }
 }

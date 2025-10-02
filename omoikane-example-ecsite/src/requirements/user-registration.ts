@@ -2,8 +2,8 @@
  * EC サイト - ユーザー登録ユースケース定義
  */
 
-import type { Actor } from '../../types/delivery-elements';
-import { typedActorRef } from '../../types/typed-references';
+import type { Actor, UseCase } from 'omoikane-metamodel';
+import { typedActorRef } from "../typed-references.js";
 
 // アクター定義
 export const customer: Actor = {

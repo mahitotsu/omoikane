@@ -1,0 +1,37 @@
+{
+  "name": "omoikane-example-ecsite",
+  "version": "1.0.0",
+  "description": "Omoikane Example EC Site - メタモデルを使用したECサイト要件定義の実例",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "dev": "bun --watch src/index.ts",
+    "type-check": "bun --bun tsc --noEmit",
+    "auto-build": "bun ../omoikane-metamodel/scripts/auto-build.ts",
+    "generate-references": "bun ../omoikane-metamodel/scripts/generate-typed-references.ts",
+    "convert-references": "bun ../omoikane-metamodel/scripts/convert-references.ts",
+    "test": "bun test"
+  },
+  "keywords": [
+    "typescript",
+    "usecase",
+    "requirements",
+    "ecsite",
+    "example",
+    "omoikane"
+  ],
+  "author": "omoikane",
+  "license": "MIT",
+  "dependencies": {
+    "omoikane-metamodel": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "README.md"
+  ]
+}

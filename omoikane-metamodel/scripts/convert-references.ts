@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { extname, join } from 'path';
 
-const REQUIREMENTS_DIR = './src/documents/requirements';
+const REQUIREMENTS_DIR = join(process.cwd(), 'src/requirements');
 
 // Node.js標準機能でTypeScriptファイルを取得
 function getAllTsFiles(dir: string): string[] {

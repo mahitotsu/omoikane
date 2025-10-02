@@ -1,0 +1,33 @@
+{
+  "folders": [
+    {
+      "name": "Omoikane Workspace (ワークスペース)",
+      "path": "."
+    },
+    {
+      "name": "Omoikane Metamodel (メタモデル)",
+      "path": "./omoikane-metamodel"
+    },
+    {
+      "name": "Omoikane Example EC Site (インスタンス)",
+      "path": "./omoikane-example-ecsite"
+    }
+  ],
+  "settings": {
+    "typescript.preferences.includePackageJsonAutoImports": "auto",
+    "typescript.suggest.autoImports": true,
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.git": false,
+      "omoikane-metamodel": true,
+      "omoikane-example-ecsite": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-typescript-next",
+      "bradlc.vscode-tailwindcss",
+      "esbenp.prettier-vscode"
+    ]
+  }
+}

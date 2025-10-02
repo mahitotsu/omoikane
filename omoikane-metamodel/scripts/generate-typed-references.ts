@@ -22,7 +22,7 @@ async function extractActorsAndUseCases(): Promise<{actors: ActorInfo[], useCase
   const useCases: UseCaseInfo[] = [];
   
   // requirements/*.ts ファイルをスキャン
-  const requirementsDir = 'src/documents/requirements';
+  const requirementsDir = path.join(process.cwd(), 'src/requirements');
   const files = readdirSync(requirementsDir).filter(f => f.endsWith('.ts'));
   
   for (const fileName of files) {
@@ -203,7 +203,7 @@ export const generatedStats = {
 `;
 
   // ファイルに書き込み
-  const outputPath = 'src/types/typed-references.ts';
+  const outputPath = path.join(process.cwd(), 'src/typed-references.ts');
   writeFileSync(outputPath, template);
   
   console.log(`✅ ${outputPath} を更新しました`);

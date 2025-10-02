@@ -5,7 +5,7 @@
  * ⚠️ このファイルは自動生成されます
  * 手動編集は scripts/generate-typed-references.ts で行ってください
  * 
- * 最終更新: 2025-10-01T16:19:54.758Z
+ * 最終更新: 2025-10-02T13:51:45.099Z
  */
 
 import type { Actor, DeliveryElement } from './delivery-elements';
@@ -155,6 +155,6 @@ export interface TypedAlternativeFlow {
 export const generatedStats = {
   actors: 16,
   useCases: 9,
-  generatedAt: '2025-10-01T16:19:54.758Z',
-  sourceFiles: ['src/documents/requirements/user-registration.ts', 'src/documents/requirements/order-processing.ts', 'src/documents/requirements/product-management.ts', 'src/documents/requirements/product-browsing.ts', 'src/documents/requirements/user-authentication.ts']
+  generatedAt: '2025-10-02T13:51:45.099Z',
+  sourceFiles: ['/home/akring/omoikane/omoikane-example-ecsite/src/requirements/user-registration.ts', '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/order-processing.ts', '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/product-management.ts', '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/product-browsing.ts', '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/user-authentication.ts']
 } as const;
