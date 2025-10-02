@@ -9,13 +9,23 @@
   ],
   "scripts": {
     "build": "bun run --filter='*' build",
-    "dev": "bun run --filter='*' dev", 
+    "dev": "bun run --filter='*' dev",
     "type-check": "bun run --filter='*' type-check",
     "test": "bun run --filter='*' test",
+    "lint": "eslint . --ext .ts,.js --ignore-path .gitignore",
+    "lint:fix": "eslint . --ext .ts,.js --ignore-path .gitignore --fix",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\" --ignore-path .gitignore",
+    "quality": "bun run format && bun run lint:fix && bun run type-check",
     "install-all": "bun install"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.0",
     "typescript": "^5.0.0"
   },
   "engines": {

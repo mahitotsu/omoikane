@@ -4,7 +4,8 @@ Omoikane Metamodelを使用したECサイト要件定義の実例
 
 ## 概要
 
-このプロジェクトは、Omoikane Metamodelを使用してECサイトの要件定義を行う実例です。以下のユースケースが含まれています：
+このプロジェクトは、Omoikane
+Metamodelを使用してECサイトの要件定義を行う実例です。以下のユースケースが含まれています：
 
 - ユーザー登録・認証
 - 商品検索・閲覧
@@ -14,14 +15,17 @@ Omoikane Metamodelを使用したECサイト要件定義の実例
 ## 含まれるユースケース
 
 ### ユーザー管理
+
 - **ユーザー登録** (`user-registration.ts`): 新規ユーザーのアカウント作成
 - **ユーザー認証** (`user-authentication.ts`): ログイン・パスワードリセット
 
 ### 商品管理
+
 - **商品検索・閲覧** (`product-browsing.ts`): 商品検索とカート機能
 - **商品管理** (`product-management.ts`): 管理者による商品登録・更新
 
 ### 注文管理
+
 - **注文処理** (`order-processing.ts`): 注文から配送までの処理
 
 ## インストール

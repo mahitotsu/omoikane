@@ -9,11 +9,6 @@ function getActorId(actor: string | ActorRef): string {
   return typeof actor === 'string' ? actor : actor.actorId;
 }
 
-// アクター参照の配列から actorId の配列を取得するヘルパー関数
-function getActorIds(actors: (string | ActorRef)[]): string[] {
-  return actors.map(getActorId);
-}
-
 // アクター・ユースケース関係マップ
 export interface ActorUseCaseRelationship {
   actorId: string;
@@ -26,10 +21,10 @@ export interface RelationshipAnalysis {
   totalActors: number;
   totalUseCases: number;
   relationships: ActorUseCaseRelationship[];
-  actorUseCaseMap: Map<string, string[]>;  // アクターID -> ユースケースID[]
-  useCaseActorMap: Map<string, string[]>;  // ユースケースID -> アクターID[]
-  multiRoleActors: string[];               // 複数のユースケースに関わるアクター
-  complexUseCases: string[];               // 複数のアクターが関わるユースケース
+  actorUseCaseMap: Map<string, string[]>; // アクターID -> ユースケースID[]
+  useCaseActorMap: Map<string, string[]>; // ユースケースID -> アクターID[]
+  multiRoleActors: string[]; // 複数のユースケースに関わるアクター
+  complexUseCases: string[]; // 複数のアクターが関わるユースケース
 }
 
 export class RelationshipAnalyzer {
@@ -61,7 +56,7 @@ export class RelationshipAnalyzer {
       relationships.push({
         actorId: primaryActorId,
         useCaseId: useCase.id,
-        role: 'primary'
+        role: 'primary',
       });
       useCaseActors.push(primaryActorId);
 
@@ -72,7 +67,7 @@ export class RelationshipAnalyzer {
           relationships.push({
             actorId: secondaryActorId,
             useCaseId: useCase.id,
-            role: 'secondary'
+            role: 'secondary',
           });
           useCaseActors.push(secondaryActorId);
         }
@@ -106,7 +101,7 @@ export class RelationshipAnalyzer {
       actorUseCaseMap,
       useCaseActorMap,
       multiRoleActors,
-      complexUseCases
+      complexUseCases,
     };
   }
 
@@ -127,7 +122,7 @@ export class RelationshipAnalyzer {
   // アクター間の協調関係を分析（同じユースケースに関わるアクター）
   getActorCollaborations(): Map<string, Set<string>> {
     const collaborations = new Map<string, Set<string>>();
-    
+
     for (const useCase of this.useCases.values()) {
       const allActors = [useCase.actors.primary];
       if (useCase.actors.secondary) {
@@ -139,9 +134,9 @@ export class RelationshipAnalyzer {
         for (let j = i + 1; j < allActors.length; j++) {
           const actorRef1 = allActors[i];
           const actorRef2 = allActors[j];
-          
+
           if (!actorRef1 || !actorRef2) continue;
-          
+
           const actor1 = getActorId(actorRef1);
           const actor2 = getActorId(actorRef2);
 
@@ -167,14 +162,14 @@ export class RelationshipAnalyzer {
     const collaborations = this.getActorCollaborations();
 
     let report = '=== アクター・ユースケース関係性分析レポート ===\n\n';
-    
+
     report += `📊 概要:\n`;
     report += `  - 総アクター数: ${analysis.totalActors}\n`;
     report += `  - 総ユースケース数: ${analysis.totalUseCases}\n`;
     report += `  - 総関係性数: ${analysis.relationships.length}\n\n`;
 
     report += `🔗 N:N関係の詳細:\n`;
-    
+
     report += `\n📋 複数のユースケースに関わるアクター:\n`;
     for (const actorId of analysis.multiRoleActors) {
       const actor = this.actors.get(actorId);
@@ -182,7 +177,9 @@ export class RelationshipAnalyzer {
       report += `  • ${actor?.name || actorId}: ${useCases.length}個のユースケース\n`;
       for (const useCaseId of useCases) {
         const useCase = this.useCases.get(useCaseId);
-        const role = analysis.relationships.find(r => r.actorId === actorId && r.useCaseId === useCaseId)?.role;
+        const role = analysis.relationships.find(
+          r => r.actorId === actorId && r.useCaseId === useCaseId
+        )?.role;
         report += `    - ${useCase?.name || useCaseId} (${role})\n`;
       }
     }
@@ -194,7 +191,9 @@ export class RelationshipAnalyzer {
       report += `  • ${useCase?.name || useCaseId}: ${actors.length}人のアクター\n`;
       for (const actorId of actors) {
         const actor = this.actors.get(actorId);
-        const role = analysis.relationships.find(r => r.actorId === actorId && r.useCaseId === useCaseId)?.role;
+        const role = analysis.relationships.find(
+          r => r.actorId === actorId && r.useCaseId === useCaseId
+        )?.role;
         report += `    - ${actor?.name || actorId} (${role})\n`;
       }
     }

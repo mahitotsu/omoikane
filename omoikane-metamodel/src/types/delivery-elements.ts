@@ -55,10 +55,10 @@ export interface UseCase extends DeliveryElement {
 export interface UseCaseStep {
   // オプショナルなstepId（開発者が指定、戻り先参照に使用）
   stepId?: string;
-  
+
   // 実行時に配列インデックスから自動計算される
   readonly stepNumber?: number;
-  
+
   actor: string | ActorRef;
   action: string;
   expectedResult: string;
@@ -78,10 +78,10 @@ export interface AlternativeFlow {
   name: string;
   condition: string;
   steps: UseCaseStep[];
-  
+
   // stepIdベースの戻り先指定（統一）
   returnToStepId?: string;
-  
+
   // 詳細化フィールド（オプション）
   probability?: 'high' | 'medium' | 'low';
   impact?: 'critical' | 'major' | 'minor';

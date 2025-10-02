@@ -4,7 +4,8 @@ TypeScript ITDelivery Framework - ユースケース・要件定義のための�
 
 ## 概要
 
-Omoikane Metamodelは、ITデリバリプロジェクトにおけるユースケース・要件定義を型安全に記述するためのTypeScriptフレームワークです。
+Omoikane
+Metamodelは、ITデリバリプロジェクトにおけるユースケース・要件定義を型安全に記述するためのTypeScriptフレームワークです。
 
 ## 主な機能
 
@@ -32,7 +33,7 @@ const customer: Actor = {
   name: '顧客',
   description: 'ECサイトで商品を購入する一般ユーザー',
   role: 'primary',
-  responsibilities: ['商品の閲覧・検索', 'アカウント登録・管理']
+  responsibilities: ['商品の閲覧・検索', 'アカウント登録・管理'],
 };
 
 // ユースケース定義（stepId自動管理）
@@ -43,7 +44,7 @@ const userRegistration: UseCase = {
   name: 'ユーザー登録',
   description: '新規ユーザーがアカウントを作成する',
   actors: {
-    primary: 'customer'
+    primary: 'customer',
   },
   preconditions: ['顧客がECサイトにアクセスしている'],
   postconditions: ['新しいユーザーアカウントが作成されている'],
@@ -52,11 +53,11 @@ const userRegistration: UseCase = {
       stepId: 'access-registration',
       actor: 'customer',
       action: '新規登録ページにアクセスする',
-      expectedResult: '登録フォームが表示される'
-    }
+      expectedResult: '登録フォームが表示される',
+    },
   ],
   businessValue: '新規顧客の獲得',
-  priority: 'high'
+  priority: 'high',
 };
 ```
 

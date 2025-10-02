@@ -1,17 +1,18 @@
 /**
  * 型安全なアクター・ユースケース参照システム
  * IDE補完とコンパイル時型チェックを提供
- * 
+ *
  * ⚠️ このファイルは自動生成されます
  * 手動編集は scripts/generate-typed-references.ts で行ってください
- * 
+ *
  * 最終更新: 2025-10-02T13:51:45.099Z
  */
 
-import type { Actor, DeliveryElement } from './delivery-elements';
+import type { Actor, DeliveryElement } from 'omoikane-metamodel';
 
 // 既知のアクターIDの型定義（自動生成）
-export type KnownActorId = 'customer'
+export type KnownActorId =
+  | 'customer'
   | 'email-service'
   | 'database-system'
   | 'validation-service'
@@ -29,7 +30,8 @@ export type KnownActorId = 'customer'
   | 'sms-service';
 
 // 既知のユースケースIDの型定義（自動生成）
-export type KnownUseCaseId = 'user-registration'
+export type KnownUseCaseId =
+  | 'user-registration'
   | 'order-processing'
   | 'order-tracking'
   | 'product-registration'
@@ -86,7 +88,7 @@ export function createActorRef<T extends KnownActorId>(
     type: 'actor-ref',
     resolve(): Actor | undefined {
       return actorRegistry?.get(actorId);
-    }
+    },
   };
 }
 
@@ -104,19 +106,19 @@ export function defineActor<T extends KnownActorId>(
 ): ActorDefinition<T> {
   const actor: Actor = {
     id,
-    ...definition
+    ...definition,
   };
 
   const ref: TypedActorRef<T> = {
     actorId: id,
-    type: 'actor-ref'
+    type: 'actor-ref',
   };
 
   return { actor, ref };
 }
 
 // 型の再エクスポート（互換性のため）
-export type { Actor, DeliveryElement, UseCase } from './delivery-elements';
+export type { Actor, DeliveryElement, UseCase } from 'omoikane-metamodel';
 export interface TypedUseCase extends Omit<DeliveryElement, 'type'> {
   readonly type: 'usecase';
   name: string;
@@ -156,5 +158,11 @@ export const generatedStats = {
   actors: 16,
   useCases: 9,
   generatedAt: '2025-10-02T13:51:45.099Z',
-  sourceFiles: ['/home/akring/omoikane/omoikane-example-ecsite/src/requirements/user-registration.ts', '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/order-processing.ts', '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/product-management.ts', '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/product-browsing.ts', '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/user-authentication.ts']
+  sourceFiles: [
+    '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/user-registration.ts',
+    '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/order-processing.ts',
+    '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/product-management.ts',
+    '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/product-browsing.ts',
+    '/home/akring/omoikane/omoikane-example-ecsite/src/requirements/user-authentication.ts',
+  ],
 } as const;

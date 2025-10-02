@@ -17,29 +17,36 @@ interface UseCaseInfo {
   file: string;
 }
 
-async function extractActorsAndUseCases(): Promise<{actors: ActorInfo[], useCases: UseCaseInfo[]}> {
+async function extractActorsAndUseCases(): Promise<{
+  actors: ActorInfo[];
+  useCases: UseCaseInfo[];
+}> {
   const actors: ActorInfo[] = [];
   const useCases: UseCaseInfo[] = [];
-  
+
   // requirements/*.ts ファイルをスキャン
   const requirementsDir = path.join(process.cwd(), 'src/requirements');
   const files = readdirSync(requirementsDir).filter(f => f.endsWith('.ts'));
-  
+
   for (const fileName of files) {
     const file = path.join(requirementsDir, fileName);
     const content = readFileSync(file, 'utf-8');
-    
+
     // アクター定義を抽出（例: export const customer: Actor = { id: 'customer', ...）
-    const actorMatches = content.matchAll(/export\s+const\s+\w+:\s*Actor\s*=\s*{[^}]*id:\s*['"`]([^'"`]+)['"`]/g);
+    const actorMatches = content.matchAll(
+      /export\s+const\s+\w+:\s*Actor\s*=\s*{[^}]*id:\s*['"`]([^'"`]+)['"`]/g
+    );
     for (const match of actorMatches) {
       const actorId = match[1];
       if (actorId && !actors.find(a => a.id === actorId)) {
         actors.push({ id: actorId, file });
       }
     }
-    
+
     // ユースケース定義を抽出（例: export const userRegistration: UseCase = { id: 'user-registration', ...）
-    const useCaseMatches = content.matchAll(/export\s+const\s+\w+:\s*UseCase\s*=\s*{[^}]*id:\s*['"`]([^'"`]+)['"`]/g);
+    const useCaseMatches = content.matchAll(
+      /export\s+const\s+\w+:\s*UseCase\s*=\s*{[^}]*id:\s*['"`]([^'"`]+)['"`]/g
+    );
     for (const match of useCaseMatches) {
       const useCaseId = match[1];
       if (useCaseId && !useCases.find(u => u.id === useCaseId)) {
@@ -47,21 +54,21 @@ async function extractActorsAndUseCases(): Promise<{actors: ActorInfo[], useCase
       }
     }
   }
-  
+
   return { actors, useCases };
 }
 
 async function generateTypedReferences() {
   console.log('🔄 型安全参照を自動生成中...');
-  
+
   const { actors, useCases } = await extractActorsAndUseCases();
-  
+
   console.log(`📊 検出されたアクター: ${actors.length}個`);
   actors.forEach(a => console.log(`  - ${a.id} (${path.basename(a.file)})`));
-  
+
   console.log(`📊 検出されたユースケース: ${useCases.length}個`);
   useCases.forEach(u => console.log(`  - ${u.id} (${path.basename(u.file)})`));
-  
+
   // 型定義テンプレート
   const template = `/**
  * 型安全なアクター・ユースケース参照システム
@@ -205,7 +212,7 @@ export const generatedStats = {
   // ファイルに書き込み
   const outputPath = path.join(process.cwd(), 'src/typed-references.ts');
   writeFileSync(outputPath, template);
-  
+
   console.log(`✅ ${outputPath} を更新しました`);
   console.log(`📈 アクター: ${actors.length}個, ユースケース: ${useCases.length}個`);
 }

@@ -1,6 +1,7 @@
 # Omoikane
 
-TypeScript ITDelivery Document Framework - ユースケース・要件定義のための統合フレームワーク
+TypeScript ITDelivery Document
+Framework - ユースケース・要件定義のための統合フレームワーク
 
 ## 概要
 
@@ -11,14 +12,18 @@ Omoikaneは、ITデリバリプロジェクトにおけるユースケース・�
 このリポジトリは、以下の2つのプロジェクトからなるモノレポ構成になっています：
 
 ### 🏗️ [Omoikane Metamodel](./omoikane-metamodel/)
+
 **TypeScript ITDelivery メタモデル**
+
 - ユースケース・要件定義のための型定義とフレームワーク
 - 型安全な参照システム
 - stepId自動管理機能
 - 段階的詳細化対応
 
 ### 🛒 [Omoikane Example EC Site](./omoikane-example-ecsite/)
+
 **ECサイト要件定義の実例**
+
 - メタモデルを使用した具体的な実装例
 - ユーザー認証、商品管理、注文処理などの要件定義
 - 自動ビルド・参照変換スクリプト
@@ -26,6 +31,7 @@ Omoikaneは、ITデリバリプロジェクトにおけるユースケース・�
 ## クイックスタート
 
 ### 前提条件
+
 - [Bun](https://bun.com) v1.0.0以上
 
 ### セットアップ
@@ -52,7 +58,7 @@ bun run type-check
 cd omoikane-metamodel
 bun run dev
 
-# Example EC Siteプロジェクト  
+# Example EC Siteプロジェクト
 cd omoikane-example-ecsite
 bun run dev
 ```

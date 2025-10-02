@@ -14,7 +14,7 @@ import type { UseCase, UseCaseStep } from './delivery-elements';
 export function enrichStepsWithNumbers(steps: UseCaseStep[]): UseCaseStep[] {
   return steps.map((step, index) => ({
     ...step,
-    stepNumber: index + 1
+    stepNumber: index + 1,
   }));
 }
 
@@ -22,15 +22,15 @@ export function enrichStepsWithNumbers(steps: UseCaseStep[]): UseCaseStep[] {
  * stepIdまたはstepNumberでステップを検索
  */
 export function findStepByIdOrNumber(
-  useCase: UseCase, 
+  useCase: UseCase,
   identifier: string | number
 ): { step: UseCaseStep; stepNumber: number } | undefined {
   for (let i = 0; i < useCase.mainFlow.length; i++) {
     const step = useCase.mainFlow[i];
     if (!step) continue;
-    
+
     const stepNumber = i + 1;
-    
+
     if (typeof identifier === 'string' && step.stepId === identifier) {
       return { step, stepNumber };
     }
@@ -49,45 +49,45 @@ export function findStepByIdOrNumber(
  */
 export const improvedOrderProcessing: UseCase = {
   id: 'order-processing',
-  type: 'usecase', 
+  type: 'usecase',
   owner: 'business-analyst',
   name: '注文処理',
   description: '顧客の注文を受け付け、決済から配送まで処理する',
   actors: {
     primary: 'customer',
-    secondary: ['payment-service', 'shipping-service']
+    secondary: ['payment-service', 'shipping-service'],
   },
   preconditions: ['顧客がログインしている'],
   postconditions: ['注文が完了している'],
   mainFlow: [
     {
-      stepId: 'select-products',  // ✨ IDベースの管理
+      stepId: 'select-products', // ✨ IDベースの管理
       actor: 'customer',
       action: '商品を選択してカートに追加',
-      expectedResult: '商品がカートに追加される'
+      expectedResult: '商品がカートに追加される',
       // stepNumberは自動で1になる
     },
     {
       stepId: 'checkout',
-      actor: 'customer', 
+      actor: 'customer',
       action: 'チェックアウト画面で注文内容を確認',
-      expectedResult: '注文詳細が表示される'
+      expectedResult: '注文詳細が表示される',
       // stepNumberは自動で2になる
     },
     {
       stepId: 'payment',
       actor: 'payment-service',
       action: '決済処理を実行',
-      expectedResult: '決済が完了する'
+      expectedResult: '決済が完了する',
       // stepNumberは自動で3になる
     },
     {
       stepId: 'shipping',
       actor: 'shipping-service',
       action: '配送手配を行う',
-      expectedResult: '配送が開始される'
+      expectedResult: '配送が開始される',
       // stepNumberは自動で4になる
-    }
+    },
   ],
   alternativeFlows: [
     {
@@ -98,15 +98,15 @@ export const improvedOrderProcessing: UseCase = {
         {
           actor: 'payment-service',
           action: '決済失敗理由を分析',
-          expectedResult: '失敗理由が特定される'
+          expectedResult: '失敗理由が特定される',
         },
         {
           actor: 'customer',
           action: '別の決済方法を選択',
-          expectedResult: '代替決済手段が選択される'
-        }
+          expectedResult: '代替決済手段が選択される',
+        },
       ],
-      returnToStepId: 'payment'  // ✨ IDベースで戻り先指定
+      returnToStepId: 'payment', // ✨ IDベースで戻り先指定
     },
     {
       id: 'out-of-stock',
@@ -116,12 +116,12 @@ export const improvedOrderProcessing: UseCase = {
         {
           actor: 'inventory-system',
           action: '在庫状況を確認',
-          expectedResult: '在庫不足が確認される'
-        }
+          expectedResult: '在庫不足が確認される',
+        },
       ],
-      returnToStepId: 'select-products'  // ✨ 商品選択に戻る
-    }
+      returnToStepId: 'select-products', // ✨ 商品選択に戻る
+    },
   ],
   businessValue: '顧客の購買体験向上',
-  priority: 'high'
+  priority: 'high',
 };
