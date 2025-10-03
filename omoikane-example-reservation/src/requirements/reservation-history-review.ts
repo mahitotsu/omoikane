@@ -36,7 +36,7 @@ export const reservationHistoryReview: ReservationUseCase = {
       stakeholderRef('stakeholder-store-ops-manager'),
     ],
     successMetrics: [successMetricRef('metric-audit-confirmation-lag')],
-    assumptions: [assumptionRef('assumption-authenticated-staff')],
+    assumptions: [assumptionRef('assumption-staff-sign-in-required')],
     constraints: [constraintRef('constraint-log-retention')],
   }),
   preconditions: [

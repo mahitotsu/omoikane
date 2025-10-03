@@ -39,7 +39,6 @@ export const reservationStaffCancel: ReservationUseCase = {
     assumptions: [
       assumptionRef('assumption-manual-communications'),
       assumptionRef('assumption-staff-sign-in-required'),
-      assumptionRef('assumption-user-accounts-with-roles'),
     ],
     constraints: [constraintRef('constraint-privacy-minimization')],
   }),

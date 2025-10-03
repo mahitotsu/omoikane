@@ -21,6 +21,10 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
       description: '来店者が営業時間外でも予約内容の変更や取消をポリシーに沿って迅速に完結できるようにする',
     },
     {
+      id: 'goal-admin-managed-accounts',
+      description: 'システム管理者が適切な権限設定のもとでユーザーの登録・削除を行えるようにする',
+    },
+    {
       id: 'goal-accurate-capacity',
       description: '予約枠のロック・リリースを適切に管理し過剰予約や空予約を防ぐ',
     },
@@ -58,6 +62,10 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
       {
         id: 'scope-history-oversight',
         description: 'スタッフがロック・リリース履歴や操作記録をレビューする業務',
+      },
+      {
+        id: 'scope-account-administration',
+        description: 'システム管理者によるユーザー登録・削除と権限設定の管理',
       },
     ],
     outOfScope: [
@@ -127,10 +135,6 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     {
       id: 'assumption-staff-sign-in-required',
       description: '店舗スタッフとキャパシティプランナーはシステムへのサインインが必要である',
-    },
-    {
-      id: 'assumption-user-accounts-with-roles',
-      description: '適切な権限設定のもとでユーザー登録されていることを前提とする',
     },
   ],
   constraints: [

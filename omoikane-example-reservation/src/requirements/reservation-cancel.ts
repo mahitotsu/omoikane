@@ -27,7 +27,7 @@ export const reservationCancel: ReservationUseCase = {
   },
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
     requirement: businessRequirementRef('reservation-business-requirements'),
-    businessGoals: [businessGoalRef('goal-flexible-adjustments')],
+  businessGoals: [],
     scopeItems: [businessScopeRef('scope-visitor-self-service-management')],
     stakeholders: [
       stakeholderRef('stakeholder-visitor'),
