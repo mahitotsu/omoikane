@@ -147,6 +147,10 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
       description: '予約・変更・取消が可能なのは予約する日時の前日の営業時間終了までとする',
     },
     {
+      id: 'constraint-staff-change-anytime-unless-checked-in',
+      description: '店舗スタッフによる予約変更は来店確認済みでない限りいつでも可能とする',
+    },
+    {
       id: 'constraint-log-retention',
       description: '予約操作ログは監査要件に従い一定期間保存する',
     },

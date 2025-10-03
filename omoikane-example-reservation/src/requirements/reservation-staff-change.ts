@@ -37,7 +37,10 @@ export const reservationStaffChange: ReservationUseCase = {
       assumptionRef('assumption-manual-communications'),
       assumptionRef('assumption-staff-sign-in-required'),
     ],
-    constraints: [constraintRef('constraint-privacy-minimization')],
+    constraints: [
+      constraintRef('constraint-privacy-minimization'),
+      constraintRef('constraint-staff-change-anytime-unless-checked-in'),
+    ],
   }),
   preconditions: [
     '店舗スタッフが予約検索ユースケースなどで対象予約の詳細画面を開いている',
@@ -130,6 +133,7 @@ export const reservationStaffChange: ReservationUseCase = {
     '変更後も予約番号は維持する',
     '変更による枠リリースとロックは履歴確認ユースケースで確認済みに更新する',
     '来店者への通知は自動送信せず、必要に応じて手動連絡手順に従う',
+    '営業時間外でも来店確認済みでない予約は変更可能とする',
   ],
   priority: 'high',
 };

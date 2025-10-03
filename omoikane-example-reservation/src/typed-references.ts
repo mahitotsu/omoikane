@@ -5,7 +5,7 @@
  * ⚠️ このファイルは自動生成されます
  * 手動編集は scripts/generate-typed-references.ts で行ってください
  *
- * 最終更新: 2025-10-03T17:43:25.229Z
+ * 最終更新: 2025-10-03T17:47:07.089Z
  */
 
 import type {
@@ -55,7 +55,8 @@ export type KnownAssumptionId = 'assumption-manual-communications'
 
 export type KnownConstraintId = 'constraint-log-retention'
   | 'constraint-operation-hours'
-  | 'constraint-privacy-minimization';
+  | 'constraint-privacy-minimization'
+  | 'constraint-staff-change-anytime-unless-checked-in';
 
 export type KnownActorId = 'system-admin'
   | 'capacity-planner'
@@ -200,7 +201,7 @@ export const generatedStats = {
   stakeholders: 5,
   successMetrics: 4,
   assumptions: 3,
-  constraints: 3,
-  generatedAt: '2025-10-03T17:43:25.231Z',
+  constraints: 4,
+  generatedAt: '2025-10-03T17:47:07.089Z',
   sourceFiles: ['/home/akring/omoikane/omoikane-example-reservation/src/requirements/account-administration.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/capacity-management.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-booking.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-check-in.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-history-review.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-change.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-search.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-update.ts'],
 } as const;
