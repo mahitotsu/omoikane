@@ -5,7 +5,8 @@
   "private": true,
   "workspaces": [
     "omoikane-metamodel",
-    "omoikane-example-ecsite"
+    "omoikane-example-ecsite",
+    "omoikane-example-reservation"
   ],
   "scripts": {
     "build": "bun run --filter='*' build",
