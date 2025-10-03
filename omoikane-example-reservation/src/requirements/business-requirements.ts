@@ -14,11 +14,11 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
   businessGoals: [
     {
       id: 'goal-self-service-booking',
-      description: '来店者が店舗の営業時間内で自ら予約を確定できるようにする',
+      description: '来店者が営業時間外でも自ら予約を確定できるようにする',
     },
     {
       id: 'goal-flexible-adjustments',
-      description: '予約内容の変更や取消をポリシーに沿って迅速に完結できるようにする',
+      description: '来店者が営業時間外でも予約内容の変更や取消をポリシーに沿って迅速に完結できるようにする',
     },
     {
       id: 'goal-accurate-capacity',
@@ -67,7 +67,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
       },
       {
         id: 'scope-payment-processing',
-        description: '予約時の決済や返金処理',
+        description: '予約時の決済や、取り消し時の返金',
       },
       {
         id: 'scope-loyalty-integration',
@@ -86,11 +86,15 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'stakeholder-capacity-planner',
-      description: '予約枠を設計し供給量を調整する担当者',
+      description: '予約枠を設計する担当者',
     },
     {
       id: 'stakeholder-store-ops-manager',
       description: '店舗全体の運営と監査対応を統括する責任者',
+    },
+    {
+      id: 'stakeholder-system-admin',
+      description: 'ユーザーの登録・削除および権限設定を管理するシステム管理者',
     },
   ],
   successMetrics: [
@@ -121,8 +125,12 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
       description: '本例では単一店舗の予約のみを対象とする',
     },
     {
-      id: 'assumption-authenticated-staff',
-      description: '店舗スタッフは管理コンソールへ認証済みである',
+      id: 'assumption-staff-sign-in-required',
+      description: '店舗スタッフとキャパシティプランナーはシステムへのサインインが必要である',
+    },
+    {
+      id: 'assumption-user-accounts-with-roles',
+      description: '適切な権限設定のもとでユーザー登録されていることを前提とする',
     },
   ],
   constraints: [
@@ -132,7 +140,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'constraint-operation-hours',
-      description: '予約・変更・取消は定義された営業時間ポリシーに従う',
+      description: '予約・変更・取消が可能なのは予約する日時の前日の営業時間終了までとする',
     },
     {
       id: 'constraint-log-retention',

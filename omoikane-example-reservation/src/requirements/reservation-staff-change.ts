@@ -35,7 +35,8 @@ export const reservationStaffChange: ReservationUseCase = {
     successMetrics: [successMetricRef('metric-manual-adjustment-time')],
     assumptions: [
       assumptionRef('assumption-manual-communications'),
-      assumptionRef('assumption-authenticated-staff'),
+      assumptionRef('assumption-staff-sign-in-required'),
+      assumptionRef('assumption-user-accounts-with-roles'),
     ],
     constraints: [constraintRef('constraint-privacy-minimization')],
   }),

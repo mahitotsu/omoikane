@@ -33,7 +33,10 @@ export const reservationStaffSearch: ReservationUseCase = {
     scopeItems: [businessScopeRef('scope-store-staff-console')],
     stakeholders: [stakeholderRef('stakeholder-store-staff')],
     successMetrics: [successMetricRef('metric-manual-adjustment-time')],
-    assumptions: [assumptionRef('assumption-authenticated-staff')],
+    assumptions: [
+      assumptionRef('assumption-staff-sign-in-required'),
+      assumptionRef('assumption-user-accounts-with-roles'),
+    ],
     constraints: [constraintRef('constraint-privacy-minimization')],
   }),
   preconditions: [

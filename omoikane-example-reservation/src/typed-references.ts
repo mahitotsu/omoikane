@@ -5,7 +5,7 @@
  * ⚠️ このファイルは自動生成されます
  * 手動編集は scripts/generate-typed-references.ts で行ってください
  *
- * 最終更新: 2025-10-03T17:00:27.595Z
+ * 最終更新: 2025-10-03T17:36:18.440Z
  */
 
 import type {
@@ -39,6 +39,7 @@ export type KnownScopeItemId = 'scope-capacity-planning'
 export type KnownStakeholderId = 'stakeholder-capacity-planner'
   | 'stakeholder-store-ops-manager'
   | 'stakeholder-store-staff'
+  | 'stakeholder-system-admin'
   | 'stakeholder-visitor';
 
 export type KnownSuccessMetricId = 'metric-audit-confirmation-lag'
@@ -46,9 +47,10 @@ export type KnownSuccessMetricId = 'metric-audit-confirmation-lag'
   | 'metric-manual-adjustment-time'
   | 'metric-slot-utilization';
 
-export type KnownAssumptionId = 'assumption-authenticated-staff'
-  | 'assumption-manual-communications'
-  | 'assumption-single-location';
+export type KnownAssumptionId = 'assumption-manual-communications'
+  | 'assumption-single-location'
+  | 'assumption-staff-sign-in-required'
+  | 'assumption-user-accounts-with-roles';
 
 export type KnownConstraintId = 'constraint-log-retention'
   | 'constraint-operation-hours'
@@ -191,10 +193,10 @@ export const generatedStats = {
   businessRequirementIds: 1,
   businessGoals: 5,
   scopeItems: 6,
-  stakeholders: 4,
+  stakeholders: 5,
   successMetrics: 4,
-  assumptions: 3,
+  assumptions: 4,
   constraints: 3,
-  generatedAt: '2025-10-03T17:00:27.596Z',
+  generatedAt: '2025-10-03T17:36:18.440Z',
   sourceFiles: ['/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/capacity-management.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-booking.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-check-in.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-history-review.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-change.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-search.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-update.ts'],
 } as const;
