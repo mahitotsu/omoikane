@@ -3,16 +3,16 @@
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
 } from '../typed-references.js';
 
 export const reservationStaffSearch: ReservationUseCase = {
@@ -55,7 +55,8 @@ export const reservationStaffSearch: ReservationUseCase = {
       stepId: 'input-filters',
       actor: typedActorRef('store-staff'),
       action: '来店予定日、来店者名、連絡先など必要な条件を入力し検索を実行する',
-      expectedResult: '条件に合致する予約のみが検索結果リストに表示される（該当なしの場合は空リストのまま）',
+      expectedResult:
+        '条件に合致する予約のみが検索結果リストに表示される（該当なしの場合は空リストのまま）',
     },
     {
       stepId: 'select-reservation',

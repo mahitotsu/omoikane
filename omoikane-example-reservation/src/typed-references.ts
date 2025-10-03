@@ -23,14 +23,16 @@ import type {
 
 export type KnownBusinessRequirementId = 'reservation-business-requirements';
 
-export type KnownBusinessGoalId = 'goal-accurate-capacity'
+export type KnownBusinessGoalId =
+  | 'goal-accurate-capacity'
   | 'goal-admin-managed-accounts'
   | 'goal-auditable-operations'
   | 'goal-empower-store-staff'
   | 'goal-flexible-adjustments'
   | 'goal-self-service-booking';
 
-export type KnownScopeItemId = 'scope-account-administration'
+export type KnownScopeItemId =
+  | 'scope-account-administration'
   | 'scope-capacity-planning'
   | 'scope-history-oversight'
   | 'scope-online-booking'
@@ -38,32 +40,34 @@ export type KnownScopeItemId = 'scope-account-administration'
   | 'scope-visit-check-in'
   | 'scope-visitor-self-service-management';
 
-export type KnownStakeholderId = 'stakeholder-capacity-planner'
+export type KnownStakeholderId =
+  | 'stakeholder-capacity-planner'
   | 'stakeholder-store-ops-manager'
   | 'stakeholder-store-staff'
   | 'stakeholder-system-admin'
   | 'stakeholder-visitor';
 
-export type KnownSuccessMetricId = 'metric-audit-confirmation-lag'
+export type KnownSuccessMetricId =
+  | 'metric-audit-confirmation-lag'
   | 'metric-booking-completion-rate'
   | 'metric-manual-adjustment-time'
   | 'metric-slot-utilization';
 
-export type KnownAssumptionId = 'assumption-manual-communications'
+export type KnownAssumptionId =
+  | 'assumption-manual-communications'
   | 'assumption-single-location'
   | 'assumption-staff-sign-in-required';
 
-export type KnownConstraintId = 'constraint-log-retention'
+export type KnownConstraintId =
+  | 'constraint-log-retention'
   | 'constraint-operation-hours'
   | 'constraint-privacy-minimization'
   | 'constraint-staff-change-anytime-unless-checked-in';
 
-export type KnownActorId = 'system-admin'
-  | 'capacity-planner'
-  | 'store-staff'
-  | 'visitor';
+export type KnownActorId = 'system-admin' | 'capacity-planner' | 'store-staff' | 'visitor';
 
-export type KnownUseCaseId = 'reservation-history-review'
+export type KnownUseCaseId =
+  | 'reservation-history-review'
   | 'reservation-staff-cancel'
   | 'reservation-staff-change'
   | 'reservation-staff-search'
@@ -203,5 +207,17 @@ export const generatedStats = {
   assumptions: 3,
   constraints: 4,
   generatedAt: '2025-10-03T17:47:07.089Z',
-  sourceFiles: ['/home/akring/omoikane/omoikane-example-reservation/src/requirements/account-administration.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/capacity-management.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-booking.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-check-in.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-history-review.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-change.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-search.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-update.ts'],
+  sourceFiles: [
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/account-administration.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/capacity-management.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-booking.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-cancel.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-check-in.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-history-review.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-cancel.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-change.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-search.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-update.ts',
+  ],
 } as const;

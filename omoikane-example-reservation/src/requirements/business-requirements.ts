@@ -18,7 +18,8 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'goal-flexible-adjustments',
-      description: '来店者が営業時間外でも予約内容の変更や取消をポリシーに沿って迅速に完結できるようにする',
+      description:
+        '来店者が営業時間外でも予約内容の変更や取消をポリシーに沿って迅速に完結できるようにする',
     },
     {
       id: 'goal-admin-managed-accounts',

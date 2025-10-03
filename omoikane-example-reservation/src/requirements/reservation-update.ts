@@ -3,16 +3,16 @@
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
 } from '../typed-references.js';
 
 export const reservationUpdate: ReservationUseCase = {
@@ -27,7 +27,7 @@ export const reservationUpdate: ReservationUseCase = {
   },
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
     requirement: businessRequirementRef('reservation-business-requirements'),
-  businessGoals: [],
+    businessGoals: [businessGoalRef('goal-flexible-adjustments')],
     scopeItems: [businessScopeRef('scope-visitor-self-service-management')],
     stakeholders: [
       stakeholderRef('stakeholder-visitor'),

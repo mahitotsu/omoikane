@@ -3,16 +3,16 @@
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
 } from '../typed-references.js';
 
 export const reservationStaffChange: ReservationUseCase = {
@@ -20,7 +20,8 @@ export const reservationStaffChange: ReservationUseCase = {
   type: 'usecase',
   owner: 'store-operations',
   name: '店舗スタッフによる予約変更',
-  description: '店舗スタッフが予約番号なしで特定した予約内容を編集し、来店者の希望に合わせて調整する',
+  description:
+    '店舗スタッフが予約番号なしで特定した予約内容を編集し、来店者の希望に合わせて調整する',
   actors: {
     primary: typedActorRef('store-staff'),
   },

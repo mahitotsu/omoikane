@@ -4,15 +4,15 @@
 
 import type { Actor } from 'omoikane-metamodel';
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    stakeholderRef,
-    typedActorRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  stakeholderRef,
+  typedActorRef,
 } from '../typed-references.js';
 
 export const systemAdmin: Actor = {
@@ -34,8 +34,7 @@ export const userAccountRegistration: ReservationUseCase = {
   type: 'usecase',
   owner: 'system-operations',
   name: 'ユーザー登録',
-  description:
-    'システム管理者がユーザー情報と権限を指定して新規ユーザーを登録する',
+  description: 'システム管理者がユーザー情報と権限を指定して新規ユーザーを登録する',
   actors: { primary: typedActorRef('system-admin') },
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
     requirement: businessRequirementRef('reservation-business-requirements'),
@@ -108,9 +107,7 @@ export const userAccountRegistration: ReservationUseCase = {
     'すべての登録操作は監査ログに記録する',
     '最小権限の原則に従い不要なロールは付与しない',
   ],
-  businessRules: [
-    'ロール付与は定義済みの職務分掌に従う',
-  ],
+  businessRules: ['ロール付与は定義済みの職務分掌に従う'],
   priority: 'medium',
 };
 
@@ -192,8 +189,6 @@ export const userAccountDeletion: ReservationUseCase = {
     'すべての削除操作は監査ログに記録する',
     '削除前に影響範囲と承認状況を確認する',
   ],
-  businessRules: [
-    'ユーザー削除は関連業務の影響を確認し責任者の承認を得る',
-  ],
+  businessRules: ['ユーザー削除は関連業務の影響を確認し責任者の承認を得る'],
   priority: 'medium',
 };

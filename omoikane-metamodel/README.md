@@ -13,6 +13,7 @@ Metamodelは、ITデリバリプロジェクトにおけるユースケース・
 - **stepId自動管理**: stepNumberの手動管理を廃止し、配列インデックスから自動生成
 - **型安全な参照システム**: ActorRefとUseCaseRefによる安全な参照
 - **段階的詳細化対応**: シンプルから複雑まで段階的に詳細化可能
+- **品質評価フレームワーク**: 設計品質の自動評価とAI Agent向け改善提案
 
 ## インストール
 
@@ -74,6 +75,25 @@ const userRegistration: UseCase = {
 
 - `enrichStepsWithNumbers()`: stepIdから自動でstepNumberを生成
 - `findStepByIdOrNumber()`: stepIdまたはstepNumberでステップを検索
+
+### 品質評価フレームワーク
+
+設計品質を自動評価し、AI Agent向けの改善提案を生成します。
+
+```typescript
+import { performQualityAssessment } from './src/quality/index.js';
+
+const { assessment, recommendations } = performQualityAssessment(
+  businessRequirements,
+  actors,
+  useCases
+);
+
+console.log(`品質スコア: ${assessment.overallScore.value}/100`);
+console.log(`推奨アクション: ${recommendations.length}件`);
+```
+
+詳細は [品質評価フレームワーク](./src/quality/README.md) を参照してください。
 
 ## ライセンス
 
