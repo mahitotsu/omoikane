@@ -2,6 +2,7 @@
 
 export * from './typed-references.js';
 
+export * from './requirements/account-administration.js';
 export * from './requirements/business-requirements.js';
 export * from './requirements/capacity-management.js';
 export * from './requirements/reservation-booking.js';
