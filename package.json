@@ -1,12 +1,11 @@
 {
   "name": "omoikane-workspace",
   "version": "1.0.0",
-  "description": "Omoikane Workspace - ITDelivery メタモデルとECサイト実例",
+  "description": "Omoikane Workspace - ITDelivery メタモデルと予約管理実例",
   "private": true,
   "workspaces": [
-    "omoikane-metamodel",
-    "omoikane-example-ecsite",
-    "omoikane-example-reservation"
+  "omoikane-metamodel",
+  "omoikane-example-reservation"
   ],
   "scripts": {
     "build": "bun run --filter='*' build",

@@ -9,10 +9,6 @@
       "path": "./omoikane-metamodel"
     },
     {
-      "name": "Omoikane Example EC Site (インスタンス)",
-      "path": "./omoikane-example-ecsite"
-    },
-    {
       "name": "Omoikane Example Reservation (インスタンス)",
       "path": "./omoikane-example-reservation"
     }
@@ -23,9 +19,8 @@
     "files.exclude": {
       "**/node_modules": true,
       "**/.git": false,
-      "omoikane-metamodel": true,
-      "omoikane-example-ecsite": true,
-      "omoikane-example-reservation": true
+  "omoikane-metamodel": true,
+  "omoikane-example-reservation": true
     }
   },
   "extensions": {
