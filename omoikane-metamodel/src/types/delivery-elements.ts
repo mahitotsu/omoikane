@@ -22,9 +22,109 @@ export interface Actor extends DeliveryElement {
 }
 
 /**
+ * 業務要件項目（ゴール・スコープ・指標などの要素）
+ */
+export interface BusinessRequirementItem {
+  id: string;
+  description: string;
+  notes?: string;
+}
+
+/**
+ * 業務要件におけるスコープ定義
+ */
+export interface BusinessRequirementScope {
+  inScope: BusinessRequirementItem[];
+  outOfScope?: BusinessRequirementItem[];
+}
+
+/**
+ * 業務要件定義（システムが提供すべき業務価値と成果の整理）
+ */
+export interface BusinessRequirementDefinition extends DeliveryElement {
+  readonly type: 'business-requirement';
+  title: string;
+  summary: string;
+  businessGoals: BusinessRequirementItem[];
+  scope: BusinessRequirementScope;
+  stakeholders: BusinessRequirementItem[];
+  successMetrics?: BusinessRequirementItem[];
+  assumptions?: BusinessRequirementItem[];
+  constraints?: BusinessRequirementItem[];
+}
+
+/**
+ * 業務要件参照オブジェクト
+ */
+export interface BusinessRequirementDefinitionRef<RequirementId extends string = string> {
+  readonly requirementId: RequirementId;
+  readonly type: 'business-requirement-ref';
+}
+
+export interface BusinessGoalRef<GoalId extends string = string> {
+  readonly id: GoalId;
+  readonly type: 'business-goal-ref';
+}
+
+export interface BusinessScopeRef<ScopeId extends string = string> {
+  readonly id: ScopeId;
+  readonly type: 'business-scope-ref';
+}
+
+export interface StakeholderRef<StakeholderId extends string = string> {
+  readonly id: StakeholderId;
+  readonly type: 'stakeholder-ref';
+}
+
+export interface SuccessMetricRef<SuccessMetricId extends string = string> {
+  readonly id: SuccessMetricId;
+  readonly type: 'success-metric-ref';
+}
+
+export interface AssumptionRef<AssumptionId extends string = string> {
+  readonly id: AssumptionId;
+  readonly type: 'assumption-ref';
+}
+
+export interface ConstraintRef<ConstraintId extends string = string> {
+  readonly id: ConstraintId;
+  readonly type: 'constraint-ref';
+}
+
+/**
+ * ユースケースから業務要件へのトレーサビリティ情報
+ */
+export interface BusinessRequirementCoverage<
+  RequirementId extends string = string,
+  GoalId extends string = string,
+  ScopeId extends string = string,
+  StakeholderId extends string = string,
+  SuccessMetricId extends string = string,
+  AssumptionId extends string = string,
+  ConstraintId extends string = string
+> {
+  requirement: BusinessRequirementDefinitionRef<RequirementId>;
+  businessGoals: BusinessGoalRef<GoalId>[];
+  scopeItems?: BusinessScopeRef<ScopeId>[];
+  stakeholders?: StakeholderRef<StakeholderId>[];
+  successMetrics?: SuccessMetricRef<SuccessMetricId>[];
+  assumptions?: AssumptionRef<AssumptionId>[];
+  constraints?: ConstraintRef<ConstraintId>[];
+  notes?: string;
+}
+
+/**
  * ユースケース（段階的詳細化対応）
  */
-export interface UseCase extends DeliveryElement {
+export interface UseCase<
+  RequirementId extends string = string,
+  GoalId extends string = string,
+  ScopeId extends string = string,
+  StakeholderId extends string = string,
+  SuccessMetricId extends string = string,
+  AssumptionId extends string = string,
+  ConstraintId extends string = string
+> extends DeliveryElement {
   readonly type: 'usecase';
   name: string;
   description: string;
@@ -32,17 +132,26 @@ export interface UseCase extends DeliveryElement {
     primary: string | ActorRef;
     secondary?: (string | ActorRef)[];
   };
+  businessRequirementCoverage?: BusinessRequirementCoverage<
+    RequirementId,
+    GoalId,
+    ScopeId,
+    StakeholderId,
+    SuccessMetricId,
+    AssumptionId,
+    ConstraintId
+  >;
   preconditions: string[];
   postconditions: string[];
   mainFlow: UseCaseStep[];
   alternativeFlows?: AlternativeFlow[];
-  businessValue: string;
   priority: 'high' | 'medium' | 'low';
   // 詳細化フィールド（オプション）
   complexity?: 'simple' | 'medium' | 'complex';
   estimatedEffort?: string;
   acceptanceCriteria?: string[];
   businessRules?: string[];
+  businessValue?: string;
   dataRequirements?: string[];
   securityRequirements?: string[];
   performanceRequirements?: string[];
@@ -111,4 +220,46 @@ export function actorRef(actorId: string): ActorRef {
 
 export function useCaseRef(useCaseId: string): UseCaseRef {
   return { useCaseId, type: 'usecase-ref' };
+}
+
+export function businessRequirementRef<RequirementId extends string>(
+  requirementId: RequirementId
+): BusinessRequirementDefinitionRef<RequirementId> {
+  return { requirementId, type: 'business-requirement-ref' };
+}
+
+export function businessGoalRef<GoalId extends string>(
+  id: GoalId
+): BusinessGoalRef<GoalId> {
+  return { id, type: 'business-goal-ref' };
+}
+
+export function businessScopeRef<ScopeId extends string>(
+  id: ScopeId
+): BusinessScopeRef<ScopeId> {
+  return { id, type: 'business-scope-ref' };
+}
+
+export function stakeholderRef<StakeholderId extends string>(
+  id: StakeholderId
+): StakeholderRef<StakeholderId> {
+  return { id, type: 'stakeholder-ref' };
+}
+
+export function successMetricRef<SuccessMetricId extends string>(
+  id: SuccessMetricId
+): SuccessMetricRef<SuccessMetricId> {
+  return { id, type: 'success-metric-ref' };
+}
+
+export function assumptionRef<AssumptionId extends string>(
+  id: AssumptionId
+): AssumptionRef<AssumptionId> {
+  return { id, type: 'assumption-ref' };
+}
+
+export function constraintRef<ConstraintId extends string>(
+  id: ConstraintId
+): ConstraintRef<ConstraintId> {
+  return { id, type: 'constraint-ref' };
 }

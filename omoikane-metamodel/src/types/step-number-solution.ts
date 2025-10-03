@@ -4,7 +4,12 @@
  * 戻り先指定はstepIdに統一
  */
 
-import type { UseCase, UseCaseStep } from './delivery-elements';
+import {
+  businessGoalRef,
+  businessRequirementRef,
+  type UseCase,
+  type UseCaseStep,
+} from './delivery-elements';
 
 // ===== ユーティリティ関数 =====
 
@@ -56,6 +61,10 @@ export const improvedOrderProcessing: UseCase = {
   actors: {
     primary: 'customer',
     secondary: ['payment-service', 'shipping-service'],
+  },
+  businessRequirementCoverage: {
+    requirement: businessRequirementRef('order-management-business-requirements'),
+    businessGoals: [businessGoalRef('goal-streamline-order-processing')],
   },
   preconditions: ['顧客がログインしている'],
   postconditions: ['注文が完了している'],
@@ -122,6 +131,5 @@ export const improvedOrderProcessing: UseCase = {
       returnToStepId: 'select-products', // ✨ 商品選択に戻る
     },
   ],
-  businessValue: '顧客の購買体験向上',
   priority: 'high',
 };

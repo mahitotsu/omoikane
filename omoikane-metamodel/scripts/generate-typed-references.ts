@@ -1,11 +1,12 @@
 #!/usr/bin/env bun
 /**
  * 型安全参照の自動生成スクリプト
- * 定義済みのアクター・ユースケースから型定義を生成
+ * 定義済みのアクター・ユースケース・業務要件から型定義を生成
  */
 
-import { readdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
+import { pathToFileURL } from 'url';
 
 interface ActorInfo {
   id: string;
@@ -17,51 +18,176 @@ interface UseCaseInfo {
   file: string;
 }
 
-async function extractActorsAndUseCases(): Promise<{
+interface BusinessRequirementInfo {
+  id: string;
+  file: string;
+  businessGoalIds: string[];
+  scopeItemIds: string[];
+  stakeholderIds: string[];
+  successMetricIds: string[];
+  assumptionIds: string[];
+  constraintIds: string[];
+}
+
+function getAllTsFiles(dir: string): string[] {
+  const results: string[] = [];
+  const entries = readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      results.push(...getAllTsFiles(fullPath));
+    } else if (entry.isFile() && fullPath.endsWith('.ts')) {
+      results.push(fullPath);
+    }
+  }
+
+  return results.sort((a, b) => {
+    const lengthDiff = b.length - a.length;
+    if (lengthDiff !== 0) {
+      return lengthDiff;
+    }
+    return a.localeCompare(b);
+  });
+}
+
+function toUnionLiteral(values: string[]): string {
+  if (values.length === 0) {
+    return 'never';
+  }
+  return values
+    .map(value => `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`)
+    .join('\n  | ');
+}
+
+async function extractElements(): Promise<{
   actors: ActorInfo[];
   useCases: UseCaseInfo[];
+  businessRequirements: BusinessRequirementInfo[];
 }> {
   const actors: ActorInfo[] = [];
   const useCases: UseCaseInfo[] = [];
+  const businessRequirements: BusinessRequirementInfo[] = [];
 
-  // requirements/*.ts ファイルをスキャン
-  const requirementsDir = path.join(process.cwd(), 'src/requirements');
-  const files = readdirSync(requirementsDir).filter(f => f.endsWith('.ts'));
+  const sourceDir = path.join(process.cwd(), 'src');
+  if (!existsSync(sourceDir)) {
+    console.warn(`⚠️  src ディレクトリが見つかりません: ${sourceDir}`);
+    return { actors, useCases, businessRequirements };
+  }
 
-  for (const fileName of files) {
-    const file = path.join(requirementsDir, fileName);
-    const content = readFileSync(file, 'utf-8');
+  const files = getAllTsFiles(sourceDir);
+  const moduleCache = new Map<string, Record<string, unknown>>();
 
-    // アクター定義を抽出（例: export const customer: Actor = { id: 'customer', ...）
-    const actorMatches = content.matchAll(
-      /export\s+const\s+\w+:\s*Actor\s*=\s*{[^}]*id:\s*['"`]([^'"`]+)['"`]/g
-    );
-    for (const match of actorMatches) {
-      const actorId = match[1];
-      if (actorId && !actors.find(a => a.id === actorId)) {
-        actors.push({ id: actorId, file });
-      }
+  for (const file of files) {
+    try {
+      const moduleUrl = pathToFileURL(path.resolve(file)).href;
+      const imported = (await import(moduleUrl)) as Record<string, unknown>;
+      moduleCache.set(file, imported);
+    } catch (error) {
+      console.warn(`⚠️  モジュールの解析に失敗しました: ${file}`, error);
     }
+  }
 
-    // ユースケース定義を抽出（例: export const userRegistration: UseCase = { id: 'user-registration', ...）
-    const useCaseMatches = content.matchAll(
-      /export\s+const\s+\w+:\s*UseCase\s*=\s*{[^}]*id:\s*['"`]([^'"`]+)['"`]/g
-    );
-    for (const match of useCaseMatches) {
-      const useCaseId = match[1];
-      if (useCaseId && !useCases.find(u => u.id === useCaseId)) {
-        useCases.push({ id: useCaseId, file });
+  for (const [file, exported] of moduleCache) {
+    for (const value of Object.values(exported)) {
+      if (!value || typeof value !== 'object' || !('type' in value)) continue;
+      const typedValue = value as { type?: string; id?: string };
+      if (typedValue.type !== 'business-requirement' || !typedValue.id) {
+        continue;
+      }
+
+      if (businessRequirements.find(req => req.id === typedValue.id)) {
+        continue;
+      }
+
+      const definition = value as {
+        businessGoals?: { id?: string }[];
+        scope?: { inScope?: { id?: string }[] };
+        stakeholders?: { id?: string }[];
+        successMetrics?: { id?: string }[];
+        assumptions?: { id?: string }[];
+        constraints?: { id?: string }[];
+      };
+
+      businessRequirements.push({
+        id: typedValue.id,
+        file,
+        businessGoalIds: (definition.businessGoals ?? [])
+          .map(item => item?.id)
+          .filter((value): value is string => Boolean(value)),
+        scopeItemIds: (definition.scope?.inScope ?? [])
+          .map(item => item?.id)
+          .filter((value): value is string => Boolean(value)),
+        stakeholderIds: (definition.stakeholders ?? [])
+          .map(item => item?.id)
+          .filter((value): value is string => Boolean(value)),
+        successMetricIds: (definition.successMetrics ?? [])
+          .map(item => item?.id)
+          .filter((value): value is string => Boolean(value)),
+        assumptionIds: (definition.assumptions ?? [])
+          .map(item => item?.id)
+          .filter((value): value is string => Boolean(value)),
+        constraintIds: (definition.constraints ?? [])
+          .map(item => item?.id)
+          .filter((value): value is string => Boolean(value)),
+      });
+    }
+  }
+
+  for (const [file, exported] of moduleCache) {
+    for (const value of Object.values(exported)) {
+      if (!value || typeof value !== 'object' || !('type' in value)) continue;
+      const typedValue = value as { type?: string; id?: string };
+      if (typedValue.type !== 'actor' || !typedValue.id) {
+        continue;
+      }
+
+      if (!actors.find(actor => actor.id === typedValue.id)) {
+        actors.push({ id: typedValue.id, file });
       }
     }
   }
 
-  return { actors, useCases };
+  for (const [file, exported] of moduleCache) {
+    for (const value of Object.values(exported)) {
+      if (!value || typeof value !== 'object' || !('type' in value)) continue;
+      const typedValue = value as { type?: string; id?: string };
+      if (typedValue.type !== 'usecase' || !typedValue.id) {
+        continue;
+      }
+
+      if (!useCases.find(useCase => useCase.id === typedValue.id)) {
+        useCases.push({ id: typedValue.id, file });
+      }
+    }
+  }
+
+  return { actors, useCases, businessRequirements };
+}
+
+function sanitizePackageSegment(segment: string): string {
+  const parts = segment.split(/[^a-zA-Z0-9]+/).filter(Boolean);
+  if (parts.length === 0) {
+    return 'Project';
+  }
+  const relevantParts = parts.length > 1 ? [parts[parts.length - 1]] : parts;
+  return relevantParts.map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+}
+
+function escapeForSingleQuote(input: string): string {
+  return input.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
 async function generateTypedReferences() {
   console.log('🔄 型安全参照を自動生成中...');
 
-  const { actors, useCases } = await extractActorsAndUseCases();
+  const { actors, useCases, businessRequirements } = await extractElements();
+
+  console.log(`📊 検出された業務要件定義: ${businessRequirements.length}個`);
+  businessRequirements.forEach(r =>
+    console.log(`  - ${r.id} (${path.basename(r.file)})`)
+  );
 
   console.log(`📊 検出されたアクター: ${actors.length}個`);
   actors.forEach(a => console.log(`  - ${a.id} (${path.basename(a.file)})`));
@@ -69,44 +195,136 @@ async function generateTypedReferences() {
   console.log(`📊 検出されたユースケース: ${useCases.length}個`);
   useCases.forEach(u => console.log(`  - ${u.id} (${path.basename(u.file)})`));
 
-  // 型定義テンプレート
+  const knownBusinessRequirementIds = [...new Set(businessRequirements.map(r => r.id))].sort();
+  const knownBusinessGoalIds = [
+    ...new Set(businessRequirements.flatMap(r => r.businessGoalIds)),
+  ].sort();
+  const knownScopeItemIds = [
+    ...new Set(businessRequirements.flatMap(r => r.scopeItemIds)),
+  ].sort();
+  const knownStakeholderIds = [
+    ...new Set(businessRequirements.flatMap(r => r.stakeholderIds)),
+  ].sort();
+  const knownSuccessMetricIds = [
+    ...new Set(businessRequirements.flatMap(r => r.successMetricIds)),
+  ].sort();
+  const knownAssumptionIds = [
+    ...new Set(businessRequirements.flatMap(r => r.assumptionIds)),
+  ].sort();
+  const knownConstraintIds = [
+    ...new Set(businessRequirements.flatMap(r => r.constraintIds)),
+  ].sort();
+
+  const packageJsonPath = path.join(process.cwd(), 'package.json');
+  let prefix = 'Project';
+  if (existsSync(packageJsonPath)) {
+    try {
+      const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as { name?: string };
+      if (pkg.name) {
+        const segments = pkg.name.split('/').filter(Boolean);
+        if (segments.length > 0) {
+          prefix = sanitizePackageSegment(segments[segments.length - 1]);
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️  package.json の読み込みに失敗しました', error);
+    }
+  }
+
+  const camelPrefix = prefix.charAt(0).toLowerCase() + prefix.slice(1);
+
+  const uniqueSourceFiles = [
+    ...new Set([
+      ...actors.map(a => a.file),
+      ...useCases.map(u => u.file),
+      ...businessRequirements.map(r => r.file),
+    ]),
+  ].sort();
+  const serializedSourceFiles = uniqueSourceFiles
+    .map(file => `'${escapeForSingleQuote(file)}'`)
+    .join(', ');
+
   const template = `/**
  * 型安全なアクター・ユースケース参照システム
  * IDE補完とコンパイル時型チェックを提供
- * 
+ *
  * ⚠️ このファイルは自動生成されます
  * 手動編集は scripts/generate-typed-references.ts で行ってください
- * 
+ *
  * 最終更新: ${new Date().toISOString()}
  */
 
-import type { Actor, DeliveryElement } from './delivery-elements';
+import type {
+  Actor,
+  AssumptionRef,
+  BusinessGoalRef,
+  BusinessRequirementCoverage,
+  BusinessRequirementDefinitionRef,
+  BusinessScopeRef,
+  ConstraintRef,
+  StakeholderRef,
+  SuccessMetricRef,
+  UseCase,
+} from 'omoikane-metamodel';
 
-// 既知のアクターIDの型定義（自動生成）
-export type KnownActorId = ${actors.length > 0 ? actors.map(a => `'${a.id}'`).join('\n  | ') : 'never'};
+export type KnownBusinessRequirementId = ${toUnionLiteral(knownBusinessRequirementIds)};
 
-// 既知のユースケースIDの型定義（自動生成）
-export type KnownUseCaseId = ${useCases.length > 0 ? useCases.map(u => `'${u.id}'`).join('\n  | ') : 'never'};
+export type KnownBusinessGoalId = ${toUnionLiteral(knownBusinessGoalIds)};
 
-/**
- * 型安全なアクター参照型
- */
+export type KnownScopeItemId = ${toUnionLiteral(knownScopeItemIds)};
+
+export type KnownStakeholderId = ${toUnionLiteral(knownStakeholderIds)};
+
+export type KnownSuccessMetricId = ${toUnionLiteral(knownSuccessMetricIds)};
+
+export type KnownAssumptionId = ${toUnionLiteral(knownAssumptionIds)};
+
+export type KnownConstraintId = ${toUnionLiteral(knownConstraintIds)};
+
+export type KnownActorId = ${toUnionLiteral(actors.map(a => a.id))};
+
+export type KnownUseCaseId = ${toUnionLiteral(useCases.map(u => u.id))};
+
+export function businessRequirementRef<T extends KnownBusinessRequirementId>(
+  requirementId: T
+): BusinessRequirementDefinitionRef<T> {
+  return { requirementId, type: 'business-requirement-ref' };
+}
+
+export function businessGoalRef<T extends KnownBusinessGoalId>(id: T): BusinessGoalRef<T> {
+  return { id, type: 'business-goal-ref' };
+}
+
+export function businessScopeRef<T extends KnownScopeItemId>(id: T): BusinessScopeRef<T> {
+  return { id, type: 'business-scope-ref' };
+}
+
+export function stakeholderRef<T extends KnownStakeholderId>(id: T): StakeholderRef<T> {
+  return { id, type: 'stakeholder-ref' };
+}
+
+export function successMetricRef<T extends KnownSuccessMetricId>(id: T): SuccessMetricRef<T> {
+  return { id, type: 'success-metric-ref' };
+}
+
+export function assumptionRef<T extends KnownAssumptionId>(id: T): AssumptionRef<T> {
+  return { id, type: 'assumption-ref' };
+}
+
+export function constraintRef<T extends KnownConstraintId>(id: T): ConstraintRef<T> {
+  return { id, type: 'constraint-ref' };
+}
+
 export interface TypedActorRef<T extends KnownActorId = KnownActorId> {
   readonly actorId: T;
   readonly type: 'actor-ref';
 }
 
-/**
- * 型安全なユースケース参照型
- */
 export interface TypedUseCaseRef<T extends KnownUseCaseId = KnownUseCaseId> {
   readonly useCaseId: T;
   readonly type: 'usecase-ref';
 }
 
-/**
- * 型安全なヘルパー関数 - IDE補完対応
- */
 export function typedActorRef<T extends KnownActorId>(actorId: T): TypedActorRef<T> {
   return { actorId, type: 'actor-ref' };
 }
@@ -115,17 +333,16 @@ export function typedUseCaseRef<T extends KnownUseCaseId>(useCaseId: T): TypedUs
   return { useCaseId, type: 'usecase-ref' };
 }
 
-/**
- * アクター情報を含む強化された参照型
- */
+export function ${camelPrefix}BusinessRequirementCoverage(
+  coverage: ${prefix}BusinessRequirementCoverage
+): ${prefix}BusinessRequirementCoverage {
+  return coverage;
+}
+
 export interface EnhancedActorRef<T extends KnownActorId = KnownActorId> extends TypedActorRef<T> {
-  // 実行時にアクター情報を解決するためのヘルパー
   resolve(): Actor | undefined;
 }
 
-/**
- * 実行時アクター解決機能付きの参照作成
- */
 export function createActorRef<T extends KnownActorId>(
   actorId: T,
   actorRegistry?: Map<string, Actor>
@@ -135,13 +352,10 @@ export function createActorRef<T extends KnownActorId>(
     type: 'actor-ref',
     resolve(): Actor | undefined {
       return actorRegistry?.get(actorId);
-    }
+    },
   };
 }
 
-/**
- * アクター定義とその型安全な参照作成を組み合わせたヘルパー
- */
 export interface ActorDefinition<T extends KnownActorId> {
   actor: Actor;
   ref: TypedActorRef<T>;
@@ -153,71 +367,68 @@ export function defineActor<T extends KnownActorId>(
 ): ActorDefinition<T> {
   const actor: Actor = {
     id,
-    ...definition
+    ...definition,
   };
 
   const ref: TypedActorRef<T> = {
     actorId: id,
-    type: 'actor-ref'
+    type: 'actor-ref',
   };
 
   return { actor, ref };
 }
 
-// 型の再エクスポート（互換性のため）
-export type { Actor, DeliveryElement, UseCase } from './delivery-elements';
-export interface TypedUseCase extends Omit<DeliveryElement, 'type'> {
-  readonly type: 'usecase';
-  name: string;
-  description: string;
-  actors: {
-    primary: TypedActorRef;
-    secondary?: TypedActorRef[];
-  };
-  preconditions: string[];
-  postconditions: string[];
-  mainFlow: TypedUseCaseStep[];
-  alternativeFlows?: TypedAlternativeFlow[];
-  businessValue: string;
-  priority: 'high' | 'medium' | 'low';
-}
+export type { Actor, BusinessRequirementCoverage, UseCase } from 'omoikane-metamodel';
 
-export interface TypedUseCaseStep {
-  stepNumber: number;
-  actor: TypedActorRef;
-  action: string;
-  expectedResult: string;
-  notes?: string;
-}
+export type ${prefix}BusinessRequirementCoverage = BusinessRequirementCoverage<
+  KnownBusinessRequirementId,
+  KnownBusinessGoalId,
+  KnownScopeItemId,
+  KnownStakeholderId,
+  KnownSuccessMetricId,
+  KnownAssumptionId,
+  KnownConstraintId
+>;
 
-export interface TypedAlternativeFlow {
-  id: string;
-  name: string;
-  condition: string;
-  steps: TypedUseCaseStep[];
-  returnToStep?: number;
-}
+export type ${prefix}UseCase = UseCase<
+  KnownBusinessRequirementId,
+  KnownBusinessGoalId,
+  KnownScopeItemId,
+  KnownStakeholderId,
+  KnownSuccessMetricId,
+  KnownAssumptionId,
+  KnownConstraintId
+> & {
+  businessRequirementCoverage: ${prefix}BusinessRequirementCoverage;
+};
 
-/**
- * 生成統計情報
- */
 export const generatedStats = {
   actors: ${actors.length},
   useCases: ${useCases.length},
+  businessRequirementIds: ${knownBusinessRequirementIds.length},
+  businessGoals: ${knownBusinessGoalIds.length},
+  scopeItems: ${knownScopeItemIds.length},
+  stakeholders: ${knownStakeholderIds.length},
+  successMetrics: ${knownSuccessMetricIds.length},
+  assumptions: ${knownAssumptionIds.length},
+  constraints: ${knownConstraintIds.length},
   generatedAt: '${new Date().toISOString()}',
-  sourceFiles: [${[...new Set([...actors.map(a => a.file), ...useCases.map(u => u.file)])].map(f => `'${f}'`).join(', ')}]
+  sourceFiles: [${serializedSourceFiles}],
 } as const;
 `;
 
-  // ファイルに書き込み
   const outputPath = path.join(process.cwd(), 'src/typed-references.ts');
   writeFileSync(outputPath, template);
 
   console.log(`✅ ${outputPath} を更新しました`);
-  console.log(`📈 アクター: ${actors.length}個, ユースケース: ${useCases.length}個`);
+  console.log(
+    `📈 業務要件: ${knownBusinessRequirementIds.length}個, アクター: ${actors.length}個, ユースケース: ${useCases.length}個`
+  );
 }
 
-// スクリプト実行
 if (import.meta.main) {
-  generateTypedReferences().catch(console.error);
+  generateTypedReferences().catch(error => {
+    console.error('❌ 型定義の生成に失敗しました', error);
+    process.exit(1);
+  });
 }
