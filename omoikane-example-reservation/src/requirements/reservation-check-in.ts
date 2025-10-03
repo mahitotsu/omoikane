@@ -38,7 +38,10 @@ export const reservationCheckIn: ReservationUseCase = {
     ],
     successMetrics: [successMetricRef('metric-slot-utilization')],
     assumptions: [assumptionRef('assumption-single-location')],
-    constraints: [constraintRef('constraint-privacy-minimization')],
+    constraints: [
+      constraintRef('constraint-privacy-minimization'),
+      constraintRef('constraint-staff-change-anytime-unless-checked-in'),
+    ],
   }),
   preconditions: [
     '予約が確定済みでチェックイン可能時間内である',
@@ -47,6 +50,7 @@ export const reservationCheckIn: ReservationUseCase = {
   postconditions: [
     '来店者のステータスが「来店済み」へ更新される',
     '店舗スタッフが対応準備を開始できる状態になる',
+    '来店済みになった予約は新しい制約により店舗スタッフによる変更が不可になる',
   ],
   mainFlow: [
     {

@@ -40,7 +40,10 @@ export const reservationStaffCancel: ReservationUseCase = {
       assumptionRef('assumption-manual-communications'),
       assumptionRef('assumption-staff-sign-in-required'),
     ],
-    constraints: [constraintRef('constraint-privacy-minimization')],
+    constraints: [
+      constraintRef('constraint-privacy-minimization'),
+      constraintRef('constraint-staff-change-anytime-unless-checked-in'),
+    ],
   }),
   preconditions: [
     '店舗スタッフが予約検索ユースケースなどで対象予約の詳細画面を開いている',

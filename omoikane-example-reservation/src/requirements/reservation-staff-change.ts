@@ -79,6 +79,19 @@ export const reservationStaffChange: ReservationUseCase = {
   ],
   alternativeFlows: [
     {
+      id: 'already-checked-in',
+      name: '来店済み予約の変更要求',
+      condition: '予約が既に来店済みとして処理されている場合',
+      steps: [
+        {
+          actor: typedActorRef('store-staff'),
+          action: '変更不可のメッセージを確認し代替案（取消や再予約の案内）を検討する',
+          expectedResult: 'ポリシーに従い変更不可であることが明確になり別手段が提示される',
+        },
+      ],
+      returnToStepId: 'review-details',
+    },
+    {
       id: 'validation-error',
       name: '検証に失敗する',
       condition: '変更内容が制約条件に違反している場合',
