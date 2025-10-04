@@ -98,9 +98,21 @@ const sampleUseCases = [
     },
     preconditions: ['顧客が認証されている'],
     mainFlow: [
-      { actor: 'actor-customer', action: 'サービス種別を選択する', expectedResult: 'サービス種別が選択されている' },
-      { actor: 'actor-customer', action: '希望日時を指定する', expectedResult: '希望日時が入力されている' },
-      { actor: 'システム', action: '空き状況を確認する', expectedResult: '空き状況が表示されている' },
+      {
+        actor: 'actor-customer',
+        action: 'サービス種別を選択する',
+        expectedResult: 'サービス種別が選択されている',
+      },
+      {
+        actor: 'actor-customer',
+        action: '希望日時を指定する',
+        expectedResult: '希望日時が入力されている',
+      },
+      {
+        actor: 'システム',
+        action: '空き状況を確認する',
+        expectedResult: '空き状況が表示されている',
+      },
       { actor: 'システム', action: '予約を確定する', expectedResult: '予約が確定されている' },
     ],
     postconditions: ['新しい予約が作成されている'],
@@ -127,9 +139,21 @@ const sampleUseCases = [
     },
     preconditions: ['スタッフが認証されている', '変更対象の予約が存在する'],
     mainFlow: [
-      { actor: 'actor-staff', action: '予約を検索する', expectedResult: '該当する予約が表示されている' },
-      { actor: 'actor-staff', action: '予約の詳細を確認する', expectedResult: '予約詳細が表示されている' },
-      { actor: 'actor-staff', action: '変更内容を入力する', expectedResult: '変更内容が入力されている' },
+      {
+        actor: 'actor-staff',
+        action: '予約を検索する',
+        expectedResult: '該当する予約が表示されている',
+      },
+      {
+        actor: 'actor-staff',
+        action: '予約の詳細を確認する',
+        expectedResult: '予約詳細が表示されている',
+      },
+      {
+        actor: 'actor-staff',
+        action: '変更内容を入力する',
+        expectedResult: '変更内容が入力されている',
+      },
       { actor: 'システム', action: '変更を保存する', expectedResult: '変更が保存されている' },
     ],
     postconditions: ['予約が変更されている'],
@@ -141,7 +165,12 @@ const sampleUseCases = [
       businessGoals: [{ id: 'goal-increase-efficiency', type: 'business-goal-ref' as const }],
       scopeItems: [{ id: 'scope-reservation-management', type: 'business-scope-ref' as const }],
       stakeholders: [{ id: 'stakeholder-staff', type: 'stakeholder-ref' as const }],
-      constraints: [{ id: 'constraint-staff-change-anytime-unless-checked-in', type: 'constraint-ref' as const }],
+      constraints: [
+        {
+          id: 'constraint-staff-change-anytime-unless-checked-in',
+          type: 'constraint-ref' as const,
+        },
+      ],
     },
   },
 ];
@@ -160,7 +189,9 @@ function runQualityAssessmentDemo() {
     );
 
     console.log('📊 品質評価結果:');
-    console.log(`総合スコア: ${result.assessment.overallScore.value}/100 (${result.assessment.overallScore.level})`);
+    console.log(
+      `総合スコア: ${result.assessment.overallScore.value}/100 (${result.assessment.overallScore.level})`
+    );
     console.log(`完全性: ${result.assessment.scores.completeness.value}/100`);
     console.log(`一貫性: ${result.assessment.scores.consistency.value}/100`);
     console.log(`妥当性: ${result.assessment.scores.validity.value}/100`);
@@ -179,10 +210,18 @@ function runQualityAssessmentDemo() {
 
     console.log('📈 カバレッジレポート:');
     const { coverage } = result.assessment;
-    console.log(`  ビジネスゴール: ${coverage.businessGoals.covered}/${coverage.businessGoals.total} (${Math.round(coverage.businessGoals.coverage * 100)}%)`);
-    console.log(`  スコープ項目: ${coverage.scopeItems.covered}/${coverage.scopeItems.total} (${Math.round(coverage.scopeItems.coverage * 100)}%)`);
-    console.log(`  ステークホルダー: ${coverage.stakeholders.covered}/${coverage.stakeholders.total} (${Math.round(coverage.stakeholders.coverage * 100)}%)`);
-    console.log(`  制約条件: ${coverage.constraints.covered}/${coverage.constraints.total} (${Math.round(coverage.constraints.coverage * 100)}%)\n`);
+    console.log(
+      `  ビジネスゴール: ${coverage.businessGoals.covered}/${coverage.businessGoals.total} (${Math.round(coverage.businessGoals.coverage * 100)}%)`
+    );
+    console.log(
+      `  スコープ項目: ${coverage.scopeItems.covered}/${coverage.scopeItems.total} (${Math.round(coverage.scopeItems.coverage * 100)}%)`
+    );
+    console.log(
+      `  ステークホルダー: ${coverage.stakeholders.covered}/${coverage.stakeholders.total} (${Math.round(coverage.stakeholders.coverage * 100)}%)`
+    );
+    console.log(
+      `  制約条件: ${coverage.constraints.covered}/${coverage.constraints.total} (${Math.round(coverage.constraints.coverage * 100)}%)\n`
+    );
 
     console.log('🤖 AI Agent向け推奨アクション:');
     if (result.recommendations.length === 0) {
@@ -196,7 +235,6 @@ function runQualityAssessmentDemo() {
     }
 
     console.log('=== デモ完了 ===');
-
   } catch (error) {
     console.error('品質評価中にエラーが発生しました:', error);
   }

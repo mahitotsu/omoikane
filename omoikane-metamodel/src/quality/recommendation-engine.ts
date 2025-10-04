@@ -3,16 +3,9 @@
  * 品質評価結果から AI Agent 向けの推奨アクションを生成
  */
 
-import type {
-    Actor,
-    BusinessRequirementDefinition,
-    UseCase,
-} from '../types/delivery-elements.js';
+import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
 
-import type {
-    QualityAssessmentResult,
-    Recommendation as QualityRecommendation
-} from './types.js';
+import type { QualityAssessmentResult, Recommendation as QualityRecommendation } from './types.js';
 
 /**
  * 推奨アクションを生成
@@ -26,14 +19,20 @@ export function generateRecommendations(
   const recommendations: QualityRecommendation[] = [];
 
   // 完全性の問題に対する推奨アクション
-  generateCompletenessRecommendations(qualityResult, businessRequirements, actors, useCases, recommendations);
-  
+  generateCompletenessRecommendations(
+    qualityResult,
+    businessRequirements,
+    actors,
+    useCases,
+    recommendations
+  );
+
   // 一貫性の問題に対する推奨アクション
   generateConsistencyRecommendations(qualityResult, recommendations);
-  
+
   // 妥当性の問題に対する推奨アクション
   generateValidityRecommendations(qualityResult, recommendations);
-  
+
   // 追跡可能性の問題に対する推奨アクション
   generateTraceabilityRecommendations(qualityResult, businessRequirements, recommendations);
 
@@ -54,7 +53,9 @@ function generateCompletenessRecommendations(
   useCases: UseCase[],
   recommendations: QualityRecommendation[]
 ): void {
-  const completenessIssues = qualityResult.issues.filter(issue => issue.category === 'completeness');
+  const completenessIssues = qualityResult.issues.filter(
+    issue => issue.category === 'completeness'
+  );
 
   for (const issue of completenessIssues) {
     switch (issue.elementType) {
@@ -297,7 +298,9 @@ function generateTraceabilityRecommendations(
   businessRequirements: BusinessRequirementDefinition,
   recommendations: QualityRecommendation[]
 ): void {
-  const traceabilityIssues = qualityResult.issues.filter(issue => issue.category === 'traceability');
+  const traceabilityIssues = qualityResult.issues.filter(
+    issue => issue.category === 'traceability'
+  );
 
   for (const issue of traceabilityIssues) {
     if (issue.description.includes('カバレッジが低い')) {
@@ -321,7 +324,10 @@ function generateTraceabilityRecommendations(
       });
     }
 
-    if (issue.elementType === 'actor' && issue.description.includes('使用するユースケースが存在しません')) {
+    if (
+      issue.elementType === 'actor' &&
+      issue.description.includes('使用するユースケースが存在しません')
+    ) {
       recommendations.push({
         priority: 'medium',
         actionType: 'create_usecase_for_actor',

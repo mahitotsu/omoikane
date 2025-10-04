@@ -4,16 +4,16 @@
 
 import type { Actor } from 'omoikane-metamodel';
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
 } from '../typed-references.js';
 
 export const capacityPlanner: Actor = {

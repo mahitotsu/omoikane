@@ -2,11 +2,7 @@
  * 品質評価フレームワークの型定義
  */
 
-import type {
-    Actor,
-    BusinessRequirementDefinition,
-    UseCase,
-} from '../types/delivery-elements.js';
+import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
 
 /**
  * 品質スコア
@@ -151,7 +147,15 @@ export interface OrphanedElement {
  */
 export interface ElementReference {
   /** 要素タイプ */
-  type: 'businessGoal' | 'scopeItem' | 'stakeholder' | 'successMetric' | 'assumption' | 'constraint' | 'actor' | 'usecase';
+  type:
+    | 'businessGoal'
+    | 'scopeItem'
+    | 'stakeholder'
+    | 'successMetric'
+    | 'assumption'
+    | 'constraint'
+    | 'actor'
+    | 'usecase';
   /** 要素ID */
   id: string;
   /** 要素名（オプション） */

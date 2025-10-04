@@ -185,9 +185,7 @@ async function generateTypedReferences() {
   const { actors, useCases, businessRequirements } = await extractElements();
 
   console.log(`📊 検出された業務要件定義: ${businessRequirements.length}個`);
-  businessRequirements.forEach(r =>
-    console.log(`  - ${r.id} (${path.basename(r.file)})`)
-  );
+  businessRequirements.forEach(r => console.log(`  - ${r.id} (${path.basename(r.file)})`));
 
   console.log(`📊 検出されたアクター: ${actors.length}個`);
   actors.forEach(a => console.log(`  - ${a.id} (${path.basename(a.file)})`));
@@ -199,9 +197,7 @@ async function generateTypedReferences() {
   const knownBusinessGoalIds = [
     ...new Set(businessRequirements.flatMap(r => r.businessGoalIds)),
   ].sort();
-  const knownScopeItemIds = [
-    ...new Set(businessRequirements.flatMap(r => r.scopeItemIds)),
-  ].sort();
+  const knownScopeItemIds = [...new Set(businessRequirements.flatMap(r => r.scopeItemIds))].sort();
   const knownStakeholderIds = [
     ...new Set(businessRequirements.flatMap(r => r.stakeholderIds)),
   ].sort();

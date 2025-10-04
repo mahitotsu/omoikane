@@ -16,16 +16,9 @@ export { assessQuality } from './assessor.js';
 export { generateRecommendations } from './recommendation-engine.js';
 
 // 便利な統合関数
-import type {
-    Actor,
-    BusinessRequirementDefinition,
-    UseCase,
-} from '../types/delivery-elements.js';
+import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
 
-import type {
-    QualityAssessmentResult,
-    Recommendation,
-} from './types.js';
+import type { QualityAssessmentResult, Recommendation } from './types.js';
 
 import { assessQuality } from './assessor.js';
 import { generateRecommendations } from './recommendation-engine.js';
@@ -42,7 +35,12 @@ export function performQualityAssessment(
   recommendations: Recommendation[];
 } {
   const assessment = assessQuality(businessRequirements, actors, useCases);
-  const recommendations = generateRecommendations(assessment, businessRequirements, actors, useCases);
+  const recommendations = generateRecommendations(
+    assessment,
+    businessRequirements,
+    actors,
+    useCases
+  );
 
   return {
     assessment,

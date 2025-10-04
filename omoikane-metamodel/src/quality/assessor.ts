@@ -3,17 +3,9 @@
  * メタモデル要素の品質を総合的に評価
  */
 
-import type {
-    Actor,
-    BusinessRequirementDefinition,
-    UseCase,
-} from '../types/delivery-elements.js';
+import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
 
-import type {
-    QualityAssessmentResult,
-    QualityIssue,
-    QualityScore,
-} from './types.js';
+import type { QualityAssessmentResult, QualityIssue, QualityScore } from './types.js';
 
 import { analyzeCoverage } from './coverage-analyzer.js';
 
@@ -30,13 +22,13 @@ export function assessQuality(
 
   // 完全性の評価
   const completeness = assessCompleteness(businessRequirements, actors, useCases, issues);
-  
+
   // 一貫性の評価
   const consistency = assessConsistency(businessRequirements, actors, useCases, issues);
-  
+
   // 妥当性の評価
   const validity = assessValidity(businessRequirements, actors, useCases, issues);
-  
+
   // 追跡可能性の評価
   const traceability = assessTraceability(businessRequirements, actors, useCases, issues, coverage);
 
@@ -83,7 +75,11 @@ function assessCompleteness(
     deductions += 20;
   }
 
-  if (!businessRequirements.scope || !businessRequirements.scope.inScope || businessRequirements.scope.inScope.length === 0) {
+  if (
+    !businessRequirements.scope ||
+    !businessRequirements.scope.inScope ||
+    businessRequirements.scope.inScope.length === 0
+  ) {
     issues.push({
       severity: 'warning',
       category: 'completeness',
@@ -256,7 +252,7 @@ function assessConsistency(
   for (const useCase of useCases) {
     const primaryActor = useCase.actors.primary;
     const primaryActorId = typeof primaryActor === 'string' ? primaryActor : primaryActor.actorId;
-    
+
     if (!actors.some(actor => actor.id === primaryActorId)) {
       issues.push({
         severity: 'critical',
@@ -410,7 +406,8 @@ function assessTraceability(
       elementId: orphaned.element.id,
       description: orphaned.reason,
       impact: '未使用の要素がモデルを複雑にしています',
-      suggestion: orphaned.suggestedUsage[0] || '要素を削除するか、使用するユースケースを作成してください',
+      suggestion:
+        orphaned.suggestedUsage[0] || '要素を削除するか、使用するユースケースを作成してください',
     });
     deductions += 5;
   }
@@ -441,7 +438,7 @@ function calculateOverallScore(
     traceability: 0.2,
   };
 
-  const weightedScore = 
+  const weightedScore =
     completeness.value * weights.completeness +
     consistency.value * weights.consistency +
     validity.value * weights.validity +

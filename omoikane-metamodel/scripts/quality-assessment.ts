@@ -4,26 +4,9 @@
  * 指定されたプロジェクトの品質を評価してレポートを生成
  */
 
-import { readdir, stat } from 'fs/promises';
+import { readdir } from 'fs/promises';
 import { extname, join } from 'path';
 import { performQualityAssessment } from '../src/quality/index.js';
-
-interface ProjectFile {
-  path: string;
-  content: any;
-}
-
-/**
- * ディレクトリが存在するかチェック
- */
-async function checkDirExists(dirPath: string): Promise<boolean> {
-  try {
-    const statResult = await stat(dirPath);
-    return statResult.isDirectory();
-  } catch {
-    return false;
-  }
-}
 
 /**
  * TypeScriptファイルを動的にインポート
@@ -35,7 +18,10 @@ async function importTsFile(filePath: string): Promise<any> {
     const module = await import(`file://${absolutePath}`);
     return module.default || module;
   } catch (error) {
-    console.warn(`Warning: Could not import ${filePath}:`, error instanceof Error ? error.message : String(error));
+    console.warn(
+      `Warning: Could not import ${filePath}:`,
+      error instanceof Error ? error.message : String(error)
+    );
     return null;
   }
 }
@@ -45,13 +31,13 @@ async function importTsFile(filePath: string): Promise<any> {
  */
 async function findAllTsFiles(dirPath: string): Promise<string[]> {
   const files: string[] = [];
-  
+
   try {
     const entries = await readdir(dirPath, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = join(dirPath, entry.name);
-      
+
       if (entry.isDirectory()) {
         // ディレクトリの場合は再帰的に検索
         const subFiles = await findAllTsFiles(fullPath);
@@ -64,7 +50,7 @@ async function findAllTsFiles(dirPath: string): Promise<string[]> {
   } catch (error) {
     // ディレクトリが存在しない場合は静かに処理を続行
   }
-  
+
   return files;
 }
 
@@ -88,26 +74,25 @@ async function findProjectFiles(projectDir: string): Promise<{
   try {
     // srcディレクトリ以下のすべてのTypeScriptファイルを検索
     const allTsFiles = await findAllTsFiles(srcDir);
-    
+
     console.log(`🔍 src/ 以下の検索対象ファイル: ${allTsFiles.length}件`);
-    
+
     for (const filePath of allTsFiles) {
       const fileName = filePath.split('/').pop() || '';
-      
+
       try {
         const module = await importTsFile(filePath);
         if (!module) continue;
-        
+
         // business-requirements.ts の検索
         if (fileName === 'business-requirements.ts' && !businessRequirements) {
-          businessRequirements = module.default || 
-                                module.businessRequirements || 
-                                module.reservationBusinessRequirements ||
-                                Object.values(module).find((item: any) => 
-                                  item && item.type === 'business-requirement'
-                                );
+          businessRequirements =
+            module.default ||
+            module.businessRequirements ||
+            module.reservationBusinessRequirements ||
+            Object.values(module).find((item: any) => item && item.type === 'business-requirement');
         }
-        
+
         // 各ファイルから export されているすべてのオブジェクトを確認
         for (const [, value] of Object.entries(module)) {
           if (!value || typeof value !== 'object') continue;
@@ -120,29 +105,35 @@ async function findProjectFiles(projectDir: string): Promise<{
             continue;
           }
 
-            if (obj.type === 'usecase' && obj.id && obj.name) {
-              const signature = JSON.stringify(obj, (_k, v) => (typeof v === 'function' ? undefined : v));
-              const existing = useCaseIdMap.get(obj.id);
-              if (!existing) {
-                useCaseIdMap.set(obj.id, { signature });
-                useCases.push(obj);
-              } else if (existing.signature !== signature) {
-                // 構造差異がある → 実際の競合として両方残す
-                useCases.push(obj);
-              } else {
-                suppressedDuplicateCount++;
-              }
+          if (obj.type === 'usecase' && obj.id && obj.name) {
+            const signature = JSON.stringify(obj, (_k, v) =>
+              typeof v === 'function' ? undefined : v
+            );
+            const existing = useCaseIdMap.get(obj.id);
+            if (!existing) {
+              useCaseIdMap.set(obj.id, { signature });
+              useCases.push(obj);
+            } else if (existing.signature !== signature) {
+              // 構造差異がある → 実際の競合として両方残す
+              useCases.push(obj);
+            } else {
+              suppressedDuplicateCount++;
             }
+          }
         }
-        
       } catch (fileError) {
         // 個別ファイルの読み込みエラーは静かに処理を続行
-        console.warn(`Warning: Could not process ${fileName}:`, fileError instanceof Error ? fileError.message : String(fileError));
+        console.warn(
+          `Warning: Could not process ${fileName}:`,
+          fileError instanceof Error ? fileError.message : String(fileError)
+        );
       }
     }
 
     if (suppressedDuplicateCount > 0) {
-      console.log(`ℹ️  同一構造のユースケース重複 ${suppressedDuplicateCount} 件を除外しました（再エクスポート等）。`);
+      console.log(
+        `ℹ️  同一構造のユースケース重複 ${suppressedDuplicateCount} 件を除外しました（再エクスポート等）。`
+      );
     }
   } catch (error) {
     console.error('Error loading project files:', error);
@@ -154,20 +145,26 @@ async function findProjectFiles(projectDir: string): Promise<{
 /**
  * 品質評価レポートを表示
  */
-function displayQualityReport(
-  assessment: any,
-  recommendations: any[],
-  projectName: string
-) {
+function displayQualityReport(assessment: any, recommendations: any[], projectName: string) {
   console.log(`\n=== 品質評価レポート: ${projectName} ===\n`);
 
   // 総合スコア
   console.log('📊 品質評価結果:');
-  console.log(`総合スコア: ${assessment.overallScore.value}/100 (${assessment.overallScore.level})`);
-  console.log(`完全性: ${assessment.scores.completeness.value}/100 (${assessment.scores.completeness.level})`);
-  console.log(`一貫性: ${assessment.scores.consistency.value}/100 (${assessment.scores.consistency.level})`);
-  console.log(`妥当性: ${assessment.scores.validity.value}/100 (${assessment.scores.validity.level})`);
-  console.log(`追跡可能性: ${assessment.scores.traceability.value}/100 (${assessment.scores.traceability.level})\n`);
+  console.log(
+    `総合スコア: ${assessment.overallScore.value}/100 (${assessment.overallScore.level})`
+  );
+  console.log(
+    `完全性: ${assessment.scores.completeness.value}/100 (${assessment.scores.completeness.level})`
+  );
+  console.log(
+    `一貫性: ${assessment.scores.consistency.value}/100 (${assessment.scores.consistency.level})`
+  );
+  console.log(
+    `妥当性: ${assessment.scores.validity.value}/100 (${assessment.scores.validity.level})`
+  );
+  console.log(
+    `追跡可能性: ${assessment.scores.traceability.value}/100 (${assessment.scores.traceability.level})\n`
+  );
 
   // 発見された問題
   console.log('🔍 発見された問題:');
@@ -175,8 +172,11 @@ function displayQualityReport(
     console.log('  問題は発見されませんでした ✨\n');
   } else {
     assessment.issues.forEach((issue: any, index: number) => {
-      const severityIcon = issue.severity === 'critical' ? '🚨' : issue.severity === 'warning' ? '⚠️' : 'ℹ️';
-      console.log(`  ${index + 1}. ${severityIcon} [${issue.severity.toUpperCase()}] ${issue.description}`);
+      const severityIcon =
+        issue.severity === 'critical' ? '🚨' : issue.severity === 'warning' ? '⚠️' : 'ℹ️';
+      console.log(
+        `  ${index + 1}. ${severityIcon} [${issue.severity.toUpperCase()}] ${issue.description}`
+      );
       console.log(`     影響: ${issue.impact}`);
       console.log(`     対応: ${issue.suggestion}\n`);
     });
@@ -185,12 +185,24 @@ function displayQualityReport(
   // カバレッジレポート
   console.log('📈 カバレッジレポート:');
   const { coverage } = assessment;
-  console.log(`  ビジネスゴール: ${coverage.businessGoals.covered}/${coverage.businessGoals.total} (${Math.round(coverage.businessGoals.coverage * 100)}%)`);
-  console.log(`  スコープ項目: ${coverage.scopeItems.covered}/${coverage.scopeItems.total} (${Math.round(coverage.scopeItems.coverage * 100)}%)`);
-  console.log(`  ステークホルダー: ${coverage.stakeholders.covered}/${coverage.stakeholders.total} (${Math.round(coverage.stakeholders.coverage * 100)}%)`);
-  console.log(`  成功指標: ${coverage.successMetrics.covered}/${coverage.successMetrics.total} (${Math.round(coverage.successMetrics.coverage * 100)}%)`);
-  console.log(`  前提条件: ${coverage.assumptions.covered}/${coverage.assumptions.total} (${Math.round(coverage.assumptions.coverage * 100)}%)`);
-  console.log(`  制約条件: ${coverage.constraints.covered}/${coverage.constraints.total} (${Math.round(coverage.constraints.coverage * 100)}%)\n`);
+  console.log(
+    `  ビジネスゴール: ${coverage.businessGoals.covered}/${coverage.businessGoals.total} (${Math.round(coverage.businessGoals.coverage * 100)}%)`
+  );
+  console.log(
+    `  スコープ項目: ${coverage.scopeItems.covered}/${coverage.scopeItems.total} (${Math.round(coverage.scopeItems.coverage * 100)}%)`
+  );
+  console.log(
+    `  ステークホルダー: ${coverage.stakeholders.covered}/${coverage.stakeholders.total} (${Math.round(coverage.stakeholders.coverage * 100)}%)`
+  );
+  console.log(
+    `  成功指標: ${coverage.successMetrics.covered}/${coverage.successMetrics.total} (${Math.round(coverage.successMetrics.coverage * 100)}%)`
+  );
+  console.log(
+    `  前提条件: ${coverage.assumptions.covered}/${coverage.assumptions.total} (${Math.round(coverage.assumptions.coverage * 100)}%)`
+  );
+  console.log(
+    `  制約条件: ${coverage.constraints.covered}/${coverage.constraints.total} (${Math.round(coverage.constraints.coverage * 100)}%)\n`
+  );
 
   // 孤立要素
   if (coverage.orphanedElements.length > 0) {
@@ -198,7 +210,9 @@ function displayQualityReport(
     coverage.orphanedElements.forEach((orphaned: any, index: number) => {
       console.log(`  ${index + 1}. ${orphaned.element.type}: ${orphaned.element.id}`);
       console.log(`     理由: ${orphaned.reason}`);
-      console.log(`     推奨: ${orphaned.suggestedUsage[0] || '要素を削除するか使用方法を検討してください'}\n`);
+      console.log(
+        `     推奨: ${orphaned.suggestedUsage[0] || '要素を削除するか使用方法を検討してください'}\n`
+      );
     });
   }
 
@@ -228,7 +242,7 @@ function displayQualityReport(
 async function main() {
   const args = process.argv.slice(2);
   const projectDir = args[0] || process.cwd();
-  
+
   console.log(`🔍 プロジェクト品質評価を開始: ${projectDir}`);
 
   try {
@@ -276,7 +290,6 @@ async function main() {
       console.log(`✅ 品質評価完了: 良好な品質です (${assessment.overallScore.value}/100)`);
       process.exit(0);
     }
-
   } catch (error) {
     console.error('❌ Error during quality assessment:', error);
     process.exit(1);

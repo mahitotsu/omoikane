@@ -100,14 +100,17 @@ function replaceArrayPropertyToTyped(
       return match;
     }
 
-    const compact = inner.replace(/'([^']+)'/g, '').replace(/[^\S\n,]/g, '').trim();
+    const compact = inner
+      .replace(/'([^']+)'/g, '')
+      .replace(/[^\S\n,]/g, '')
+      .trim();
     if (compact.length > 0) {
       return match;
     }
 
     conversions += idMatches.length;
     const entryIndent = `${indent}  `;
-    const convertedItems = idMatches.map((raw) => {
+    const convertedItems = idMatches.map(raw => {
       const id = raw.slice(1, -1);
       return `${factoryName}('${id}')`;
     });
@@ -136,7 +139,10 @@ function replaceArrayPropertyToString(
       return match;
     }
 
-    const compact = inner.replace(factoryRegex, '').replace(/[^\S\n,]/g, '').trim();
+    const compact = inner
+      .replace(factoryRegex, '')
+      .replace(/[^\S\n,]/g, '')
+      .trim();
     if (compact.length > 0) {
       return match;
     }

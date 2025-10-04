@@ -3,18 +3,9 @@
  * 業務要件定義とユースケースの対応関係を分析
  */
 
-import type {
-    Actor,
-    BusinessRequirementDefinition,
-    UseCase,
-} from '../types/delivery-elements.js';
+import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
 
-import type {
-    CoverageDetail,
-    CoverageReport,
-    ElementCoverage,
-    OrphanedElement
-} from './types.js';
+import type { CoverageDetail, CoverageReport, ElementCoverage, OrphanedElement } from './types.js';
 
 /**
  * カバレッジ分析を実行
@@ -47,12 +38,14 @@ function analyzeBusinessGoalsCoverage(
 
   for (const goal of businessGoals) {
     const usedBy: string[] = [];
-    
+
     for (const useCase of useCases) {
       const coverage = useCase.businessRequirementCoverage;
-      if (coverage?.businessGoals?.some(bgRef => 
-        typeof bgRef === 'object' && 'id' in bgRef ? bgRef.id === goal.id : bgRef === goal.id
-      )) {
+      if (
+        coverage?.businessGoals?.some(bgRef =>
+          typeof bgRef === 'object' && 'id' in bgRef ? bgRef.id === goal.id : bgRef === goal.id
+        )
+      ) {
         usedBy.push(useCase.id);
       }
     }
@@ -92,12 +85,14 @@ function analyzeScopeItemsCoverage(
 
   for (const item of scopeItems) {
     const usedBy: string[] = [];
-    
+
     for (const useCase of useCases) {
       const coverage = useCase.businessRequirementCoverage;
-      if (coverage?.scopeItems?.some(siRef => 
-        typeof siRef === 'object' && 'id' in siRef ? siRef.id === item.id : siRef === item.id
-      )) {
+      if (
+        coverage?.scopeItems?.some(siRef =>
+          typeof siRef === 'object' && 'id' in siRef ? siRef.id === item.id : siRef === item.id
+        )
+      ) {
         usedBy.push(useCase.id);
       }
     }
@@ -137,12 +132,16 @@ function analyzeStakeholdersCoverage(
 
   for (const stakeholder of stakeholders) {
     const usedBy: string[] = [];
-    
+
     for (const useCase of useCases) {
       const coverage = useCase.businessRequirementCoverage;
-      if (coverage?.stakeholders?.some(shRef => 
-        typeof shRef === 'object' && 'id' in shRef ? shRef.id === stakeholder.id : shRef === stakeholder.id
-      )) {
+      if (
+        coverage?.stakeholders?.some(shRef =>
+          typeof shRef === 'object' && 'id' in shRef
+            ? shRef.id === stakeholder.id
+            : shRef === stakeholder.id
+        )
+      ) {
         usedBy.push(useCase.id);
       }
     }
@@ -182,12 +181,14 @@ function analyzeSuccessMetricsCoverage(
 
   for (const metric of successMetrics) {
     const usedBy: string[] = [];
-    
+
     for (const useCase of useCases) {
       const coverage = useCase.businessRequirementCoverage;
-      if (coverage?.successMetrics?.some(smRef => 
-        typeof smRef === 'object' && 'id' in smRef ? smRef.id === metric.id : smRef === metric.id
-      )) {
+      if (
+        coverage?.successMetrics?.some(smRef =>
+          typeof smRef === 'object' && 'id' in smRef ? smRef.id === metric.id : smRef === metric.id
+        )
+      ) {
         usedBy.push(useCase.id);
       }
     }
@@ -227,12 +228,16 @@ function analyzeAssumptionsCoverage(
 
   for (const assumption of assumptions) {
     const usedBy: string[] = [];
-    
+
     for (const useCase of useCases) {
       const coverage = useCase.businessRequirementCoverage;
-      if (coverage?.assumptions?.some(aRef => 
-        typeof aRef === 'object' && 'id' in aRef ? aRef.id === assumption.id : aRef === assumption.id
-      )) {
+      if (
+        coverage?.assumptions?.some(aRef =>
+          typeof aRef === 'object' && 'id' in aRef
+            ? aRef.id === assumption.id
+            : aRef === assumption.id
+        )
+      ) {
         usedBy.push(useCase.id);
       }
     }
@@ -272,12 +277,16 @@ function analyzeConstraintsCoverage(
 
   for (const constraint of constraints) {
     const usedBy: string[] = [];
-    
+
     for (const useCase of useCases) {
       const coverage = useCase.businessRequirementCoverage;
-      if (coverage?.constraints?.some(cRef => 
-        typeof cRef === 'object' && 'id' in cRef ? cRef.id === constraint.id : cRef === constraint.id
-      )) {
+      if (
+        coverage?.constraints?.some(cRef =>
+          typeof cRef === 'object' && 'id' in cRef
+            ? cRef.id === constraint.id
+            : cRef === constraint.id
+        )
+      ) {
         usedBy.push(useCase.id);
       }
     }
@@ -320,10 +329,10 @@ function findOrphanedElements(
     const isUsed = useCases.some(useCase => {
       const primary = useCase.actors.primary;
       const secondary = useCase.actors.secondary || [];
-      
+
       const primaryId = typeof primary === 'string' ? primary : primary.actorId;
-      const secondaryIds = secondary.map(s => typeof s === 'string' ? s : s.actorId);
-      
+      const secondaryIds = secondary.map(s => (typeof s === 'string' ? s : s.actorId));
+
       return primaryId === actor.id || secondaryIds.includes(actor.id);
     });
 

@@ -101,7 +101,7 @@ export interface BusinessRequirementCoverage<
   StakeholderId extends string = string,
   SuccessMetricId extends string = string,
   AssumptionId extends string = string,
-  ConstraintId extends string = string
+  ConstraintId extends string = string,
 > {
   requirement: BusinessRequirementDefinitionRef<RequirementId>;
   businessGoals: BusinessGoalRef<GoalId>[];
@@ -123,7 +123,7 @@ export interface UseCase<
   StakeholderId extends string = string,
   SuccessMetricId extends string = string,
   AssumptionId extends string = string,
-  ConstraintId extends string = string
+  ConstraintId extends string = string,
 > extends DeliveryElement {
   readonly type: 'usecase';
   name: string;
@@ -228,15 +228,11 @@ export function businessRequirementRef<RequirementId extends string>(
   return { requirementId, type: 'business-requirement-ref' };
 }
 
-export function businessGoalRef<GoalId extends string>(
-  id: GoalId
-): BusinessGoalRef<GoalId> {
+export function businessGoalRef<GoalId extends string>(id: GoalId): BusinessGoalRef<GoalId> {
   return { id, type: 'business-goal-ref' };
 }
 
-export function businessScopeRef<ScopeId extends string>(
-  id: ScopeId
-): BusinessScopeRef<ScopeId> {
+export function businessScopeRef<ScopeId extends string>(id: ScopeId): BusinessScopeRef<ScopeId> {
   return { id, type: 'business-scope-ref' };
 }
 

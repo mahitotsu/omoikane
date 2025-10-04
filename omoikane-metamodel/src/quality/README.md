@@ -1,6 +1,7 @@
 # 品質評価フレームワーク
 
-メタモデルの設計品質を自動評価し、AI Agent向けの改善提案を生成するフレームワークです。
+メタモデルの設計品質を自動評価し、AI
+Agent向けの改善提案を生成するフレームワークです。
 
 ## 概要
 
@@ -32,7 +33,9 @@ console.log(`総合スコア: ${result.overallScore.value}/100`);
 import { analyzeCoverage } from './src/quality/coverage-analyzer.js';
 
 const coverage = analyzeCoverage(businessRequirements, actors, useCases);
-console.log(`ビジネスゴールカバレッジ: ${coverage.businessGoals.coverage * 100}%`);
+console.log(
+  `ビジネスゴールカバレッジ: ${coverage.businessGoals.coverage * 100}%`
+);
 ```
 
 ### 3. 推奨アクション生成 (`recommendation-engine.ts`)
@@ -42,7 +45,12 @@ console.log(`ビジネスゴールカバレッジ: ${coverage.businessGoals.cove
 ```typescript
 import { generateRecommendations } from './src/quality/recommendation-engine.js';
 
-const recommendations = generateRecommendations(qualityResult, businessRequirements, actors, useCases);
+const recommendations = generateRecommendations(
+  qualityResult,
+  businessRequirements,
+  actors,
+  useCases
+);
 recommendations.forEach(rec => {
   console.log(`[${rec.priority}] ${rec.action}`);
 });
@@ -145,7 +153,8 @@ recommendations.forEach(rec => {
 
 ## AI Agent との連携
 
-このフレームワークは AI Agent が次に実行すべきアクションを決定するための情報を提供します：
+このフレームワークは AI
+Agent が次に実行すべきアクションを決定するための情報を提供します：
 
 1. **優先度付きアクション**: 重要度に応じたアクションリスト
 2. **具体的な提案**: テンプレートを含む実装指針
