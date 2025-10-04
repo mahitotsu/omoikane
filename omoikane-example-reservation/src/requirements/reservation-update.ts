@@ -3,16 +3,16 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const reservationUpdate: ReservationUseCase = {
@@ -27,7 +27,7 @@ export const reservationUpdate: ReservationUseCase = {
   },
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
     requirement: businessRequirementRef('reservation-business-requirements'),
-    businessGoals: [businessGoalRef('goal-flexible-adjustments')],
+    businessGoals: [businessGoalRef('goal-visitor-self-service-flexibility')],
     scopeItems: [businessScopeRef('scope-visitor-self-service-management')],
     stakeholders: [
       stakeholderRef('stakeholder-visitor'),
@@ -35,7 +35,11 @@ export const reservationUpdate: ReservationUseCase = {
     ],
     successMetrics: [successMetricRef('metric-manual-adjustment-time')],
     assumptions: [assumptionRef('assumption-manual-communications')],
-    constraints: [constraintRef('constraint-privacy-minimization')],
+    constraints: [
+      constraintRef('constraint-privacy-minimization'),
+      constraintRef('constraint-operation-hours-visitor'),
+      constraintRef('constraint-visitor-own-reservation-only'),
+    ],
   }),
   preconditions: [
     '有効な予約番号と登録済みの連絡先情報を来店者が保持している',

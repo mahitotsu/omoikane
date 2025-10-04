@@ -28,7 +28,7 @@ export type KnownBusinessGoalId =
   | 'goal-admin-managed-accounts'
   | 'goal-auditable-operations'
   | 'goal-empower-store-staff'
-  | 'goal-flexible-adjustments'
+  | 'goal-visitor-self-service-flexibility'
   | 'goal-self-service-booking';
 
 export type KnownScopeItemId =
@@ -60,9 +60,11 @@ export type KnownAssumptionId =
 
 export type KnownConstraintId =
   | 'constraint-log-retention'
-  | 'constraint-operation-hours'
+  | 'constraint-no-double-booking'
+  | 'constraint-operation-hours-visitor'
   | 'constraint-privacy-minimization'
-  | 'constraint-staff-change-anytime-unless-checked-in';
+  | 'constraint-staff-change-anytime-unless-checked-in'
+  | 'constraint-visitor-own-reservation-only';
 
 export type KnownActorId = 'system-admin' | 'capacity-planner' | 'store-staff' | 'visitor';
 

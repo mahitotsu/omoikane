@@ -4,16 +4,16 @@
 
 import type { Actor } from 'omoikane-metamodel';
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const visitor: Actor = {
@@ -72,7 +72,8 @@ export const reservationBooking: ReservationUseCase = {
     assumptions: [assumptionRef('assumption-manual-communications')],
     constraints: [
       constraintRef('constraint-privacy-minimization'),
-      constraintRef('constraint-operation-hours'),
+      constraintRef('constraint-operation-hours-visitor'),
+      constraintRef('constraint-no-double-booking'),
     ],
   }),
   preconditions: [

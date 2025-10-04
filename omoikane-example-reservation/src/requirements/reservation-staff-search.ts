@@ -3,16 +3,16 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const reservationStaffSearch: ReservationUseCase = {
@@ -28,7 +28,7 @@ export const reservationStaffSearch: ReservationUseCase = {
     requirement: businessRequirementRef('reservation-business-requirements'),
     businessGoals: [
       businessGoalRef('goal-empower-store-staff'),
-      businessGoalRef('goal-flexible-adjustments'),
+      businessGoalRef('goal-visitor-self-service-flexibility'),
     ],
     scopeItems: [businessScopeRef('scope-store-staff-console')],
     stakeholders: [stakeholderRef('stakeholder-store-staff')],

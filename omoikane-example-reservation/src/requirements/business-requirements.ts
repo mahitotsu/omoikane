@@ -17,9 +17,9 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
       description: '来店者が営業時間外でも自ら予約を確定できるようにする',
     },
     {
-      id: 'goal-flexible-adjustments',
+      id: 'goal-visitor-self-service-flexibility',
       description:
-        '来店者が営業時間外でも予約内容の変更や取消をポリシーに沿って迅速に完結できるようにする',
+        '来店者が営業時間外でも予約内容の変更や取消を自己完結できるようにする',
     },
     {
       id: 'goal-admin-managed-accounts',
@@ -99,7 +99,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'stakeholder-store-ops-manager',
-      description: '店舗全体の運営と監査対応を統括する責任者',
+      description: '店舗全体の運営と予約履歴・操作ログの監査確認を担う責任者',
     },
     {
       id: 'stakeholder-system-admin',
@@ -117,7 +117,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'metric-slot-utilization',
-      description: '予約枠のロックとリリースが適切に行われている比率',
+      description: '予約枠の実利用率（確定予約数/利用可能枠数）および無駄ロック発生率',
     },
     {
       id: 'metric-audit-confirmation-lag',
@@ -144,16 +144,24 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
       description: '予約情報は必要最小限の個人情報のみ保存する',
     },
     {
-      id: 'constraint-operation-hours',
-      description: '予約・変更・取消が可能なのは予約する日時の前日の営業時間終了までとする',
+      id: 'constraint-operation-hours-visitor',
+      description: '来店者による予約・変更・取消が可能なのは予約する日時の前日の営業時間終了までとする',
     },
     {
       id: 'constraint-staff-change-anytime-unless-checked-in',
-      description: '店舗スタッフによる予約変更は来店確認済みでない限りいつでも可能とする',
+      description: '店舗スタッフによる予約変更は来店確認済みでない限り営業時間に関係なくいつでも可能とする',
     },
     {
       id: 'constraint-log-retention',
       description: '予約操作ログは監査要件に従い一定期間保存する',
+    },
+    {
+      id: 'constraint-no-double-booking',
+      description: '同一時間枠での重複予約は技術的に防止する',
+    },
+    {
+      id: 'constraint-visitor-own-reservation-only',
+      description: '来店者は自分の予約のみアクセス可能とし他人の予約は閲覧・変更できない',
     },
   ],
 };
