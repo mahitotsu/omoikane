@@ -7,10 +7,10 @@
 import { readdir } from 'fs/promises';
 import { extname, join } from 'path';
 import type {
-    BusinessRuleStats,
-    BusinessRuleSummary,
-    SecurityPolicyStats,
-    SecurityPolicySummary,
+  BusinessRuleStats,
+  BusinessRuleSummary,
+  SecurityPolicyStats,
+  SecurityPolicySummary,
 } from '../src/quality/index.js';
 import { performQualityAssessment } from '../src/quality/index.js';
 
