@@ -2,7 +2,6 @@
  * 来店予約管理システム - 枠管理ユースケース
  */
 
-import type { Actor } from 'omoikane-metamodel';
 import {
     ReservationUseCase,
     assumptionRef,
@@ -16,15 +15,6 @@ import {
     typedActorRef,
 } from '../typed-references.js';
 
-export const capacityPlanner: Actor = {
-  id: 'capacity-planner',
-  type: 'actor',
-  owner: 'store-operations',
-  name: 'キャパシティプランナー',
-  description: '予約可能な枠を作成・整理する店舗運営担当者',
-  role: 'primary',
-  responsibilities: ['予約枠の新規登録', '不要になった枠の削除', '枠情報のメンテナンス'],
-};
 
 export const capacityManagement: ReservationUseCase = {
   id: 'capacity-management',

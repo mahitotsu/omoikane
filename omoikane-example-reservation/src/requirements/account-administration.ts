@@ -2,7 +2,6 @@
  * 来店予約管理システム - アカウント管理（システム管理者）
  */
 
-import type { Actor } from 'omoikane-metamodel';
 import {
     ReservationUseCase,
     assumptionRef,
@@ -18,19 +17,6 @@ import {
     typedActorRef,
 } from '../typed-references.js';
 
-export const systemAdmin: Actor = {
-  id: 'system-admin',
-  type: 'actor',
-  owner: 'system-operations',
-  name: 'システム管理者',
-  description: 'ユーザー登録・削除および権限設定を行う管理者',
-  role: 'primary',
-  responsibilities: [
-    'ユーザーの登録・削除',
-    '権限（ロール）の付与・変更',
-    '監査やセキュリティ方針に基づく定期的なアカウント整備',
-  ],
-};
 
 export const userAccountRegistration: ReservationUseCase = {
   id: 'user-account-registration',
