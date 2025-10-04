@@ -4,7 +4,17 @@
 
 import type { SecurityPolicy, SecurityPolicyRef, UseCase } from '../types/delivery-elements.js';
 
-export type AnyUseCase = UseCase<string, string, string, string, string, string, string, string>;
+export type AnyUseCase = UseCase<
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string
+>;
 
 export interface SecurityPolicyCoverageEntry<
   Policy extends SecurityPolicy = SecurityPolicy,

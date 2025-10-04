@@ -52,9 +52,14 @@ export interface BusinessRequirementDefinition extends DeliveryElement {
   assumptions?: BusinessRequirementItem[];
   constraints?: BusinessRequirementItem[];
   securityPolicies?: SecurityPolicy[];
+  businessRules?: BusinessRule[];
 }
 
 export interface SecurityPolicy extends BusinessRequirementItem {}
+
+export interface BusinessRule extends BusinessRequirementItem {
+  category?: string;
+}
 
 /**
  * 業務要件参照オブジェクト
@@ -99,6 +104,11 @@ export interface SecurityPolicyRef<SecurityPolicyId extends string = string> {
   readonly type: 'security-policy-ref';
 }
 
+export interface BusinessRuleRef<BusinessRuleId extends string = string> {
+  readonly id: BusinessRuleId;
+  readonly type: 'business-rule-ref';
+}
+
 /**
  * ユースケースから業務要件へのトレーサビリティ情報
  */
@@ -111,6 +121,7 @@ export interface BusinessRequirementCoverage<
   AssumptionId extends string = string,
   ConstraintId extends string = string,
   SecurityPolicyId extends string = string,
+  BusinessRuleId extends string = string,
 > {
   requirement: BusinessRequirementDefinitionRef<RequirementId>;
   businessGoals: BusinessGoalRef<GoalId>[];
@@ -120,6 +131,7 @@ export interface BusinessRequirementCoverage<
   assumptions?: AssumptionRef<AssumptionId>[];
   constraints?: ConstraintRef<ConstraintId>[];
   securityPolicies?: SecurityPolicyRef<SecurityPolicyId>[];
+  businessRules?: BusinessRuleRef<BusinessRuleId>[];
   notes?: string;
 }
 
@@ -135,6 +147,7 @@ export interface UseCase<
   AssumptionId extends string = string,
   ConstraintId extends string = string,
   SecurityPolicyId extends string = string,
+  BusinessRuleId extends string = string,
 > extends DeliveryElement {
   readonly type: 'usecase';
   name: string;
@@ -151,7 +164,8 @@ export interface UseCase<
     SuccessMetricId,
     AssumptionId,
     ConstraintId,
-    SecurityPolicyId
+    SecurityPolicyId,
+    BusinessRuleId
   >;
   preconditions: string[];
   postconditions: string[];
@@ -162,7 +176,7 @@ export interface UseCase<
   complexity?: 'simple' | 'medium' | 'complex';
   estimatedEffort?: string;
   acceptanceCriteria?: string[];
-  businessRules?: string[];
+  businessRules?: BusinessRuleRef<BusinessRuleId>[];
   businessValue?: string;
   dataRequirements?: string[];
   securityRequirements?: string[];
@@ -277,4 +291,10 @@ export function securityPolicyRef<SecurityPolicyId extends string>(
   id: SecurityPolicyId
 ): SecurityPolicyRef<SecurityPolicyId> {
   return { id, type: 'security-policy-ref' };
+}
+
+export function businessRuleRef<BusinessRuleId extends string>(
+  id: BusinessRuleId
+): BusinessRuleRef<BusinessRuleId> {
+  return { id, type: 'business-rule-ref' };
 }

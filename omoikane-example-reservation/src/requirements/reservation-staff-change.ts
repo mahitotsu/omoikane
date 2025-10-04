@@ -3,23 +3,34 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
-import { concurrentEditWarningSteps, visitorOfflineNotificationSteps } from './common-flows.js';
-import {
-  manualNotificationBusinessRule,
-  staffReservationDetailPrecondition,
-} from './common-policies.js';
+const concurrentEditWarningSteps = [
+  {
+    actor: typedActorRef('store-staff'),
+    action: '編集中である旨の警告を確認する',
+    expectedResult: '同時編集を避けるため操作は中断される',
+  },
+] as const;
+
+const visitorOfflineNotificationSteps = [
+  {
+    actor: typedActorRef('store-staff'),
+    action: '電話やメールなど外部手段での連絡計画をメモに記録する',
+    expectedResult: '自動通知を送らずフォロー方法が共有される',
+  },
+] as const;
 
 export const reservationStaffChange: ReservationUseCase = {
   id: 'reservation-staff-change',
@@ -43,10 +54,15 @@ export const reservationStaffChange: ReservationUseCase = {
     assumptions: [
       assumptionRef('assumption-manual-communications'),
       assumptionRef('assumption-staff-sign-in-required'),
+      assumptionRef('assumption-slot-capacity-single'),
     ],
     constraints: [
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-staff-change-anytime-unless-checked-in'),
+    ],
+    businessRules: [
+      businessRuleRef('business-rule-change-retain-reference'),
+      businessRuleRef('business-rule-manual-notification'),
     ],
     securityPolicies: [
       securityPolicyRef('security-policy-staff-operation-audit'),
@@ -54,7 +70,7 @@ export const reservationStaffChange: ReservationUseCase = {
     ],
   }),
   preconditions: [
-    staffReservationDetailPrecondition,
+    '店舗スタッフが予約検索ユースケースなどで対象予約の詳細画面を開いている',
     '予約ステータスが変更可能な状態（来店済み・キャンセル済み以外）である',
   ],
   postconditions: [
@@ -121,11 +137,8 @@ export const reservationStaffChange: ReservationUseCase = {
     securityPolicyRef('security-policy-concurrency-control'),
   ],
   businessRules: [
-    '変更対象となる日時・サービスは容量と運用ルールを満たす必要がある',
-    '変更後も予約番号は維持する',
-    '変更による旧枠の予約取消と新枠の予約確定は履歴確認ユースケースで確認済みに更新する',
-    manualNotificationBusinessRule,
-    '営業時間外でも来店確認済みでない予約は変更可能とする',
+    businessRuleRef('business-rule-change-retain-reference'),
+    businessRuleRef('business-rule-manual-notification'),
   ],
   priority: 'high',
 };

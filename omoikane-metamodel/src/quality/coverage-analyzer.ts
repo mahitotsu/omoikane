@@ -22,6 +22,7 @@ export function analyzeCoverage(
     successMetrics: analyzeSuccessMetricsCoverage(businessRequirements, useCases),
     assumptions: analyzeAssumptionsCoverage(businessRequirements, useCases),
     constraints: analyzeConstraintsCoverage(businessRequirements, useCases),
+    businessRules: analyzeBusinessRulesCoverage(businessRequirements, useCases),
     orphanedElements: findOrphanedElements(businessRequirements, actors, useCases),
   };
 }
@@ -296,6 +297,63 @@ function analyzeConstraintsCoverage(
         type: 'constraint',
         id: constraint.id,
         description: constraint.description,
+      },
+      usedBy,
+      isCovered: usedBy.length > 0,
+    });
+  }
+
+  const covered = details.filter(d => d.isCovered).length;
+  const total = details.length;
+
+  return {
+    total,
+    covered,
+    coverage: total > 0 ? covered / total : 1,
+    uncovered: details.filter(d => !d.isCovered).map(d => d.element),
+    details,
+  };
+}
+
+/**
+ * ビジネスルールのカバレッジを分析
+ */
+function analyzeBusinessRulesCoverage(
+  businessRequirements: BusinessRequirementDefinition,
+  useCases: UseCase[]
+): ElementCoverage {
+  const businessRules = businessRequirements.businessRules || [];
+  const details: CoverageDetail[] = [];
+
+  for (const rule of businessRules) {
+    const usedBy: string[] = [];
+
+    for (const useCase of useCases) {
+      const coverage = useCase.businessRequirementCoverage;
+      const coverageRuleRefs = coverage?.businessRules ?? [];
+      const directRuleRefs = useCase.businessRules ?? [];
+
+      const isReferenced = [...coverageRuleRefs, ...directRuleRefs].some(ruleRef => {
+        if (!ruleRef) return false;
+        if (typeof ruleRef === 'string') {
+          return ruleRef === rule.id;
+        }
+        if ('id' in ruleRef) {
+          return ruleRef.id === rule.id;
+        }
+        return false;
+      });
+
+      if (isReferenced) {
+        usedBy.push(useCase.id);
+      }
+    }
+
+    details.push({
+      element: {
+        type: 'businessRule',
+        id: rule.id,
+        description: rule.description,
       },
       usedBy,
       isCovered: usedBy.length > 0,

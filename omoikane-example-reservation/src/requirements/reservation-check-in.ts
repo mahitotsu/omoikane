@@ -3,16 +3,16 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const reservationCheckIn: ReservationUseCase = {
@@ -37,7 +37,11 @@ export const reservationCheckIn: ReservationUseCase = {
       stakeholderRef('stakeholder-visitor'),
     ],
     successMetrics: [successMetricRef('metric-slot-utilization')],
-    assumptions: [assumptionRef('assumption-single-location')],
+    assumptions: [
+      assumptionRef('assumption-single-location'),
+      assumptionRef('assumption-standard-business-hours'),
+  assumptionRef('assumption-slot-interval-1-hour'),
+    ],
     constraints: [
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-staff-change-anytime-unless-checked-in'),

@@ -4,6 +4,7 @@
  */
 
 // 型定義をエクスポート
+export * from './business-rules.ts';
 export * from './security-requirements.ts';
 export * from './types.ts';
 
@@ -21,13 +22,21 @@ import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/del
 
 import type { QualityAssessmentResult, Recommendation } from './types.ts';
 
+import type {
+    BusinessRuleStats,
+    BusinessRuleSummary,
+} from './business-rules.ts';
 import type { SecurityPolicyStats, SecurityPolicySummary } from './security-requirements.ts';
 
 import { assessQuality } from './assessor.ts';
+import {
+    calculateBusinessRuleStats,
+    summarizeBusinessRules,
+} from './business-rules.ts';
 import { generateRecommendations } from './recommendation-engine.ts';
 import {
-  calculateSecurityPolicyStats,
-  summarizeSecurityPolicies,
+    calculateSecurityPolicyStats,
+    summarizeSecurityPolicies,
 } from './security-requirements.ts';
 
 /**
@@ -40,6 +49,8 @@ export function performQualityAssessment(
 ): {
   assessment: QualityAssessmentResult;
   recommendations: Recommendation[];
+  businessRuleSummary: BusinessRuleSummary;
+  businessRuleStats: BusinessRuleStats;
   securityPolicySummary: SecurityPolicySummary;
   securityPolicyStats: SecurityPolicyStats;
 } {
@@ -50,6 +61,9 @@ export function performQualityAssessment(
     actors,
     useCases
   );
+  const businessRules = businessRequirements.businessRules ?? [];
+  const businessRuleSummary = summarizeBusinessRules(businessRules, useCases);
+  const businessRuleStats = calculateBusinessRuleStats(businessRuleSummary.coverage);
   const securityPolicies = businessRequirements.securityPolicies ?? [];
   const securityPolicySummary = summarizeSecurityPolicies(securityPolicies, useCases);
   const securityPolicyStats = calculateSecurityPolicyStats(securityPolicySummary.coverage);
@@ -57,6 +71,8 @@ export function performQualityAssessment(
   return {
     assessment,
     recommendations,
+    businessRuleSummary,
+    businessRuleStats,
     securityPolicySummary,
     securityPolicyStats,
   };

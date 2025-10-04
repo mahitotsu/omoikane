@@ -4,16 +4,16 @@
 
 import type { Actor } from 'omoikane-metamodel';
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const capacityPlanner: Actor = {
@@ -38,10 +38,19 @@ export const capacityManagement: ReservationUseCase = {
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
     requirement: businessRequirementRef('reservation-business-requirements'),
     businessGoals: [businessGoalRef('goal-accurate-capacity')],
-    scopeItems: [businessScopeRef('scope-capacity-planning')],
+    scopeItems: [
+      businessScopeRef('scope-capacity-planning'),
+      businessScopeRef('scope-business-day-configuration'),
+    ],
     stakeholders: [stakeholderRef('stakeholder-capacity-planner')],
     successMetrics: [successMetricRef('metric-slot-utilization')],
-    assumptions: [assumptionRef('assumption-single-location')],
+    assumptions: [
+    assumptionRef('assumption-single-location'),
+    assumptionRef('assumption-standard-business-hours'),
+    assumptionRef('assumption-holiday-manual-registration'),
+    assumptionRef('assumption-slot-interval-1-hour'),
+    assumptionRef('assumption-slot-capacity-single'),
+    ],
     constraints: [
       constraintRef('constraint-no-double-booking'),
       constraintRef('constraint-log-retention'),

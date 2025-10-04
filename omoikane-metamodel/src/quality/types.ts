@@ -98,6 +98,8 @@ export interface CoverageReport {
   assumptions: ElementCoverage;
   /** 制約条件のカバレッジ */
   constraints: ElementCoverage;
+  /** ビジネスルールのカバレッジ */
+  businessRules: ElementCoverage;
   /** 孤立した要素 */
   orphanedElements: OrphanedElement[];
 }
@@ -154,6 +156,7 @@ export interface ElementReference {
     | 'successMetric'
     | 'assumption'
     | 'constraint'
+  | 'businessRule'
     | 'actor'
     | 'usecase';
   /** 要素ID */
@@ -187,6 +190,7 @@ export interface UseCaseTemplate {
     successMetrics?: string[];
     assumptions?: string[];
     constraints?: string[];
+    businessRules?: string[];
   };
 }
 

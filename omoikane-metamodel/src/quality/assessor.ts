@@ -379,6 +379,7 @@ function assessTraceability(
     { type: '成功指標', coverage: coverage.successMetrics },
     { type: '前提条件', coverage: coverage.assumptions },
     { type: '制約条件', coverage: coverage.constraints },
+    { type: 'ビジネスルール', coverage: coverage.businessRules },
   ];
 
   for (const { type, coverage: cov } of coverageTypes) {

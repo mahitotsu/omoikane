@@ -4,22 +4,19 @@
 
 import type { Actor } from 'omoikane-metamodel';
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
-import {
-  historyReviewBusinessRule,
-  visitorSingleReservationBusinessRule,
-} from './common-policies.js';
 
 export const visitor: Actor = {
   id: 'visitor',
@@ -75,11 +72,23 @@ export const reservationBooking: ReservationUseCase = {
       stakeholderRef('stakeholder-store-ops-manager'),
     ],
     successMetrics: [successMetricRef('metric-booking-completion-rate')],
-    assumptions: [assumptionRef('assumption-manual-communications')],
+    assumptions: [
+      assumptionRef('assumption-manual-communications'),
+      assumptionRef('assumption-standard-business-hours'),
+  assumptionRef('assumption-slot-interval-1-hour'),
+      assumptionRef('assumption-slot-capacity-single'),
+    ],
     constraints: [
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-operation-hours-visitor'),
       constraintRef('constraint-no-double-booking'),
+    ],
+    businessRules: [
+      businessRuleRef('business-rule-visitor-single-reservation'),
+      businessRuleRef('business-rule-reservation-number-display-once'),
+      businessRuleRef('business-rule-record-all-reservation-actions'),
+      businessRuleRef('business-rule-history-review-status'),
+      businessRuleRef('business-rule-history-review-governance'),
     ],
     securityPolicies: [
       securityPolicyRef('security-policy-self-service-contact-verification'),
@@ -154,12 +163,11 @@ export const reservationBooking: ReservationUseCase = {
     securityPolicyRef('security-policy-history-audit-log'),
   ],
   businessRules: [
-    visitorSingleReservationBusinessRule,
-    '来店者は自分が作成した予約のみ確認・変更できる',
-    '予約番号は予約完了画面にのみ表示され来店者が控えることを前提とする',
-    '予約の確定および取消操作は履歴に記録される',
-    '履歴には確認未済／済の状態が付与され店舗スタッフが更新を把握できる',
-    historyReviewBusinessRule,
+    businessRuleRef('business-rule-visitor-single-reservation'),
+    businessRuleRef('business-rule-reservation-number-display-once'),
+    businessRuleRef('business-rule-record-all-reservation-actions'),
+    businessRuleRef('business-rule-history-review-status'),
+    businessRuleRef('business-rule-history-review-governance'),
   ],
   priority: 'high',
 };

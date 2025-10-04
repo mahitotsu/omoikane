@@ -3,28 +3,51 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
-import {
-  alreadyCheckedInSelfServiceSteps,
-  contactMismatchSteps,
-  reservationLookupStep,
-} from './common-flows.js';
-import {
-  historyReviewBusinessRule,
-  reservationCancellationHistoryBusinessRule,
-  validReservationReferencePrecondition,
-} from './common-policies.js';
+const reservationLookupStep = {
+  stepId: 'open-lookup',
+  actor: typedActorRef('visitor'),
+  action: '予約照会ページで予約番号と連絡先を入力し対象予約を表示する',
+  expectedResult: '本人と一致する予約のみが照会される',
+} as const;
+
+const contactMismatchSteps = [
+  {
+    actor: typedActorRef('visitor'),
+    action: '照合エラーを確認し入力内容を修正する',
+    expectedResult: '誤った入力が明示され再入力が促される',
+  },
+  {
+    actor: typedActorRef('store-staff'),
+    action: '本人確認のため追加情報の提供を依頼する',
+    expectedResult: '不正アクセスを防止したまま本人確認手続きが整う',
+  },
+] as const;
+
+const alreadyCheckedInSelfServiceSteps = [
+  {
+    actor: typedActorRef('visitor'),
+    action: 'キャンセルや変更がオンラインでは行えない旨の案内を確認する',
+    expectedResult: '来店済みで手続きできない理由と連絡方法が明示される',
+  },
+  {
+    actor: typedActorRef('store-staff'),
+    action: '状況を確認し必要に応じて返金やクレーム対応などのフォローを記録する',
+    expectedResult: 'アフターケアのタスクと責任者が履歴に残る',
+  },
+] as const;
 
 export const reservationCancel: ReservationUseCase = {
   id: 'reservation-cancel',
@@ -48,11 +71,22 @@ export const reservationCancel: ReservationUseCase = {
       successMetricRef('metric-manual-adjustment-time'),
       successMetricRef('metric-slot-utilization'),
     ],
-    assumptions: [assumptionRef('assumption-manual-communications')],
+    assumptions: [
+      assumptionRef('assumption-manual-communications'),
+      assumptionRef('assumption-standard-business-hours'),
+      assumptionRef('assumption-slot-interval-1-hour'),
+    ],
     constraints: [
       constraintRef('constraint-operation-hours-visitor'),
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-visitor-own-reservation-only'),
+    ],
+    businessRules: [
+      businessRuleRef('business-rule-visitor-cutoff'),
+      businessRuleRef('business-rule-cancel-invalidate-reference'),
+      businessRuleRef('business-rule-cancel-reason-category'),
+      businessRuleRef('business-rule-record-all-reservation-actions'),
+      businessRuleRef('business-rule-history-review-governance'),
     ],
     securityPolicies: [
       securityPolicyRef('security-policy-self-service-contact-verification'),
@@ -60,7 +94,7 @@ export const reservationCancel: ReservationUseCase = {
     ],
   }),
   preconditions: [
-    validReservationReferencePrecondition,
+    '有効な予約番号と登録済みの連絡先情報を来店者が保持している',
     '予約ステータスが「来店済み」や「キャンセル済み」ではない',
   ],
   postconditions: [
@@ -80,7 +114,7 @@ export const reservationCancel: ReservationUseCase = {
     {
       stepId: 'confirm-cancel',
       actor: typedActorRef('visitor'),
-      action: '取消理由を入力しキャンセルを確定する',
+  action: '必要に応じて取消理由を入力しキャンセルを確定する',
       expectedResult:
         'システムが予約ステータスをキャンセル済みに更新し、枠解放（予約取消）を未確認記録として履歴に追加した上で確認画面を表示する',
     },
@@ -89,7 +123,7 @@ export const reservationCancel: ReservationUseCase = {
     {
       id: 'cancel-cutoff-exceeded',
       name: 'キャンセル可能時間を超過',
-      condition: '利用予定日時の前日営業終了後である場合',
+  condition: '利用予定日時の前営業日の営業時間終了後である場合',
       steps: [
         {
           actor: typedActorRef('visitor'),
@@ -124,11 +158,11 @@ export const reservationCancel: ReservationUseCase = {
     securityPolicyRef('security-policy-self-service-audit-log'),
   ],
   businessRules: [
-    'オンラインでのキャンセルは利用予定日時の前日営業時間終了まで可能',
-    'キャンセル完了後は予約番号が無効化される',
-    'キャンセル理由は必須入力で統計分析に活用される',
-    reservationCancellationHistoryBusinessRule,
-    historyReviewBusinessRule,
+    businessRuleRef('business-rule-visitor-cutoff'),
+    businessRuleRef('business-rule-cancel-invalidate-reference'),
+    businessRuleRef('business-rule-cancel-reason-category'),
+    businessRuleRef('business-rule-record-all-reservation-actions'),
+    businessRuleRef('business-rule-history-review-governance'),
   ],
   priority: 'medium',
 };

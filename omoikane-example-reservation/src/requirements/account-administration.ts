@@ -4,17 +4,18 @@
 
 import type { Actor } from 'omoikane-metamodel';
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const systemAdmin: Actor = {
@@ -49,6 +50,7 @@ export const userAccountRegistration: ReservationUseCase = {
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-log-retention'),
     ],
+    businessRules: [businessRuleRef('business-rule-role-segregation')],
     securityPolicies: [
       securityPolicyRef('security-policy-account-admin-audit'),
       securityPolicyRef('security-policy-least-privilege'),
@@ -114,7 +116,7 @@ export const userAccountRegistration: ReservationUseCase = {
     securityPolicyRef('security-policy-account-admin-audit'),
     securityPolicyRef('security-policy-least-privilege'),
   ],
-  businessRules: ['ロール付与は定義済みの職務分掌に従う'],
+  businessRules: [businessRuleRef('business-rule-role-segregation')],
   priority: 'medium',
 };
 
@@ -136,10 +138,10 @@ export const userAccountDeletion: ReservationUseCase = {
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-log-retention'),
     ],
+    businessRules: [businessRuleRef('business-rule-account-deletion-approval')],
     securityPolicies: [
       securityPolicyRef('security-policy-account-admin-audit'),
       securityPolicyRef('security-policy-least-privilege'),
-      securityPolicyRef('security-policy-account-deletion-approval'),
     ],
   }),
   preconditions: [
@@ -201,8 +203,7 @@ export const userAccountDeletion: ReservationUseCase = {
   securityPolicies: [
     securityPolicyRef('security-policy-account-admin-audit'),
     securityPolicyRef('security-policy-least-privilege'),
-    securityPolicyRef('security-policy-account-deletion-approval'),
   ],
-  businessRules: ['ユーザー削除は関連業務の影響を確認し責任者の承認を得る'],
+  businessRules: [businessRuleRef('business-rule-account-deletion-approval')],
   priority: 'medium',
 };

@@ -3,24 +3,34 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
-import { concurrentEditWarningSteps, visitorOfflineNotificationSteps } from './common-flows.js';
-import {
-  manualNotificationBusinessRule,
-  reservationCancellationHistoryBusinessRule,
-  staffReservationDetailPrecondition,
-} from './common-policies.js';
+const concurrentEditWarningSteps = [
+  {
+    actor: typedActorRef('store-staff'),
+    action: '編集中である旨の警告を確認する',
+    expectedResult: '同時編集を避けるため操作は中断される',
+  },
+] as const;
+
+const visitorOfflineNotificationSteps = [
+  {
+    actor: typedActorRef('store-staff'),
+    action: '電話やメールなど外部手段での連絡計画をメモに記録する',
+    expectedResult: '自動通知を送らずフォロー方法が共有される',
+  },
+] as const;
 
 export const reservationStaffCancel: ReservationUseCase = {
   id: 'reservation-staff-cancel',
@@ -46,10 +56,18 @@ export const reservationStaffCancel: ReservationUseCase = {
     assumptions: [
       assumptionRef('assumption-manual-communications'),
       assumptionRef('assumption-staff-sign-in-required'),
+      assumptionRef('assumption-slot-capacity-single'),
     ],
     constraints: [
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-staff-change-anytime-unless-checked-in'),
+    ],
+    businessRules: [
+      businessRuleRef('business-rule-cancel-invalidate-reference'),
+      businessRuleRef('business-rule-cancel-reason-category'),
+      businessRuleRef('business-rule-no-show-cancel'),
+      businessRuleRef('business-rule-record-all-reservation-actions'),
+      businessRuleRef('business-rule-manual-notification'),
     ],
     securityPolicies: [
       securityPolicyRef('security-policy-staff-operation-audit'),
@@ -58,7 +76,7 @@ export const reservationStaffCancel: ReservationUseCase = {
     ],
   }),
   preconditions: [
-    staffReservationDetailPrecondition,
+    '店舗スタッフが予約検索ユースケースなどで対象予約の詳細画面を開いている',
     '予約ステータスが来店済みやキャンセル済みではない',
   ],
   postconditions: [
@@ -125,11 +143,11 @@ export const reservationStaffCancel: ReservationUseCase = {
     securityPolicyRef('security-policy-slot-release-verification'),
   ],
   businessRules: [
-    'キャンセル完了後は予約番号を無効化し再利用不可とする',
-    'キャンセル理由は定義済みカテゴリーから選択し自由記述欄で補足する',
-    'チェックインが行われない予約は所定の猶予時間後にノーショーとして取消できる',
-    reservationCancellationHistoryBusinessRule,
-    manualNotificationBusinessRule,
+    businessRuleRef('business-rule-cancel-invalidate-reference'),
+    businessRuleRef('business-rule-cancel-reason-category'),
+    businessRuleRef('business-rule-no-show-cancel'),
+    businessRuleRef('business-rule-record-all-reservation-actions'),
+    businessRuleRef('business-rule-manual-notification'),
   ],
   priority: 'high',
 };

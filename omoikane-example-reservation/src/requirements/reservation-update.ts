@@ -3,24 +3,38 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
-import { contactMismatchSteps, reservationLookupStep } from './common-flows.js';
-import {
-  historyReviewBusinessRule,
-  validReservationReferencePrecondition,
-  visitorSingleReservationBusinessRule,
-} from './common-policies.js';
+const reservationLookupStep = {
+  stepId: 'open-lookup',
+  actor: typedActorRef('visitor'),
+  action: '予約照会ページで予約番号と連絡先を入力し対象予約を表示する',
+  expectedResult: '本人と一致する予約のみが照会される',
+} as const;
+
+const contactMismatchSteps = [
+  {
+    actor: typedActorRef('visitor'),
+    action: '照合エラーを確認し入力内容を修正する',
+    expectedResult: '誤った入力が明示され再入力が促される',
+  },
+  {
+    actor: typedActorRef('store-staff'),
+    action: '本人確認のため追加情報の提供を依頼する',
+    expectedResult: '不正アクセスを防止したまま本人確認手続きが整う',
+  },
+] as const;
 
 export const reservationUpdate: ReservationUseCase = {
   id: 'reservation-update',
@@ -41,11 +55,22 @@ export const reservationUpdate: ReservationUseCase = {
       stakeholderRef('stakeholder-store-staff'),
     ],
     successMetrics: [successMetricRef('metric-manual-adjustment-time')],
-    assumptions: [assumptionRef('assumption-manual-communications')],
+    assumptions: [
+      assumptionRef('assumption-manual-communications'),
+      assumptionRef('assumption-standard-business-hours'),
+      assumptionRef('assumption-slot-interval-1-hour'),
+      assumptionRef('assumption-slot-capacity-single'),
+    ],
     constraints: [
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-operation-hours-visitor'),
       constraintRef('constraint-visitor-own-reservation-only'),
+    ],
+    businessRules: [
+      businessRuleRef('business-rule-visitor-single-reservation'),
+      businessRuleRef('business-rule-visitor-cutoff'),
+      businessRuleRef('business-rule-change-retain-reference'),
+      businessRuleRef('business-rule-history-review-governance'),
     ],
     securityPolicies: [
       securityPolicyRef('security-policy-self-service-contact-verification'),
@@ -53,8 +78,8 @@ export const reservationUpdate: ReservationUseCase = {
     ],
   }),
   preconditions: [
-    validReservationReferencePrecondition,
-    '予約変更受付期限（利用予定日時の前日営業時間終了まで）を過ぎていない',
+    '有効な予約番号と登録済みの連絡先情報を来店者が保持している',
+  '予約変更受付期限（利用予定日時の前営業日の営業時間終了まで）を過ぎていない',
   ],
   postconditions: [
     '予約内容が最新の情報に更新されている',
@@ -88,7 +113,7 @@ export const reservationUpdate: ReservationUseCase = {
     {
       id: 'change-cutoff-exceeded',
       name: '変更可能時間を超過',
-      condition: '利用予定日時の前日営業終了後である場合',
+  condition: '利用予定日時の前営業日の営業時間終了後である場合',
       steps: [
         {
           actor: typedActorRef('visitor'),
@@ -129,12 +154,10 @@ export const reservationUpdate: ReservationUseCase = {
     securityPolicyRef('security-policy-self-service-audit-log'),
   ],
   businessRules: [
-    visitorSingleReservationBusinessRule,
-    '予約変更は利用予定日時の前日営業時間終了まで可能',
-    '変更後の予約番号は変わらない',
-    '変更内容は枠の容量制約と店舗の運用ルールを満たしている必要がある',
-    '変更に伴う旧枠の予約取消と新枠の予約確定は履歴に記録され確認未済／済で管理される',
-    historyReviewBusinessRule,
+    businessRuleRef('business-rule-visitor-single-reservation'),
+    businessRuleRef('business-rule-visitor-cutoff'),
+    businessRuleRef('business-rule-change-retain-reference'),
+    businessRuleRef('business-rule-history-review-governance'),
   ],
   priority: 'medium',
 };

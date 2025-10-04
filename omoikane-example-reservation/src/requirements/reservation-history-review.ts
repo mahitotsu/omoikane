@@ -3,17 +3,18 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const reservationHistoryReview: ReservationUseCase = {
@@ -39,6 +40,11 @@ export const reservationHistoryReview: ReservationUseCase = {
     successMetrics: [successMetricRef('metric-audit-confirmation-lag')],
     assumptions: [assumptionRef('assumption-staff-sign-in-required')],
     constraints: [constraintRef('constraint-log-retention')],
+    businessRules: [
+      businessRuleRef('business-rule-history-auto-generated'),
+      businessRuleRef('business-rule-history-review-toggle'),
+      businessRuleRef('business-rule-history-note-sharing'),
+    ],
     securityPolicies: [
       securityPolicyRef('security-policy-history-access-control'),
       securityPolicyRef('security-policy-history-audit-log'),
@@ -111,9 +117,9 @@ export const reservationHistoryReview: ReservationUseCase = {
     securityPolicyRef('security-policy-history-audit-log'),
   ],
   businessRules: [
-    '履歴は予約新規・変更・取消の都度自動生成される',
-    '既読状態は履歴単位で管理され、再確認が必要な場合は未確認に戻せる',
-    '履歴のメモ入力は任意だが残した内容は他のスタッフと共有される',
+    businessRuleRef('business-rule-history-auto-generated'),
+    businessRuleRef('business-rule-history-review-toggle'),
+    businessRuleRef('business-rule-history-note-sharing'),
   ],
   priority: 'medium',
 };

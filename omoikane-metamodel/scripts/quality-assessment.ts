@@ -6,7 +6,12 @@
 
 import { readdir } from 'fs/promises';
 import { extname, join } from 'path';
-import type { SecurityPolicyStats, SecurityPolicySummary } from '../src/quality/index.js';
+import type {
+    BusinessRuleStats,
+    BusinessRuleSummary,
+    SecurityPolicyStats,
+    SecurityPolicySummary,
+} from '../src/quality/index.js';
 import { performQualityAssessment } from '../src/quality/index.js';
 
 /**
@@ -150,6 +155,8 @@ function displayQualityReport(
   assessment: any,
   recommendations: any[],
   projectName: string,
+  businessRuleSummary: BusinessRuleSummary,
+  businessRuleStats: BusinessRuleStats,
   securityPolicySummary: SecurityPolicySummary,
   securityPolicyStats: SecurityPolicyStats
 ) {
@@ -211,7 +218,30 @@ function displayQualityReport(
     `  制約条件: ${coverage.constraints.covered}/${coverage.constraints.total} (${Math.round(coverage.constraints.coverage * 100)}%)\n`
   );
 
-  console.log('🛡️ セキュリティポリシーカバレッジ:');
+  console.log('� ビジネスルールカバレッジ:');
+  if (businessRuleSummary.rules.length === 0) {
+    console.log('  ビジネスルールは定義されていません\n');
+  } else {
+    const coveragePercent = Math.round(businessRuleStats.coverageRatio * 100);
+    console.log(
+      `  カバレッジ: ${businessRuleStats.totalCoveredRules}/${businessRuleStats.totalRules} (${coveragePercent}%)`
+    );
+
+    if (businessRuleSummary.uncoveredRules.length === 0) {
+      console.log('  未カバーのビジネスルールはありません ✅\n');
+    } else {
+      console.log('  未カバーのルール:');
+      businessRuleSummary.uncoveredRules.forEach((entry, index) => {
+        const description = entry.rule.description || entry.rule.id;
+        console.log(`    ${index + 1}. ${entry.rule.id} — ${description}`);
+        const coveringUseCases = entry.coveredByUseCases.map(useCase => useCase.id).join(', ');
+        console.log(`       カバーするユースケース: ${coveringUseCases || 'なし'}`);
+      });
+      console.log('');
+    }
+  }
+
+  console.log('�🛡️ セキュリティポリシーカバレッジ:');
   if (securityPolicySummary.policies.length === 0) {
     console.log('  セキュリティポリシーは定義されていません\n');
   } else {
@@ -298,8 +328,14 @@ async function main() {
     console.log(`  - ユースケース: ${useCases.length}件`);
 
     // 品質評価実行
-    const { assessment, recommendations, securityPolicySummary, securityPolicyStats } =
-      performQualityAssessment(businessRequirements, actors, useCases);
+    const {
+      assessment,
+      recommendations,
+      businessRuleSummary,
+      businessRuleStats,
+      securityPolicySummary,
+      securityPolicyStats,
+    } = performQualityAssessment(businessRequirements, actors, useCases);
 
     // レポート表示
     const projectName = projectDir.split('/').pop() || 'Unknown Project';
@@ -307,6 +343,8 @@ async function main() {
       assessment,
       recommendations,
       projectName,
+      businessRuleSummary,
+      businessRuleStats,
       securityPolicySummary,
       securityPolicyStats
     );

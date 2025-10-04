@@ -3,17 +3,18 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const reservationStaffSearch: ReservationUseCase = {
@@ -36,6 +37,11 @@ export const reservationStaffSearch: ReservationUseCase = {
     successMetrics: [successMetricRef('metric-manual-adjustment-time')],
     assumptions: [assumptionRef('assumption-staff-sign-in-required')],
     constraints: [constraintRef('constraint-privacy-minimization')],
+    businessRules: [
+      businessRuleRef('business-rule-search-empty-initial'),
+      businessRuleRef('business-rule-search-multi-criteria'),
+      businessRuleRef('business-rule-search-sort-ascending'),
+    ],
     securityPolicies: [
       securityPolicyRef('security-policy-staff-visibility-governance'),
       securityPolicyRef('security-policy-staff-search-audit'),
@@ -103,10 +109,9 @@ export const reservationStaffSearch: ReservationUseCase = {
     securityPolicyRef('security-policy-staff-search-audit'),
   ],
   businessRules: [
-    '検索ビューの初期表示では検索結果を自動表示せず空リストとする',
-    '検索条件は日付・氏名・連絡先・ステータスなど複数条件の組み合わせを許容する',
-    '検索実行ごとに担当者IDと検索条件のハッシュ値を記録する',
-    '検索結果の並び順は来店予定日時の昇順を既定とする',
+    businessRuleRef('business-rule-search-empty-initial'),
+    businessRuleRef('business-rule-search-multi-criteria'),
+    businessRuleRef('business-rule-search-sort-ascending'),
   ],
   priority: 'high',
 };
