@@ -26,7 +26,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'goal-accurate-capacity',
-      description: '予約枠のロック・リリースを適切に管理し過剰予約や空予約を防ぐ',
+      description: '予約枠の確保（予約確定）と解放（予約取消）を適切に管理し過剰予約や空予約を防ぐ',
     },
     {
       id: 'goal-auditable-operations',
@@ -61,7 +61,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
       },
       {
         id: 'scope-history-oversight',
-        description: 'スタッフがロック・リリース履歴や操作記録をレビューする業務',
+        description: 'スタッフが予約確定・取消の履歴や操作記録をレビューする業務',
       },
       {
         id: 'scope-account-administration',
@@ -116,11 +116,15 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'metric-slot-utilization',
-      description: '予約枠の実利用率（確定予約数/利用可能枠数）および無駄ロック発生率',
+      description: '予約枠の実利用率（確定予約数/利用可能枠数）および不要な枠確保発生率',
     },
     {
       id: 'metric-audit-confirmation-lag',
-      description: 'ロック・リリース履歴が確認済みになるまでの平均時間',
+      description: '予約確定・取消履歴が確認済みになるまでの平均時間',
+    },
+    {
+      id: 'metric-admin-access-readiness',
+      description: '管理アカウントの登録・削除要求が完了するまでの平均リードタイム',
     },
   ],
   assumptions: [
@@ -163,6 +167,68 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     {
       id: 'constraint-visitor-own-reservation-only',
       description: '来店者は自分の予約のみアクセス可能とし他人の予約は閲覧・変更できない',
+    },
+    {
+      id: 'constraint-late-arrival-grace-period',
+      description:
+        '予約開始時刻から15分以内の遅刻は受付対象としそれ以降はスタッフ判断で枠を解放または再調整する',
+    },
+  ],
+  securityPolicies: [
+    {
+      id: 'security-policy-self-service-contact-verification',
+      description:
+        'セルフサービス経路では予約番号と登録済み連絡先の照合を必須とし本人以外のアクセスを拒否する',
+    },
+    {
+      id: 'security-policy-self-service-audit-log',
+      description:
+        'セルフサービスからの予約確定・変更・取消リクエストはすべて監査ログに記録し不正操作の追跡に備える',
+    },
+    {
+      id: 'security-policy-staff-visibility-governance',
+      description:
+        '店舗スタッフの予約閲覧は担当店舗と権限レベルに基づき制御し必要最小限の個人情報のみを検索結果で表示する',
+    },
+    {
+      id: 'security-policy-history-access-control',
+      description:
+        '予約の確定・取消履歴への閲覧および既読更新は権限を持つスタッフに限定し履歴データを署名付きで保全する',
+    },
+    {
+      id: 'security-policy-history-audit-log',
+      description: '履歴の閲覧・既読操作は担当者IDとともに監査ログへ記録し定期レビューを実施する',
+    },
+    {
+      id: 'security-policy-staff-operation-audit',
+      description:
+        'スタッフによる予約変更・取消では担当者IDと理由の入力を必須とし変更前後の差分を履歴と監査ログに残す',
+    },
+    {
+      id: 'security-policy-concurrency-control',
+      description:
+        'スタッフ操作で予約変更・取消を確定する際は最新ロック状態を再確認し競合検知時には処理を中断する',
+    },
+    {
+      id: 'security-policy-slot-release-verification',
+      description: '予約取消で解放された枠は確認済みフラグ付与前に外部システムへ連携しない',
+    },
+    {
+      id: 'security-policy-staff-search-audit',
+      description:
+        '店舗スタッフによる予約検索は検索条件と結果閲覧の記録を監査ログに保持し定期的にレビューする',
+    },
+    {
+      id: 'security-policy-account-admin-audit',
+      description: 'システム管理者によるユーザー登録・削除操作はすべて監査ログに記録する',
+    },
+    {
+      id: 'security-policy-least-privilege',
+      description: 'ユーザーとロールの付与は最小権限の原則に従い不要な権限を発行しない',
+    },
+    {
+      id: 'security-policy-account-deletion-approval',
+      description: 'ユーザー削除前に影響範囲と承認状況を確認し必要な承認フローを完了させる',
     },
   ],
 };

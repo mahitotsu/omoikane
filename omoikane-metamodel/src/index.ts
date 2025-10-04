@@ -19,12 +19,21 @@ export type {
   BusinessScopeRef,
   ConstraintRef,
   DeliveryElement,
+  SecurityPolicy,
+  SecurityPolicyRef,
   StakeholderRef,
   SuccessMetricRef,
   UseCase,
   UseCaseRef,
   UseCaseStep,
 } from './types/delivery-elements.js';
+
+export type {
+  AnyUseCase,
+  SecurityPolicyCoverageEntry,
+  SecurityPolicyStats,
+  SecurityPolicySummary,
+} from './quality/security-requirements.js';
 
 // ヘルパー関数をエクスポート
 export {
@@ -34,10 +43,18 @@ export {
   businessRequirementRef,
   businessScopeRef,
   constraintRef,
+  securityPolicyRef,
   stakeholderRef,
   successMetricRef,
   useCaseRef,
 } from './types/delivery-elements.js';
+
+export {
+  buildSecurityPolicyCoverage,
+  calculateSecurityPolicyStats,
+  collectSecurityPolicyIds,
+  summarizeSecurityPolicies,
+} from './quality/security-requirements.js';
 
 // stepNumber自動管理ユーティリティ
 export {

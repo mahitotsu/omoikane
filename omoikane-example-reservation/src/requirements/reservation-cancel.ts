@@ -10,10 +10,21 @@ import {
   businessScopeRef,
   constraintRef,
   reservationBusinessRequirementCoverage,
+  securityPolicyRef,
   stakeholderRef,
   successMetricRef,
   typedActorRef,
 } from '../typed-references.js';
+import {
+  alreadyCheckedInSelfServiceSteps,
+  contactMismatchSteps,
+  reservationLookupStep,
+} from './common-flows.js';
+import {
+  historyReviewBusinessRule,
+  reservationCancellationHistoryBusinessRule,
+  validReservationReferencePrecondition,
+} from './common-policies.js';
 
 export const reservationCancel: ReservationUseCase = {
   id: 'reservation-cancel',
@@ -43,24 +54,23 @@ export const reservationCancel: ReservationUseCase = {
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-visitor-own-reservation-only'),
     ],
+    securityPolicies: [
+      securityPolicyRef('security-policy-self-service-contact-verification'),
+      securityPolicyRef('security-policy-self-service-audit-log'),
+    ],
   }),
   preconditions: [
-    '有効な予約番号と登録済みの連絡先情報を来店者が保持している',
+    validReservationReferencePrecondition,
     '予約ステータスが「来店済み」や「キャンセル済み」ではない',
   ],
   postconditions: [
     '対象予約のステータスが「キャンセル済み」に更新されている',
     '解放された枠が空き状況に反映され他の来店者が利用可能になる',
     '店舗スタッフの業務リストと担当者割り当てが更新される',
-    'キャンセルによる枠リリースが履歴に未確認状態で記録されている',
+    'キャンセルによる枠解放（予約取消）が履歴に未確認状態で記録されている',
   ],
   mainFlow: [
-    {
-      stepId: 'open-lookup',
-      actor: typedActorRef('visitor'),
-      action: '予約照会ページで予約番号と連絡先を入力し対象予約を表示する',
-      expectedResult: '本人と一致する予約のみが照会される',
-    },
+    reservationLookupStep,
     {
       stepId: 'review-policy',
       actor: typedActorRef('visitor'),
@@ -72,14 +82,14 @@ export const reservationCancel: ReservationUseCase = {
       actor: typedActorRef('visitor'),
       action: '取消理由を入力しキャンセルを確定する',
       expectedResult:
-        'システムが予約ステータスをキャンセル済みに更新し、枠リリースを未確認記録として履歴に追加した上で確認画面を表示する',
+        'システムが予約ステータスをキャンセル済みに更新し、枠解放（予約取消）を未確認記録として履歴に追加した上で確認画面を表示する',
     },
   ],
   alternativeFlows: [
     {
       id: 'cancel-cutoff-exceeded',
       name: 'キャンセル可能時間を超過',
-      condition: '予約開始まで12時間を切っている場合',
+      condition: '利用予定日時の前日営業終了後である場合',
       steps: [
         {
           actor: typedActorRef('visitor'),
@@ -98,51 +108,27 @@ export const reservationCancel: ReservationUseCase = {
       id: 'already-checked-in',
       name: '来店済み予約のキャンセル',
       condition: '予約が既に来店済みとして処理されている場合',
-      steps: [
-        {
-          actor: typedActorRef('visitor'),
-          action: 'キャンセル不可のメッセージを確認する',
-          expectedResult: 'キャンセル手続きが行えない理由が明示される',
-        },
-        {
-          actor: typedActorRef('store-staff'),
-          action: '状況を確認し必要に応じて返金やクレーム対応を記録する',
-          expectedResult: 'アフターケアのタスクが設定される',
-        },
-      ],
+      steps: [...alreadyCheckedInSelfServiceSteps],
       returnToStepId: 'open-lookup',
     },
     {
       id: 'contact-mismatch',
       name: '照合に失敗',
       condition: '入力した連絡先が予約情報と一致しない場合',
-      steps: [
-        {
-          actor: typedActorRef('visitor'),
-          action: '照合エラーを確認し入力内容を修正する',
-          expectedResult: '誤った入力が明示され再入力が促される',
-        },
-        {
-          actor: typedActorRef('store-staff'),
-          action: '本人確認のため追加情報の提供を依頼する',
-          expectedResult: '不正アクセスを防止したまま本人確認手続きが整う',
-        },
-      ],
+      steps: [...contactMismatchSteps],
       returnToStepId: 'open-lookup',
     },
   ],
-  securityRequirements: [
-    '予約番号と連絡先情報の照合によって本人のみがキャンセル操作を行える',
-    'キャンセル処理は監査ログに記録される',
-    'スタッフは管理画面から全キャンセル履歴を閲覧できる',
-    'ロック・リリース履歴は権限者のみが参照し確認状態を更新できる',
+  securityPolicies: [
+    securityPolicyRef('security-policy-self-service-contact-verification'),
+    securityPolicyRef('security-policy-self-service-audit-log'),
   ],
   businessRules: [
-    'オンラインでのキャンセルは利用予定日時の12時間前まで可能',
+    'オンラインでのキャンセルは利用予定日時の前日営業時間終了まで可能',
     'キャンセル完了後は予約番号が無効化される',
     'キャンセル理由は必須入力で統計分析に活用される',
-    'キャンセル時の枠リリースは履歴に記録され確認未済／済で管理される',
-    '履歴の確認・既読化は予約履歴確認ユースケースで実施する',
+    reservationCancellationHistoryBusinessRule,
+    historyReviewBusinessRule,
   ],
   priority: 'medium',
 };

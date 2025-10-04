@@ -10,6 +10,7 @@ import {
   businessScopeRef,
   constraintRef,
   reservationBusinessRequirementCoverage,
+  securityPolicyRef,
   stakeholderRef,
   successMetricRef,
   typedActorRef,
@@ -35,6 +36,10 @@ export const reservationStaffSearch: ReservationUseCase = {
     successMetrics: [successMetricRef('metric-manual-adjustment-time')],
     assumptions: [assumptionRef('assumption-staff-sign-in-required')],
     constraints: [constraintRef('constraint-privacy-minimization')],
+    securityPolicies: [
+      securityPolicyRef('security-policy-staff-visibility-governance'),
+      securityPolicyRef('security-policy-staff-search-audit'),
+    ],
   }),
   preconditions: [
     '店舗スタッフが管理コンソールに認証済みで予約閲覧権限を持っている',
@@ -93,10 +98,9 @@ export const reservationStaffSearch: ReservationUseCase = {
       returnToStepId: 'select-reservation',
     },
   ],
-  securityRequirements: [
-    '検索条件と結果閲覧の履歴を監査ログに保持し定期的にレビューする',
-    '閲覧可能な予約情報は担当店舗および権限レベルに応じて制御する',
-    '検索結果には個人情報の一部のみを表示し、詳細表示時に追加情報を開示する',
+  securityPolicies: [
+    securityPolicyRef('security-policy-staff-visibility-governance'),
+    securityPolicyRef('security-policy-staff-search-audit'),
   ],
   businessRules: [
     '検索ビューの初期表示では検索結果を自動表示せず空リストとする',

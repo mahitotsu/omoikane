@@ -11,7 +11,9 @@ import {
   businessScopeRef,
   constraintRef,
   reservationBusinessRequirementCoverage,
+  securityPolicyRef,
   stakeholderRef,
+  successMetricRef,
   typedActorRef,
 } from '../typed-references.js';
 
@@ -41,10 +43,15 @@ export const userAccountRegistration: ReservationUseCase = {
     businessGoals: [businessGoalRef('goal-admin-managed-accounts')],
     scopeItems: [businessScopeRef('scope-account-administration')],
     stakeholders: [stakeholderRef('stakeholder-system-admin')],
+    successMetrics: [successMetricRef('metric-admin-access-readiness')],
     assumptions: [assumptionRef('assumption-staff-sign-in-required')],
     constraints: [
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-log-retention'),
+    ],
+    securityPolicies: [
+      securityPolicyRef('security-policy-account-admin-audit'),
+      securityPolicyRef('security-policy-least-privilege'),
     ],
   }),
   preconditions: [
@@ -103,9 +110,9 @@ export const userAccountRegistration: ReservationUseCase = {
       returnToStepId: 'open-admin-console',
     },
   ],
-  securityRequirements: [
-    'すべての登録操作は監査ログに記録する',
-    '最小権限の原則に従い不要なロールは付与しない',
+  securityPolicies: [
+    securityPolicyRef('security-policy-account-admin-audit'),
+    securityPolicyRef('security-policy-least-privilege'),
   ],
   businessRules: ['ロール付与は定義済みの職務分掌に従う'],
   priority: 'medium',
@@ -123,10 +130,16 @@ export const userAccountDeletion: ReservationUseCase = {
     businessGoals: [businessGoalRef('goal-admin-managed-accounts')],
     scopeItems: [businessScopeRef('scope-account-administration')],
     stakeholders: [stakeholderRef('stakeholder-system-admin')],
+    successMetrics: [successMetricRef('metric-admin-access-readiness')],
     assumptions: [assumptionRef('assumption-staff-sign-in-required')],
     constraints: [
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-log-retention'),
+    ],
+    securityPolicies: [
+      securityPolicyRef('security-policy-account-admin-audit'),
+      securityPolicyRef('security-policy-least-privilege'),
+      securityPolicyRef('security-policy-account-deletion-approval'),
     ],
   }),
   preconditions: [
@@ -185,9 +198,10 @@ export const userAccountDeletion: ReservationUseCase = {
       returnToStepId: 'open-admin-console',
     },
   ],
-  securityRequirements: [
-    'すべての削除操作は監査ログに記録する',
-    '削除前に影響範囲と承認状況を確認する',
+  securityPolicies: [
+    securityPolicyRef('security-policy-account-admin-audit'),
+    securityPolicyRef('security-policy-least-privilege'),
+    securityPolicyRef('security-policy-account-deletion-approval'),
   ],
   businessRules: ['ユーザー削除は関連業務の影響を確認し責任者の承認を得る'],
   priority: 'medium',

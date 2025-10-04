@@ -27,6 +27,7 @@ interface BusinessRequirementInfo {
   successMetricIds: string[];
   assumptionIds: string[];
   constraintIds: string[];
+  securityPolicyIds: string[];
 }
 
 function getAllTsFiles(dir: string): string[] {
@@ -108,6 +109,7 @@ async function extractElements(): Promise<{
         successMetrics?: { id?: string }[];
         assumptions?: { id?: string }[];
         constraints?: { id?: string }[];
+        securityPolicies?: { id?: string }[];
       };
 
       businessRequirements.push({
@@ -129,6 +131,9 @@ async function extractElements(): Promise<{
           .map(item => item?.id)
           .filter((value): value is string => Boolean(value)),
         constraintIds: (definition.constraints ?? [])
+          .map(item => item?.id)
+          .filter((value): value is string => Boolean(value)),
+        securityPolicyIds: (definition.securityPolicies ?? [])
           .map(item => item?.id)
           .filter((value): value is string => Boolean(value)),
       });
@@ -210,6 +215,9 @@ async function generateTypedReferences() {
   const knownConstraintIds = [
     ...new Set(businessRequirements.flatMap(r => r.constraintIds)),
   ].sort();
+  const knownSecurityPolicyIds = [
+    ...new Set(businessRequirements.flatMap(r => r.securityPolicyIds)),
+  ].sort();
 
   const packageJsonPath = path.join(process.cwd(), 'package.json');
   let prefix = 'Project';
@@ -258,6 +266,7 @@ import type {
   BusinessRequirementDefinitionRef,
   BusinessScopeRef,
   ConstraintRef,
+  SecurityPolicyRef,
   StakeholderRef,
   SuccessMetricRef,
   UseCase,
@@ -276,6 +285,8 @@ export type KnownSuccessMetricId = ${toUnionLiteral(knownSuccessMetricIds)};
 export type KnownAssumptionId = ${toUnionLiteral(knownAssumptionIds)};
 
 export type KnownConstraintId = ${toUnionLiteral(knownConstraintIds)};
+
+export type KnownSecurityPolicyId = ${toUnionLiteral(knownSecurityPolicyIds)};
 
 export type KnownActorId = ${toUnionLiteral(actors.map(a => a.id))};
 
@@ -309,6 +320,12 @@ export function assumptionRef<T extends KnownAssumptionId>(id: T): AssumptionRef
 
 export function constraintRef<T extends KnownConstraintId>(id: T): ConstraintRef<T> {
   return { id, type: 'constraint-ref' };
+}
+
+export function securityPolicyRef<T extends KnownSecurityPolicyId>(
+  id: T
+): SecurityPolicyRef<T> {
+  return { id, type: 'security-policy-ref' };
 }
 
 export interface TypedActorRef<T extends KnownActorId = KnownActorId> {
@@ -374,7 +391,7 @@ export function defineActor<T extends KnownActorId>(
   return { actor, ref };
 }
 
-export type { Actor, BusinessRequirementCoverage, UseCase } from 'omoikane-metamodel';
+export type { Actor, BusinessRequirementCoverage, SecurityPolicyRef, UseCase } from 'omoikane-metamodel';
 
 export type ${prefix}BusinessRequirementCoverage = BusinessRequirementCoverage<
   KnownBusinessRequirementId,
@@ -383,7 +400,8 @@ export type ${prefix}BusinessRequirementCoverage = BusinessRequirementCoverage<
   KnownStakeholderId,
   KnownSuccessMetricId,
   KnownAssumptionId,
-  KnownConstraintId
+  KnownConstraintId,
+  KnownSecurityPolicyId
 >;
 
 export type ${prefix}UseCase = UseCase<
@@ -393,7 +411,8 @@ export type ${prefix}UseCase = UseCase<
   KnownStakeholderId,
   KnownSuccessMetricId,
   KnownAssumptionId,
-  KnownConstraintId
+  KnownConstraintId,
+  KnownSecurityPolicyId
 > & {
   businessRequirementCoverage: ${prefix}BusinessRequirementCoverage;
 };
@@ -408,6 +427,7 @@ export const generatedStats = {
   successMetrics: ${knownSuccessMetricIds.length},
   assumptions: ${knownAssumptionIds.length},
   constraints: ${knownConstraintIds.length},
+  securityPolicies: ${knownSecurityPolicyIds.length},
   generatedAt: '${new Date().toISOString()}',
   sourceFiles: [${serializedSourceFiles}],
 } as const;

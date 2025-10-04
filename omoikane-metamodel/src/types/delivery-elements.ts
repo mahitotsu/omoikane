@@ -51,7 +51,10 @@ export interface BusinessRequirementDefinition extends DeliveryElement {
   successMetrics?: BusinessRequirementItem[];
   assumptions?: BusinessRequirementItem[];
   constraints?: BusinessRequirementItem[];
+  securityPolicies?: SecurityPolicy[];
 }
+
+export interface SecurityPolicy extends BusinessRequirementItem {}
 
 /**
  * 業務要件参照オブジェクト
@@ -91,6 +94,11 @@ export interface ConstraintRef<ConstraintId extends string = string> {
   readonly type: 'constraint-ref';
 }
 
+export interface SecurityPolicyRef<SecurityPolicyId extends string = string> {
+  readonly id: SecurityPolicyId;
+  readonly type: 'security-policy-ref';
+}
+
 /**
  * ユースケースから業務要件へのトレーサビリティ情報
  */
@@ -102,6 +110,7 @@ export interface BusinessRequirementCoverage<
   SuccessMetricId extends string = string,
   AssumptionId extends string = string,
   ConstraintId extends string = string,
+  SecurityPolicyId extends string = string,
 > {
   requirement: BusinessRequirementDefinitionRef<RequirementId>;
   businessGoals: BusinessGoalRef<GoalId>[];
@@ -110,6 +119,7 @@ export interface BusinessRequirementCoverage<
   successMetrics?: SuccessMetricRef<SuccessMetricId>[];
   assumptions?: AssumptionRef<AssumptionId>[];
   constraints?: ConstraintRef<ConstraintId>[];
+  securityPolicies?: SecurityPolicyRef<SecurityPolicyId>[];
   notes?: string;
 }
 
@@ -124,6 +134,7 @@ export interface UseCase<
   SuccessMetricId extends string = string,
   AssumptionId extends string = string,
   ConstraintId extends string = string,
+  SecurityPolicyId extends string = string,
 > extends DeliveryElement {
   readonly type: 'usecase';
   name: string;
@@ -139,7 +150,8 @@ export interface UseCase<
     StakeholderId,
     SuccessMetricId,
     AssumptionId,
-    ConstraintId
+    ConstraintId,
+    SecurityPolicyId
   >;
   preconditions: string[];
   postconditions: string[];
@@ -154,6 +166,7 @@ export interface UseCase<
   businessValue?: string;
   dataRequirements?: string[];
   securityRequirements?: string[];
+  securityPolicies?: SecurityPolicyRef<SecurityPolicyId>[];
   performanceRequirements?: string[];
   uiRequirements?: string[];
 }
@@ -258,4 +271,10 @@ export function constraintRef<ConstraintId extends string>(
   id: ConstraintId
 ): ConstraintRef<ConstraintId> {
   return { id, type: 'constraint-ref' };
+}
+
+export function securityPolicyRef<SecurityPolicyId extends string>(
+  id: SecurityPolicyId
+): SecurityPolicyRef<SecurityPolicyId> {
+  return { id, type: 'security-policy-ref' };
 }

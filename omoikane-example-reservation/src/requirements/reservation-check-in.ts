@@ -41,6 +41,7 @@ export const reservationCheckIn: ReservationUseCase = {
     constraints: [
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-staff-change-anytime-unless-checked-in'),
+      constraintRef('constraint-late-arrival-grace-period'),
     ],
   }),
   preconditions: [
@@ -50,7 +51,6 @@ export const reservationCheckIn: ReservationUseCase = {
   postconditions: [
     '来店者のステータスが「来店済み」へ更新される',
     '店舗スタッフが対応準備を開始できる状態になる',
-    '来店済みになった予約は新しい制約により店舗スタッフによる変更が不可になる',
   ],
   mainFlow: [
     {
@@ -71,12 +71,6 @@ export const reservationCheckIn: ReservationUseCase = {
       action: 'チェックインコンソールで来店済みに更新し必要なメモを記録する',
       expectedResult: '予約カレンダー上のステータスが「来店済み」に変更される',
     },
-    {
-      stepId: 'confirm-task',
-      actor: typedActorRef('store-staff'),
-      action: 'チェックインコンソールでタスク一覧の更新を確認する',
-      expectedResult: '最新ステータスを基に対応優先度と席の準備状況を把握できる',
-    },
   ],
   alternativeFlows: [
     {
@@ -87,15 +81,16 @@ export const reservationCheckIn: ReservationUseCase = {
         {
           actor: typedActorRef('store-staff'),
           action: '遅刻理由をヒアリングしコンソールに遅刻メモを記録する',
-          expectedResult: '遅刻に関する情報が共有される',
+          expectedResult: '遅刻に関する情報と到着時刻が共有される',
         },
         {
           actor: typedActorRef('store-staff'),
           action: '遅刻理由を確認し受け入れ可否を判断する',
-          expectedResult: '枠を維持するかリスケジュールするか決定される',
+          expectedResult:
+            '15分以内は継続受け入れ、15分を超える場合は枠解放または再調整の判断が記録される',
         },
       ],
-      returnToStepId: 'confirm-task',
+      returnToStepId: 'register-arrival',
     },
     {
       id: 'reservation-not-found',

@@ -5,7 +5,7 @@
  * ⚠️ このファイルは自動生成されます
  * 手動編集は scripts/generate-typed-references.ts で行ってください
  *
- * 最終更新: 2025-10-04T13:54:00.420Z
+ * 最終更新: 2025-10-04T16:34:33.447Z
  */
 
 import type {
@@ -16,6 +16,7 @@ import type {
   BusinessRequirementDefinitionRef,
   BusinessScopeRef,
   ConstraintRef,
+  SecurityPolicyRef,
   StakeholderRef,
   SuccessMetricRef,
   UseCase,
@@ -48,6 +49,7 @@ export type KnownStakeholderId =
   | 'stakeholder-visitor';
 
 export type KnownSuccessMetricId =
+  | 'metric-admin-access-readiness'
   | 'metric-audit-confirmation-lag'
   | 'metric-booking-completion-rate'
   | 'metric-manual-adjustment-time'
@@ -59,12 +61,27 @@ export type KnownAssumptionId =
   | 'assumption-staff-sign-in-required';
 
 export type KnownConstraintId =
+  | 'constraint-late-arrival-grace-period'
   | 'constraint-log-retention'
   | 'constraint-no-double-booking'
   | 'constraint-operation-hours-visitor'
   | 'constraint-privacy-minimization'
   | 'constraint-staff-change-anytime-unless-checked-in'
   | 'constraint-visitor-own-reservation-only';
+
+export type KnownSecurityPolicyId =
+  | 'security-policy-account-admin-audit'
+  | 'security-policy-account-deletion-approval'
+  | 'security-policy-concurrency-control'
+  | 'security-policy-history-access-control'
+  | 'security-policy-history-audit-log'
+  | 'security-policy-least-privilege'
+  | 'security-policy-self-service-audit-log'
+  | 'security-policy-self-service-contact-verification'
+  | 'security-policy-slot-release-verification'
+  | 'security-policy-staff-operation-audit'
+  | 'security-policy-staff-search-audit'
+  | 'security-policy-staff-visibility-governance';
 
 export type KnownActorId = 'system-admin' | 'capacity-planner' | 'store-staff' | 'visitor';
 
@@ -109,6 +126,10 @@ export function assumptionRef<T extends KnownAssumptionId>(id: T): AssumptionRef
 
 export function constraintRef<T extends KnownConstraintId>(id: T): ConstraintRef<T> {
   return { id, type: 'constraint-ref' };
+}
+
+export function securityPolicyRef<T extends KnownSecurityPolicyId>(id: T): SecurityPolicyRef<T> {
+  return { id, type: 'security-policy-ref' };
 }
 
 export interface TypedActorRef<T extends KnownActorId = KnownActorId> {
@@ -174,7 +195,12 @@ export function defineActor<T extends KnownActorId>(
   return { actor, ref };
 }
 
-export type { Actor, BusinessRequirementCoverage, UseCase } from 'omoikane-metamodel';
+export type {
+  Actor,
+  BusinessRequirementCoverage,
+  SecurityPolicyRef,
+  UseCase,
+} from 'omoikane-metamodel';
 
 export type ReservationBusinessRequirementCoverage = BusinessRequirementCoverage<
   KnownBusinessRequirementId,
@@ -183,7 +209,8 @@ export type ReservationBusinessRequirementCoverage = BusinessRequirementCoverage
   KnownStakeholderId,
   KnownSuccessMetricId,
   KnownAssumptionId,
-  KnownConstraintId
+  KnownConstraintId,
+  KnownSecurityPolicyId
 >;
 
 export type ReservationUseCase = UseCase<
@@ -193,7 +220,8 @@ export type ReservationUseCase = UseCase<
   KnownStakeholderId,
   KnownSuccessMetricId,
   KnownAssumptionId,
-  KnownConstraintId
+  KnownConstraintId,
+  KnownSecurityPolicyId
 > & {
   businessRequirementCoverage: ReservationBusinessRequirementCoverage;
 };
@@ -205,10 +233,11 @@ export const generatedStats = {
   businessGoals: 6,
   scopeItems: 7,
   stakeholders: 5,
-  successMetrics: 4,
+  successMetrics: 5,
   assumptions: 3,
-  constraints: 6,
-  generatedAt: '2025-10-04T13:54:00.422Z',
+  constraints: 7,
+  securityPolicies: 12,
+  generatedAt: '2025-10-04T16:34:33.448Z',
   sourceFiles: [
     '/home/akring/omoikane/omoikane-example-reservation/src/requirements/account-administration.ts',
     '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts',

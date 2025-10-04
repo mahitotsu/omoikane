@@ -10,6 +10,7 @@ import {
   businessScopeRef,
   constraintRef,
   reservationBusinessRequirementCoverage,
+  securityPolicyRef,
   stakeholderRef,
   successMetricRef,
   typedActorRef,
@@ -20,7 +21,7 @@ export const reservationHistoryReview: ReservationUseCase = {
   type: 'usecase',
   owner: 'store-operations',
   name: '予約履歴確認',
-  description: '店舗スタッフが予約状況と枠ロック・リリース履歴を確認し既読状態を更新する',
+  description: '店舗スタッフが予約状況と予約確定・取消履歴を確認し既読状態を更新する',
   actors: {
     primary: typedActorRef('store-staff'),
   },
@@ -38,10 +39,14 @@ export const reservationHistoryReview: ReservationUseCase = {
     successMetrics: [successMetricRef('metric-audit-confirmation-lag')],
     assumptions: [assumptionRef('assumption-staff-sign-in-required')],
     constraints: [constraintRef('constraint-log-retention')],
+    securityPolicies: [
+      securityPolicyRef('security-policy-history-access-control'),
+      securityPolicyRef('security-policy-history-audit-log'),
+    ],
   }),
   preconditions: [
     '店舗スタッフが予約照会画面へアクセスできる権限を持っている',
-    '予約枠ロック・リリース履歴に未確認または既読対象の記録が存在する',
+    '予約確定・取消履歴に未確認または既読対象の記録が存在する',
   ],
   postconditions: [
     '確認対象の履歴が既読状態に更新される',
@@ -51,7 +56,7 @@ export const reservationHistoryReview: ReservationUseCase = {
     {
       stepId: 'open-history',
       actor: typedActorRef('store-staff'),
-      action: '予約照会画面でロック・リリース履歴タブを開き未確認の記録を一覧表示する',
+      action: '予約照会画面で確定・取消履歴タブを開き未確認の記録を一覧表示する',
       expectedResult: '未確認の履歴が作成日時順に表示される',
     },
     {
@@ -67,6 +72,7 @@ export const reservationHistoryReview: ReservationUseCase = {
       expectedResult: '履歴の確認状態が更新され、対応メモが残る',
     },
     {
+      stepId: 'verify-remaining-items',
       actor: typedActorRef('store-staff'),
       action: '既読済み履歴を除外して残件を確認する',
       expectedResult: '未確認の履歴がなくなり、対応が完了したことが把握できる',
@@ -100,10 +106,9 @@ export const reservationHistoryReview: ReservationUseCase = {
       returnToStepId: 'open-history',
     },
   ],
-  securityRequirements: [
-    '履歴閲覧と既読設定は店舗スタッフなど権限を持つスタッフのみが実行できる',
-    '履歴の既読操作は監査ログに記録される',
-    '履歴データは改ざん防止のため署名つきで保存される',
+  securityPolicies: [
+    securityPolicyRef('security-policy-history-access-control'),
+    securityPolicyRef('security-policy-history-audit-log'),
   ],
   businessRules: [
     '履歴は予約新規・変更・取消の都度自動生成される',

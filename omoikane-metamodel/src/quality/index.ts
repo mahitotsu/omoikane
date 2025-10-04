@@ -4,6 +4,7 @@
  */
 
 // 型定義をエクスポート
+export * from './security-requirements.ts';
 export * from './types.ts';
 
 // カバレッジ分析
@@ -20,8 +21,14 @@ import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/del
 
 import type { QualityAssessmentResult, Recommendation } from './types.ts';
 
+import type { SecurityPolicyStats, SecurityPolicySummary } from './security-requirements.ts';
+
 import { assessQuality } from './assessor.ts';
 import { generateRecommendations } from './recommendation-engine.ts';
+import {
+  calculateSecurityPolicyStats,
+  summarizeSecurityPolicies,
+} from './security-requirements.ts';
 
 /**
  * 品質評価と推奨アクション生成を一括実行
@@ -33,6 +40,8 @@ export function performQualityAssessment(
 ): {
   assessment: QualityAssessmentResult;
   recommendations: Recommendation[];
+  securityPolicySummary: SecurityPolicySummary;
+  securityPolicyStats: SecurityPolicyStats;
 } {
   const assessment = assessQuality(businessRequirements, actors, useCases);
   const recommendations = generateRecommendations(
@@ -41,9 +50,14 @@ export function performQualityAssessment(
     actors,
     useCases
   );
+  const securityPolicies = businessRequirements.securityPolicies ?? [];
+  const securityPolicySummary = summarizeSecurityPolicies(securityPolicies, useCases);
+  const securityPolicyStats = calculateSecurityPolicyStats(securityPolicySummary.coverage);
 
   return {
     assessment,
     recommendations,
+    securityPolicySummary,
+    securityPolicyStats,
   };
 }

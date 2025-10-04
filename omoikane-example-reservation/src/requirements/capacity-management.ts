@@ -42,7 +42,10 @@ export const capacityManagement: ReservationUseCase = {
     stakeholders: [stakeholderRef('stakeholder-capacity-planner')],
     successMetrics: [successMetricRef('metric-slot-utilization')],
     assumptions: [assumptionRef('assumption-single-location')],
-    constraints: [constraintRef('constraint-operation-hours-visitor')],
+    constraints: [
+      constraintRef('constraint-no-double-booking'),
+      constraintRef('constraint-log-retention'),
+    ],
   }),
   preconditions: [
     '管理者が予約カレンダーの編集権限を持っている',
@@ -66,6 +69,7 @@ export const capacityManagement: ReservationUseCase = {
       expectedResult: '入力内容が保存前チェックに進む',
     },
     {
+      stepId: 'confirm-slot-publication',
       actor: typedActorRef('capacity-planner'),
       action: '検証結果を確認し問題がなければ保存を確定する',
       expectedResult: 'システムが枠を公開し、空き枠一覧が更新される',

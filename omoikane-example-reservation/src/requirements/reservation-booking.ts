@@ -11,10 +11,15 @@ import {
   businessScopeRef,
   constraintRef,
   reservationBusinessRequirementCoverage,
+  securityPolicyRef,
   stakeholderRef,
   successMetricRef,
   typedActorRef,
 } from '../typed-references.js';
+import {
+  historyReviewBusinessRule,
+  visitorSingleReservationBusinessRule,
+} from './common-policies.js';
 
 export const visitor: Actor = {
   id: 'visitor',
@@ -43,7 +48,7 @@ export const storeStaff: Actor = {
     'スタッフアサイン',
     '全予約情報の照会と共有',
     'キャンセルリクエストに伴う準備調整',
-    '予約枠ロック・リリース履歴の確認と確認状態の更新',
+    '予約確定・取消履歴の確認と確認状態の更新',
   ],
 };
 
@@ -66,6 +71,7 @@ export const reservationBooking: ReservationUseCase = {
     scopeItems: [businessScopeRef('scope-online-booking')],
     stakeholders: [
       stakeholderRef('stakeholder-visitor'),
+      stakeholderRef('stakeholder-store-staff'),
       stakeholderRef('stakeholder-store-ops-manager'),
     ],
     successMetrics: [successMetricRef('metric-booking-completion-rate')],
@@ -74,6 +80,13 @@ export const reservationBooking: ReservationUseCase = {
       constraintRef('constraint-privacy-minimization'),
       constraintRef('constraint-operation-hours-visitor'),
       constraintRef('constraint-no-double-booking'),
+    ],
+    securityPolicies: [
+      securityPolicyRef('security-policy-self-service-contact-verification'),
+      securityPolicyRef('security-policy-self-service-audit-log'),
+      securityPolicyRef('security-policy-staff-visibility-governance'),
+      securityPolicyRef('security-policy-history-access-control'),
+      securityPolicyRef('security-policy-history-audit-log'),
     ],
   }),
   preconditions: [
@@ -84,7 +97,7 @@ export const reservationBooking: ReservationUseCase = {
     '予約が確定し画面上に予約番号と内容が表示されている',
     '店舗スタッフの業務リストに予約が追加されている',
     '来店者が予約番号と連絡先で照会・変更できるページへのアクセス方法を理解している',
-    '確定時の予約枠ロックが履歴に未確認状態で記録されている',
+    '予約確定操作が履歴に未確認状態で記録されている',
   ],
   mainFlow: [
     {
@@ -100,13 +113,14 @@ export const reservationBooking: ReservationUseCase = {
       expectedResult: 'サービス内容がリアルタイムでバリデーションされる',
     },
     {
-      stepId: 'lock-slot',
+      stepId: 'confirm-reservation',
       actor: typedActorRef('visitor'),
       action: '入力内容を送信し選択した枠の確定操作を完了する',
       expectedResult:
-        'システムが対象枠をロックし履歴に未確認のロック記録を追加、予約番号を画面に表示する',
+        'システムが対象枠を予約確定として登録し履歴に未確認の確定記録を追加、予約番号を画面に表示する',
     },
     {
+      stepId: 'acknowledge-reservation-reference',
       actor: typedActorRef('visitor'),
       action: '表示された予約番号と照会手順を確認し控える',
       expectedResult: '予約照会・変更ページへの到達手順が明示される',
@@ -121,7 +135,7 @@ export const reservationBooking: ReservationUseCase = {
         {
           actor: typedActorRef('visitor'),
           action: '画面上の枠確保失敗メッセージを確認し代替候補を検討する',
-          expectedResult: '選択可能な別枠と履歴に残された失敗記録を参照できる',
+          expectedResult: '選択可能な別枠が提示され再選択のガイダンスが表示される',
         },
         {
           actor: typedActorRef('visitor'),
@@ -132,20 +146,20 @@ export const reservationBooking: ReservationUseCase = {
       returnToStepId: 'enter-details',
     },
   ],
-  securityRequirements: [
-    '来店者は予約番号と連絡先情報の照合により予約情報へアクセスできる',
-    '来店者による他者の予約番号入力は連絡先照合で拒否される',
-    '店舗スタッフは業務権限に基づき全予約情報を閲覧・共有できる',
-    'ロック・リリース履歴は閲覧権限のあるスタッフのみが参照・確認状態更新できる',
-    '履歴データは改ざん防止のため監査ログとして保持される',
+  securityPolicies: [
+    securityPolicyRef('security-policy-self-service-contact-verification'),
+    securityPolicyRef('security-policy-self-service-audit-log'),
+    securityPolicyRef('security-policy-staff-visibility-governance'),
+    securityPolicyRef('security-policy-history-access-control'),
+    securityPolicyRef('security-policy-history-audit-log'),
   ],
   businessRules: [
-    '予約は来店者本人1名分のみを対象とする',
+    visitorSingleReservationBusinessRule,
     '来店者は自分が作成した予約のみ確認・変更できる',
     '予約番号は予約完了画面にのみ表示され来店者が控えることを前提とする',
-    '予約枠のロックおよびリリース操作は履歴に記録される',
+    '予約の確定および取消操作は履歴に記録される',
     '履歴には確認未済／済の状態が付与され店舗スタッフが更新を把握できる',
-    '履歴の確認・既読化は予約履歴確認ユースケースで実施する',
+    historyReviewBusinessRule,
   ],
   priority: 'high',
 };

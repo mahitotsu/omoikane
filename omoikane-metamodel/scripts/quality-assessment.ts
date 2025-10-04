@@ -6,6 +6,7 @@
 
 import { readdir } from 'fs/promises';
 import { extname, join } from 'path';
+import type { SecurityPolicyStats, SecurityPolicySummary } from '../src/quality/index.js';
 import { performQualityAssessment } from '../src/quality/index.js';
 
 /**
@@ -145,7 +146,13 @@ async function findProjectFiles(projectDir: string): Promise<{
 /**
  * 品質評価レポートを表示
  */
-function displayQualityReport(assessment: any, recommendations: any[], projectName: string) {
+function displayQualityReport(
+  assessment: any,
+  recommendations: any[],
+  projectName: string,
+  securityPolicySummary: SecurityPolicySummary,
+  securityPolicyStats: SecurityPolicyStats
+) {
   console.log(`\n=== 品質評価レポート: ${projectName} ===\n`);
 
   // 総合スコア
@@ -203,6 +210,29 @@ function displayQualityReport(assessment: any, recommendations: any[], projectNa
   console.log(
     `  制約条件: ${coverage.constraints.covered}/${coverage.constraints.total} (${Math.round(coverage.constraints.coverage * 100)}%)\n`
   );
+
+  console.log('🛡️ セキュリティポリシーカバレッジ:');
+  if (securityPolicySummary.policies.length === 0) {
+    console.log('  セキュリティポリシーは定義されていません\n');
+  } else {
+    const coveragePercent = Math.round(securityPolicyStats.coverageRatio * 100);
+    console.log(
+      `  カバレッジ: ${securityPolicyStats.totalCoveredPolicies}/${securityPolicyStats.totalPolicies} (${coveragePercent}%)`
+    );
+
+    if (securityPolicySummary.uncoveredPolicies.length === 0) {
+      console.log('  未カバーのセキュリティポリシーはありません ✅\n');
+    } else {
+      console.log('  未カバーのポリシー:');
+      securityPolicySummary.uncoveredPolicies.forEach((entry, index) => {
+        const description = entry.policy.description || entry.policy.id;
+        console.log(`    ${index + 1}. ${entry.policy.id} — ${description}`);
+        const coveringUseCases = entry.coveredByUseCases.map(useCase => useCase.id).join(', ');
+        console.log(`       カバーするユースケース: ${coveringUseCases || 'なし'}`);
+      });
+      console.log('');
+    }
+  }
 
   // 孤立要素
   if (coverage.orphanedElements.length > 0) {
@@ -268,15 +298,18 @@ async function main() {
     console.log(`  - ユースケース: ${useCases.length}件`);
 
     // 品質評価実行
-    const { assessment, recommendations } = performQualityAssessment(
-      businessRequirements,
-      actors,
-      useCases
-    );
+    const { assessment, recommendations, securityPolicySummary, securityPolicyStats } =
+      performQualityAssessment(businessRequirements, actors, useCases);
 
     // レポート表示
     const projectName = projectDir.split('/').pop() || 'Unknown Project';
-    displayQualityReport(assessment, recommendations, projectName);
+    displayQualityReport(
+      assessment,
+      recommendations,
+      projectName,
+      securityPolicySummary,
+      securityPolicyStats
+    );
 
     // 終了コード決定
     const criticalIssues = assessment.issues.filter((issue: any) => issue.severity === 'critical');
