@@ -18,8 +18,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'goal-visitor-self-service-flexibility',
-      description:
-        '来店者が営業時間外でも予約内容の変更や取消を自己完結できるようにする',
+      description: '来店者が営業時間外でも予約内容の変更や取消を自己完結できるようにする',
     },
     {
       id: 'goal-admin-managed-accounts',
@@ -145,11 +144,13 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'constraint-operation-hours-visitor',
-      description: '来店者による予約・変更・取消が可能なのは予約する日時の前日の営業時間終了までとする',
+      description:
+        '来店者による予約・変更・取消が可能なのは予約する日時の前日の営業時間終了までとする',
     },
     {
       id: 'constraint-staff-change-anytime-unless-checked-in',
-      description: '店舗スタッフによる予約変更は来店確認済みでない限り営業時間に関係なくいつでも可能とする',
+      description:
+        '店舗スタッフによる予約変更は来店確認済みでない限り営業時間に関係なくいつでも可能とする',
     },
     {
       id: 'constraint-log-retention',

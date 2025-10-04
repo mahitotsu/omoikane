@@ -5,7 +5,7 @@
  * ⚠️ このファイルは自動生成されます
  * 手動編集は scripts/generate-typed-references.ts で行ってください
  *
- * 最終更新: 2025-10-03T17:47:07.089Z
+ * 最終更新: 2025-10-04T13:54:00.420Z
  */
 
 import type {
@@ -28,8 +28,8 @@ export type KnownBusinessGoalId =
   | 'goal-admin-managed-accounts'
   | 'goal-auditable-operations'
   | 'goal-empower-store-staff'
-  | 'goal-visitor-self-service-flexibility'
-  | 'goal-self-service-booking';
+  | 'goal-self-service-booking'
+  | 'goal-visitor-self-service-flexibility';
 
 export type KnownScopeItemId =
   | 'scope-account-administration'
@@ -207,8 +207,8 @@ export const generatedStats = {
   stakeholders: 5,
   successMetrics: 4,
   assumptions: 3,
-  constraints: 4,
-  generatedAt: '2025-10-03T17:47:07.089Z',
+  constraints: 6,
+  generatedAt: '2025-10-04T13:54:00.422Z',
   sourceFiles: [
     '/home/akring/omoikane/omoikane-example-reservation/src/requirements/account-administration.ts',
     '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts',

@@ -4,16 +4,16 @@
 
 import type { Actor } from 'omoikane-metamodel';
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const capacityPlanner: Actor = {
@@ -42,7 +42,7 @@ export const capacityManagement: ReservationUseCase = {
     stakeholders: [stakeholderRef('stakeholder-capacity-planner')],
     successMetrics: [successMetricRef('metric-slot-utilization')],
     assumptions: [assumptionRef('assumption-single-location')],
-    constraints: [constraintRef('constraint-operation-hours')],
+    constraints: [constraintRef('constraint-operation-hours-visitor')],
   }),
   preconditions: [
     '管理者が予約カレンダーの編集権限を持っている',

@@ -15,7 +15,7 @@
     "lint:fix": "eslint . --ext .ts --ignore-path ../.gitignore --fix",
     "format": "prettier --write \"**/*.{ts,json,md}\" --ignore-path ../.gitignore",
     "format:check": "prettier --check \"**/*.{ts,json,md}\" --ignore-path ../.gitignore",
-    "quality": "bun run format && bun run lint:fix && bun run type-check",
+    "code-quality": "bun run format && bun run lint:fix && bun run type-check",
     "test": "bun test"
   },
   "keywords": [
