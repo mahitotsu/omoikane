@@ -4,24 +4,24 @@
  */
 
 // 型定義をエクスポート
-export * from './types.js';
+export * from './types.ts';
 
 // カバレッジ分析
-export { analyzeCoverage } from './coverage-analyzer.js';
+export { analyzeCoverage } from './coverage-analyzer.ts';
 
 // 品質評価
-export { assessQuality } from './assessor.js';
+export { assessQuality } from './assessor.ts';
 
 // 推奨アクション生成
-export { generateRecommendations } from './recommendation-engine.js';
+export { generateRecommendations } from './recommendation-engine.ts';
 
 // 便利な統合関数
 import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
 
-import type { QualityAssessmentResult, Recommendation } from './types.js';
+import type { QualityAssessmentResult, Recommendation } from './types.ts';
 
-import { assessQuality } from './assessor.js';
-import { generateRecommendations } from './recommendation-engine.js';
+import { assessQuality } from './assessor.ts';
+import { generateRecommendations } from './recommendation-engine.ts';
 
 /**
  * 品質評価と推奨アクション生成を一括実行

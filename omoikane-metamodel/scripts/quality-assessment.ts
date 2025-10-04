@@ -47,7 +47,7 @@ async function findAllTsFiles(dirPath: string): Promise<string[]> {
         files.push(fullPath);
       }
     }
-  } catch (error) {
+  } catch {
     // ディレクトリが存在しない場合は静かに処理を続行
   }
 
