@@ -70,7 +70,7 @@ async function findProjectFiles(projectDir: string): Promise<{
 }> {
   const srcDir = join(projectDir, 'src');
 
-  let businessRequirements = null;
+  let businessRequirements: any = null;
   const actors: any[] = [];
   const useCases: any[] = [];
   // ユースケースID毎の最初の構造署名を保存し、完全一致重複は抑止
@@ -80,8 +80,7 @@ async function findProjectFiles(projectDir: string): Promise<{
   try {
     // srcディレクトリ以下のすべてのTypeScriptファイルを検索
     const allTsFiles = await findAllTsFiles(srcDir);
-
-    console.log(`🔍 src/ 以下の検索対象ファイル: ${allTsFiles.length}件`);
+    // console.log(`🔍 src/ 以下の検索対象ファイル: ${allTsFiles.length}件`);
 
     for (const filePath of allTsFiles) {
       const fileName = filePath.split('/').pop() || '';
@@ -90,49 +89,36 @@ async function findProjectFiles(projectDir: string): Promise<{
         const module = await importTsFile(filePath);
         if (!module) continue;
 
-        // business-requirements.ts の検索
-        if (fileName === 'business-requirements.ts' && !businessRequirements) {
-          businessRequirements =
-            module.default ||
-            module.businessRequirements ||
-            module.reservationBusinessRequirements ||
-            Object.values(module).find((item: any) => item && item.type === 'business-requirement');
-        }
-
-        // 各ファイルから export されているすべてのオブジェクトを確認
-        for (const [, value] of Object.entries(module)) {
-          if (!value || typeof value !== 'object') continue;
-          const obj: any = value;
-
-          if (obj.type === 'actor' && obj.id && obj.name) {
-            if (!actors.some(a => a.id === obj.id)) {
-              actors.push(obj);
-            }
-            continue;
+        // business-requirements.ts の検出
+        for (const exportedName of Object.keys(module)) {
+          const value: any = (module as any)[exportedName];
+          if (value && typeof value === 'object' && value.type === 'business-requirement') {
+            // 最初に見つかった業務要件定義を採用
+            businessRequirements = value;
           }
 
-          if (obj.type === 'usecase' && obj.id && obj.name) {
-            const signature = JSON.stringify(obj, (_k, v) =>
-              typeof v === 'function' ? undefined : v
-            );
-            const existing = useCaseIdMap.get(obj.id);
+          // アクターの収集
+          if (value && typeof value === 'object' && value.type === 'actor') {
+            actors.push(value);
+          }
+
+          // ユースケースの収集（重複排除）
+          if (value && typeof value === 'object' && value.type === 'usecase') {
+            const signature = JSON.stringify({ id: value.id, name: value.name, owner: value.owner });
+            const existing = useCaseIdMap.get(value.id);
             if (!existing) {
-              useCaseIdMap.set(obj.id, { signature });
-              useCases.push(obj);
+              useCaseIdMap.set(value.id, { signature });
+              useCases.push(value);
             } else if (existing.signature !== signature) {
-              // 構造差異がある → 実際の競合として両方残す
-              useCases.push(obj);
+              // IDが同じで構造が異なる場合は別物として追加（念のため）
+              useCases.push(value);
             } else {
               suppressedDuplicateCount++;
             }
           }
         }
-      } catch (fileError) {
-        // 個別ファイルの読み込みエラーは静かに処理を続行
-        console.warn(
-          `Warning: Could not process ${fileName}:`,
-          fileError instanceof Error ? fileError.message : String(fileError)
-        );
+      } catch {
+        // 個別ファイルの読み込み失敗はスキップ
       }
     }
 
@@ -196,7 +182,7 @@ function displayQualityReport(
     });
   }
 
-  // カバレッジレポート
+  // カバレッジレポート（統合）
   console.log('📈 カバレッジレポート:');
   const { coverage } = assessment;
   console.log(
@@ -215,53 +201,55 @@ function displayQualityReport(
     `  前提条件: ${coverage.assumptions.covered}/${coverage.assumptions.total} (${Math.round(coverage.assumptions.coverage * 100)}%)`
   );
   console.log(
-    `  制約条件: ${coverage.constraints.covered}/${coverage.constraints.total} (${Math.round(coverage.constraints.coverage * 100)}%)\n`
+    `  制約条件: ${coverage.constraints.covered}/${coverage.constraints.total} (${Math.round(coverage.constraints.coverage * 100)}%)`
   );
-
-  console.log('� ビジネスルールカバレッジ:');
+  // 追加: ビジネスルールとセキュリティポリシーもここで表示
   if (businessRuleSummary.rules.length === 0) {
-    console.log('  ビジネスルールは定義されていません\n');
+    console.log('  ビジネスルール: 0/0 (—)');
   } else {
-    const coveragePercent = Math.round(businessRuleStats.coverageRatio * 100);
+    const brPercent = Math.round(businessRuleStats.coverageRatio * 100);
     console.log(
-      `  カバレッジ: ${businessRuleStats.totalCoveredRules}/${businessRuleStats.totalRules} (${coveragePercent}%)`
+      `  ビジネスルール: ${businessRuleStats.totalCoveredRules}/${businessRuleStats.totalRules} (${brPercent}%)`
     );
-
-    if (businessRuleSummary.uncoveredRules.length === 0) {
-      console.log('  未カバーのビジネスルールはありません ✅\n');
-    } else {
-      console.log('  未カバーのルール:');
-      businessRuleSummary.uncoveredRules.forEach((entry, index) => {
-        const description = entry.rule.description || entry.rule.id;
-        console.log(`    ${index + 1}. ${entry.rule.id} — ${description}`);
-        const coveringUseCases = entry.coveredByUseCases.map(useCase => useCase.id).join(', ');
-        console.log(`       カバーするユースケース: ${coveringUseCases || 'なし'}`);
-      });
-      console.log('');
-    }
+  }
+  if (securityPolicySummary.policies.length === 0) {
+    console.log('  セキュリティポリシー: 0/0 (—)\n');
+  } else {
+    const spPercent = Math.round(securityPolicyStats.coverageRatio * 100);
+    console.log(
+      `  セキュリティポリシー: ${securityPolicyStats.totalCoveredPolicies}/${securityPolicyStats.totalPolicies} (${spPercent}%)\n`
+    );
   }
 
-  console.log('�🛡️ セキュリティポリシーカバレッジ:');
-  if (securityPolicySummary.policies.length === 0) {
-    console.log('  セキュリティポリシーは定義されていません\n');
+  // 詳細（未カバーのみ）
+  console.log('🧩 ビジネスルール詳細（未カバー一覧）:');
+  if (businessRuleSummary.rules.length === 0) {
+    console.log('  定義なし\n');
+  } else if (businessRuleSummary.uncoveredRules.length === 0) {
+    console.log('  未カバーはありません ✅\n');
   } else {
-    const coveragePercent = Math.round(securityPolicyStats.coverageRatio * 100);
-    console.log(
-      `  カバレッジ: ${securityPolicyStats.totalCoveredPolicies}/${securityPolicyStats.totalPolicies} (${coveragePercent}%)`
-    );
+    businessRuleSummary.uncoveredRules.forEach((entry: any, index: number) => {
+      const description = entry.rule.description || entry.rule.id;
+      console.log(`  ${index + 1}. ${entry.rule.id} — ${description}`);
+      const coveringUseCases = entry.coveredByUseCases.map((useCase: any) => useCase.id).join(', ');
+      console.log(`     カバーするユースケース: ${coveringUseCases || 'なし'}`);
+    });
+    console.log('');
+  }
 
-    if (securityPolicySummary.uncoveredPolicies.length === 0) {
-      console.log('  未カバーのセキュリティポリシーはありません ✅\n');
-    } else {
-      console.log('  未カバーのポリシー:');
-      securityPolicySummary.uncoveredPolicies.forEach((entry, index) => {
-        const description = entry.policy.description || entry.policy.id;
-        console.log(`    ${index + 1}. ${entry.policy.id} — ${description}`);
-        const coveringUseCases = entry.coveredByUseCases.map(useCase => useCase.id).join(', ');
-        console.log(`       カバーするユースケース: ${coveringUseCases || 'なし'}`);
-      });
-      console.log('');
-    }
+  console.log('️ セキュリティポリシー詳細（未カバー一覧）:');
+  if (securityPolicySummary.policies.length === 0) {
+    console.log('  定義なし\n');
+  } else if (securityPolicySummary.uncoveredPolicies.length === 0) {
+    console.log('  未カバーはありません ✅\n');
+  } else {
+    securityPolicySummary.uncoveredPolicies.forEach((entry: any, index: number) => {
+      const description = entry.policy.description || entry.policy.id;
+      console.log(`  ${index + 1}. ${entry.policy.id} — ${description}`);
+      const coveringUseCases = entry.coveredByUseCases.map((useCase: any) => useCase.id).join(', ');
+      console.log(`     カバーするユースケース: ${coveringUseCases || 'なし'}`);
+    });
+    console.log('');
   }
 
   // 孤立要素
