@@ -43,7 +43,10 @@ async function findProjectFiles(dir: string): Promise<string[]> {
         files.push(...(await findProjectFiles(fullPath)));
       }
     } else if (entry.isFile() && extname(entry.name) === '.ts') {
-      files.push(fullPath);
+      // index.ts は他のファイルの集約なのでスキップ
+      if (entry.name !== 'index.ts') {
+        files.push(fullPath);
+      }
     }
   }
   return files;
