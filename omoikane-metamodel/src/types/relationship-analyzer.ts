@@ -4,9 +4,24 @@
 
 import type { Actor, ActorRef, UseCase } from './delivery-elements';
 
+// 新型・旧型両対応のための型定義
+type AnyActor = Actor | { id: string; name: string };
+type AnyUseCase = UseCase | {
+  id: string;
+  name: string;
+  actors: {
+    primary: string | ActorRef | { id: string };
+    secondary?: (string | ActorRef | { id: string })[];
+  };
+};
+
 // ユニオン型から actorId を取得するヘルパー関数
-function getActorId(actor: string | ActorRef): string {
-  return typeof actor === 'string' ? actor : actor.actorId;
+// 新型では Ref<Actor> = {id: string} 形式
+function getActorId(actor: string | ActorRef | { id: string }): string {
+  if (typeof actor === 'string') return actor;
+  if ('id' in actor) return actor.id;
+  if ('actorId' in actor) return (actor as ActorRef).actorId; // 後方互換性
+  return '';
 }
 
 // アクター・ユースケース関係マップ
@@ -28,16 +43,16 @@ export interface RelationshipAnalysis {
 }
 
 export class RelationshipAnalyzer {
-  private actors: Map<string, Actor> = new Map();
-  private useCases: Map<string, UseCase> = new Map();
+  private actors: Map<string, AnyActor> = new Map();
+  private useCases: Map<string, AnyUseCase> = new Map();
 
   // アクターを追加
-  addActor(actor: Actor): void {
+  addActor(actor: AnyActor): void {
     this.actors.set(actor.id, actor);
   }
 
   // ユースケースを追加
-  addUseCase(useCase: UseCase): void {
+  addUseCase(useCase: AnyUseCase): void {
     this.useCases.set(useCase.id, useCase);
   }
 
@@ -106,14 +121,14 @@ export class RelationshipAnalyzer {
   }
 
   // 特定のアクターが関わるユースケースを取得
-  getUseCasesForActor(actorId: string): UseCase[] {
+  getUseCasesForActor(actorId: string): AnyUseCase[] {
     const analysis = this.analyze();
     const useCaseIds = analysis.actorUseCaseMap.get(actorId) || [];
     return useCaseIds.map(id => this.useCases.get(id)!).filter(Boolean);
   }
 
   // 特定のユースケースに関わるアクターを取得
-  getActorsForUseCase(useCaseId: string): Actor[] {
+  getActorsForUseCase(useCaseId: string): AnyActor[] {
     const analysis = this.analyze();
     const actorIds = analysis.useCaseActorMap.get(useCaseId) || [];
     return actorIds.map(id => this.actors.get(id)!).filter(Boolean);
