@@ -2,10 +2,27 @@
 /**
  * 品質評価スクリプト v2.0
  * Quality Assessment Framework v2.0を使用した総合品質評価
+ * 
+ * 機能:
+ * - プロジェクト成熟度評価 (5レベル x 5次元)
+ * - コンテキスト対応評価
+ * - 依存関係グラフ分析
+ * - AI推奨生成 (構造化された推奨事項)
+ * - メトリクスダッシュボード (健全性スコア、トレンド分析)
+ * 
+ * 使用方法:
+ *   bun run quality-assessment [プロジェクトディレクトリ] [オプション]
+ * 
+ * オプション:
+ *   --export        レポートをファイルにエクスポート
+ *   --json          JSON形式でエクスポート
+ *   --html          HTML形式でエクスポート
+ *   --markdown      Markdown形式でエクスポート (デフォルト)
+ *   --help          ヘルプを表示
  */
 
 import { readdir } from 'fs/promises';
-import { extname, join } from 'path';
+import { extname, join, resolve } from 'path';
 import {
   AIRecommendationEngine,
   analyzeGraph,
@@ -34,18 +51,37 @@ async function findProjectFiles(dir: string): Promise<string[]> {
 
 async function loadTsFile(filePath: string): Promise<any> {
   try {
-    // file://プロトコルを使用して絶対パスをURLに変換
-    const fileUrl = `file://${filePath}`;
-    const module = await import(fileUrl);
-    // defaultエクスポート、または全ての名前付きエクスポートを返す
-    if (module.default) {
-      return module.default;
+    // 1. Bunのトランスパイラーでファイルを読み込み準備
+    const absolutePath = resolve(filePath);
+    
+    // 2. 動的インポートを試行
+    try {
+      // file:// プロトコルを使用して絶対パスをURLに変換
+      const fileUrl = `file://${absolutePath}`;
+      const module = await import(fileUrl);
+      
+      // defaultエクスポートがあれば返す
+      if (module.default) {
+        return module.default;
+      }
+      
+      // 名前付きエクスポートを配列で返す
+      const namedExports = Object.keys(module)
+        .filter(key => key !== 'default' && key !== '__esModule')
+        .map(key => module[key])
+        .filter(val => val !== undefined && val !== null);
+      
+      if (namedExports.length === 1) {
+        return namedExports[0];
+      } else if (namedExports.length > 1) {
+        return namedExports;
+      }
+    } catch (importError) {
+      // インポートに失敗した場合は静かにスキップ
+      return null;
     }
-    // 名前付きエクスポートを配列として返す
-    const exports = Object.keys(module)
-      .filter(key => key !== 'default' && key !== '__esModule')
-      .map(key => module[key]);
-    return exports.length === 1 ? exports[0] : exports.length > 1 ? exports : null;
+    
+    return null;
   } catch (error) {
     return null;
   }
@@ -53,7 +89,6 @@ async function loadTsFile(filePath: string): Promise<any> {
 
 async function loadProjectData(projectDir: string) {
   const files = await findProjectFiles(projectDir);
-  console.log(`  ファイル数: ${files.length}`);
   
   const businessRequirements: any[] = [];
   const actors: any[] = [];
@@ -63,31 +98,27 @@ async function loadProjectData(projectDir: string) {
     const data = await loadTsFile(file);
     if (!data) continue;
 
+    // データが配列の場合は各要素を処理、単一オブジェクトならそのまま処理
     const items = Array.isArray(data) ? data : [data];
-    console.log(`  ${file.split('/').pop()}: ${items.length} items`);
     
     for (const item of items) {
       if (!item || typeof item !== 'object') continue;
       
-      console.log(`    - type: ${item.type}, id: ${item.id}, keys: ${Object.keys(item).slice(0, 5).join(', ')}`);
-      
-      // ビジネス要件の判定
-      if (item.businessGoals || item.type === 'businessRequirement' || item.id?.includes('business')) {
+      // ビジネス要件の判定（businessGoalsプロパティが配列として存在）
+      if (item.businessGoals && Array.isArray(item.businessGoals)) {
         businessRequirements.push(item);
-        console.log(`      → ビジネス要件`);
       }
-      // アクターの判定
-      else if (item.role || item.type === 'actor' || item.id?.includes('actor')) {
+      // アクターの判定（roleプロパティが存在）
+      else if (item.role !== undefined) {
         actors.push(item);
-        console.log(`      → アクター`);
       }
-      // ユースケースの判定
-      else if (item.actors || item.type === 'useCase' || item.id?.includes('usecase')) {
+      // ユースケースの判定（actorsプロパティとmainFlowが存在）
+      else if (item.actors && item.mainFlow) {
         useCases.push(item);
-        console.log(`      → ユースケース`);
       }
     }
   }
+  
   return { businessRequirements, actors, useCases };
 }
 
@@ -131,6 +162,15 @@ function displayV2Report(
       console.log(`     優先度: ${rec.priority}`);
       console.log(`     工数: ${rec.effort.hours}時間`);
       console.log(`     問題: ${rec.problem}`);
+    }
+    console.log();
+  }
+  
+  if (recommendations.quickWins.length > 0) {
+    console.log('【クイックウィン（すぐに実行可能）】');
+    for (let i = 0; i < Math.min(5, recommendations.quickWins.length); i++) {
+      const rec = recommendations.quickWins[i];
+      console.log(`  • ${rec.title} (${rec.effort.hours}h)`);
     }
     console.log();
   }

@@ -89,22 +89,105 @@ const userRegistration: Functional.UseCase = {
 - `enrichStepsWithNumbers()`: stepIdから自動でstepNumberを生成
 - `findStepByIdOrNumber()`: stepIdまたはstepNumberでステップを検索
 
-### 品質評価フレームワーク
+### 品質評価フレームワーク v2.0
 
-設計品質を自動評価し、AI Agent向けの改善提案を生成します。
+プロジェクトの設計品質を多角的に評価し、実用的な改善提案を生成します。
+
+#### コマンドライン使用
+
+```bash
+# 基本実行（現在のディレクトリを評価）
+bun run quality-assessment
+
+# 特定のプロジェクトを評価
+bun run quality-assessment ./path/to/project
+
+# レポートをエクスポート
+bun run quality-assessment --export --markdown
+bun run quality-assessment --export --json
+bun run quality-assessment --export --html
+```
+
+#### プログラマティック使用
 
 ```typescript
-import { performQualityAssessment } from './src/quality/index.js';
+import {
+  assessProjectMaturity,
+  inferContext,
+  applyContext,
+  buildDependencyGraph,
+  analyzeGraph,
+  AIRecommendationEngine,
+  MetricsDashboard,
+} from 'omoikane-metamodel';
 
-const { assessment, recommendations } = performQualityAssessment(
+// 1. 成熟度評価
+const maturityResult = assessProjectMaturity(
   businessRequirements,
   actors,
   useCases
 );
 
-console.log(`品質スコア: ${assessment.overallScore.value}/100`);
-console.log(`推奨アクション: ${recommendations.length}件`);
+// 2. コンテキスト分析
+const context = inferContext(projectDir, businessRequirements);
+const contextRules = applyContext(context);
+
+// 3. 依存関係分析
+const graph = buildDependencyGraph(businessRequirements, actors, useCases);
+const graphAnalysis = analyzeGraph(graph);
+
+// 4. AI推奨生成
+const engine = new AIRecommendationEngine();
+const recommendations = engine.generateRecommendations({
+  maturity: maturityResult,
+  context,
+  graph: graphAnalysis,
+});
+
+// 5. ダッシュボード
+const dashboard = new MetricsDashboard();
+const snapshot = dashboard.createSnapshot({
+  maturity: maturityResult,
+  graph: graphAnalysis,
+  recommendations,
+  context,
+});
+const healthScore = dashboard.calculateHealthScore(snapshot);
+
+console.log(`総合健全性スコア: ${healthScore.overall}/100`);
+console.log(`成熟度レベル: ${maturityResult.projectLevel}/5`);
+console.log(`推奨事項: ${recommendations.recommendations.length}件`);
 ```
+
+#### 評価内容
+
+- **成熟度評価**: 5レベル × 5次元の詳細評価
+  - 構造（Structure）: 基本構造の定義
+  - 詳細（Detail）: 説明の詳細度
+  - トレーサビリティ（Traceability）: 要素間の追跡可能性
+  - テスト可能性（Testability）: テスト関連情報
+  - 保守性（Maintainability）: 変更管理情報
+
+- **コンテキスト対応**: プロジェクトの特性に応じた評価
+  - ドメイン（金融、医療、EC等）
+  - 開発段階（PoC、MVP、本番等）
+  - チーム規模（個人、小規模、大規模）
+  - 重要度（実験的、通常、ミッションクリティカル）
+
+- **依存関係グラフ**: 要素間の関係を可視化・分析
+  - 循環依存の検出
+  - 孤立ノードの特定
+  - クリティカルパスの抽出
+
+- **AI推奨**: 構造化された改善提案
+  - 優先度別推奨（Critical, High, Medium, Low）
+  - クイックウィン（すぐに実施可能な改善）
+  - 長期戦略（アーキテクチャレベルの改善）
+
+- **メトリクスダッシュボード**: 健全性スコアとトレンド
+  - 5カテゴリ健全性スコア（0-100点）
+  - 時系列トレンド分析
+  - アラート生成
 
 詳細は [品質評価フレームワーク](./src/quality/README.md) を参照してください。
 
