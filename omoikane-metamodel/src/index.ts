@@ -2,9 +2,31 @@
  * Omoikane Metamodel - ITDelivery Framework
  *
  * TypeScriptによるユースケース・要件定義のためのメタモデル
+ * 
+ * 【レイヤー構造】
+ * - Foundation: 基礎層（プリミティブ、参照、文書基底）
+ * - Business: 業務層（業務要件定義）
+ * - Functional: 機能層（ユースケース、アクター）
+ * - Cross-Cutting: 横断層（トレーサビリティ、バージョニング）
  */
 
-// 基本型定義をエクスポート
+// ===== 新しいレイヤー型定義 =====
+export * as Business from './types/business/index.js';
+export * as CrossCutting from './types/cross-cutting/index.js';
+export * as Foundation from './types/foundation/index.js';
+export * as Functional from './types/functional/index.js';
+
+// Foundationレイヤーから主要な型をre-export（便利のため）
+export type {
+    Approvable, Categorizable, ChangeLogEntry, DateRange, DocumentBase, Identifiable, Metadata, PriorityLevel, QualityLevel, Ref,
+    RefArray, SeverityLevel, TraceableDocument, Versionable
+} from './types/foundation/index.js';
+
+export {
+    createRef, extractRefIds, isApprovable, isCategorizable, isTraceableDocument, isValidRef, isVersionable
+} from './types/foundation/index.js';
+
+// ===== 既存の型定義（後方互換性のため） =====
 export type {
     Actor,
     ActorRef,
