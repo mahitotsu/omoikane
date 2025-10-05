@@ -2,12 +2,13 @@
  * 来店予約管理システム - 業務要件定義
  */
 
-import type { BusinessRequirementDefinition } from 'omoikane-metamodel';
+import type { Business } from 'omoikane-metamodel';
+
+type BusinessRequirementDefinition = Business.BusinessRequirementDefinition;
 
 export const reservationBusinessRequirements: BusinessRequirementDefinition = {
   id: 'reservation-business-requirements',
-  type: 'business-requirement',
-  owner: 'store-operations',
+  name: '来店予約管理システム 業務要件定義',
   title: '来店予約管理システム 業務要件定義',
   summary:
     '来店者のセルフサービスによる予約と、店舗スタッフによる対面業務を両立させ、履歴管理と監査性を確保する',
