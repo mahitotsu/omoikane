@@ -141,7 +141,7 @@ function displayV2Report(
   console.log();
   
   console.log('【成熟度レベル】');
-  console.log(`レベル: ${maturityResult.projectLevel}/5\n`);
+  console.log(`  レベル: ${maturityResult.projectLevel}/5\n`);
   
   console.log('【依存関係グラフ】');
   console.log(`  ノード数: ${graphAnalysis.statistics.nodeCount}`);
