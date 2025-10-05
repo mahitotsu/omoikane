@@ -61,7 +61,3 @@ export type {
     DocumentRelationship, TraceabilityAnalysis, TraceabilityIssue, TraceabilityMatrix,
     TraceabilityValidation
 } from './cross-cutting/index.js';
-
-// ===== Legacy Compatibility =====
-// 既存コードとの互換性のため、旧型定義もre-exportする
-export * from './delivery-elements.js';

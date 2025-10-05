@@ -4,8 +4,8 @@
  */
 
 import { readdir } from 'fs/promises';
-import { extname, join } from 'path';
 import { RelationshipAnalyzer } from 'omoikane-metamodel';
+import { extname, join } from 'path';
 
 async function importTsFile(filePath: string): Promise<any> {
   try {

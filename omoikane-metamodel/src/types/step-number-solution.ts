@@ -4,12 +4,11 @@
  * 戻り先指定はstepIdに統一
  */
 
-import {
-  businessGoalRef,
-  businessRequirementRef,
-  type UseCase,
-  type UseCaseStep,
-} from './delivery-elements';
+import type * as Functional from './functional/index.js';
+
+// 型エイリアス
+type UseCase = Functional.UseCase;
+type UseCaseStep = Functional.UseCaseStep;
 
 // ===== ユーティリティ関数 =====
 
@@ -54,24 +53,23 @@ export function findStepByIdOrNumber(
  */
 export const improvedOrderProcessing: UseCase = {
   id: 'order-processing',
-  type: 'usecase',
-  owner: 'business-analyst',
   name: '注文処理',
   description: '顧客の注文を受け付け、決済から配送まで処理する',
   actors: {
-    primary: 'customer',
-    secondary: ['payment-service', 'shipping-service'],
+    primary: { id: 'customer' },
+    secondary: [{ id: 'payment-service' }, { id: 'shipping-service' }],
   },
   businessRequirementCoverage: {
-    requirement: businessRequirementRef('order-management-business-requirements'),
-    businessGoals: [businessGoalRef('goal-streamline-order-processing')],
+    requirement: { id: 'order-management-business-requirements' },
+    businessGoals: [{ id: 'goal-streamline-order-processing' }],
   },
   preconditions: ['顧客がログインしている'],
   postconditions: ['注文が完了している'],
+  priority: 'high',
   mainFlow: [
     {
       stepId: 'select-products', // ✨ IDベースの管理
-      actor: 'customer',
+      actor: { id: 'customer' },
       action: '商品を選択してカートに追加',
       expectedResult: '商品がカートに追加される',
       // stepNumberは自動で1になる
@@ -123,7 +121,7 @@ export const improvedOrderProcessing: UseCase = {
       condition: '注文商品の在庫が不足',
       steps: [
         {
-          actor: 'inventory-system',
+          actor: { id: 'inventory-system' },
           action: '在庫状況を確認',
           expectedResult: '在庫不足が確認される',
         },
@@ -131,5 +129,4 @@ export const improvedOrderProcessing: UseCase = {
       returnToStepId: 'select-products', // ✨ 商品選択に戻る
     },
   ],
-  priority: 'high',
 };

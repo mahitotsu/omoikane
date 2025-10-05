@@ -2,7 +2,13 @@
  * 品質評価フレームワークの型定義
  */
 
-import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
+import type * as Business from '../types/business/index.js';
+import type * as Functional from '../types/functional/index.js';
+
+// 型エイリアス（新型システム）
+type Actor = Functional.Actor;
+type BusinessRequirementDefinition = Business.BusinessRequirementDefinition;
+type UseCase = Functional.UseCase;
 
 /**
  * 品質スコア

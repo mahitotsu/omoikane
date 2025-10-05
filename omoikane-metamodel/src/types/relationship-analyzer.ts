@@ -2,7 +2,13 @@
  * ユースケースとアクターの関係性分析ユーティリティ
  */
 
-import type { Actor, ActorRef, UseCase } from './delivery-elements';
+import type { Ref } from './foundation/index.js';
+import type * as Functional from './functional/index.js';
+
+// 型エイリアス
+type Actor = Functional.Actor;
+type UseCase = Functional.UseCase;
+type ActorRef = Ref<Actor>;
 
 // 新型・旧型両対応のための型定義
 type AnyActor = Actor | { id: string; name: string };
@@ -20,7 +26,6 @@ type AnyUseCase = UseCase | {
 function getActorId(actor: string | ActorRef | { id: string }): string {
   if (typeof actor === 'string') return actor;
   if ('id' in actor) return actor.id;
-  if ('actorId' in actor) return (actor as ActorRef).actorId; // 後方互換性
   return '';
 }
 

@@ -3,11 +3,17 @@
  * メタモデル要素の品質を総合的に評価
  */
 
-import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
+import type * as Business from '../types/business/index.js';
+import type * as Functional from '../types/functional/index.js';
 
 import type { QualityAssessmentResult, QualityIssue, QualityScore } from './types.js';
 
 import { analyzeCoverage } from './coverage-analyzer.js';
+
+// 型エイリアス
+type Actor = Functional.Actor;
+type BusinessRequirementDefinition = Business.BusinessRequirementDefinition;
+type UseCase = Functional.UseCase;
 
 /**
  * 品質評価を実行

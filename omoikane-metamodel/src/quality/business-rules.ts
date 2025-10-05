@@ -2,19 +2,16 @@
  * ビジネスルールとユースケースの関連付けを評価するユーティリティ
  */
 
-import type { BusinessRule, BusinessRuleRef, UseCase } from '../types/delivery-elements.js';
+import type * as Business from '../types/business/index.js';
+import type { Ref } from '../types/foundation/index.js';
+import type * as Functional from '../types/functional/index.js';
 
-type BusinessRuleUseCase = UseCase<
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string,
-  string
->;
+// 型エイリアス
+type BusinessRule = Business.BusinessRule;
+type BusinessRuleRef = Ref<BusinessRule>;  // 新型では Ref<T>
+type UseCase = Functional.UseCase;
+
+type BusinessRuleUseCase = UseCase;
 
 export interface BusinessRuleCoverageEntry<
   Rule extends BusinessRule = BusinessRule,

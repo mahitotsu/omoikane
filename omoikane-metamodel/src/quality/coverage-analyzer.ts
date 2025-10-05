@@ -3,9 +3,15 @@
  * 業務要件定義とユースケースの対応関係を分析
  */
 
-import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
+import type * as Business from '../types/business/index.js';
+import type * as Functional from '../types/functional/index.js';
 
 import type { CoverageDetail, CoverageReport, ElementCoverage, OrphanedElement } from './types.js';
+
+// 型エイリアス
+type Actor = Functional.Actor;
+type BusinessRequirementDefinition = Business.BusinessRequirementDefinition;
+type UseCase = Functional.UseCase;
 
 /**
  * カバレッジ分析を実行
@@ -388,8 +394,13 @@ function findOrphanedElements(
       const primary = useCase.actors.primary;
       const secondary = useCase.actors.secondary || [];
 
-      const primaryId = typeof primary === 'string' ? primary : primary.actorId;
-      const secondaryIds = secondary.map(s => (typeof s === 'string' ? s : s.actorId));
+      // 新型では Ref<Actor> = {id: string} または 文字列
+      const primaryId = typeof primary === 'string' ? primary : 
+                       (typeof primary === 'object' && 'id' in primary ? primary.id : '');
+      const secondaryIds = secondary.map(s => 
+        typeof s === 'string' ? s : 
+        (typeof s === 'object' && 'id' in s ? s.id : '')
+      );
 
       return primaryId === actor.id || secondaryIds.includes(actor.id);
     });

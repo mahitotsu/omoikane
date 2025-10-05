@@ -1,11 +1,16 @@
 /**
- * 推奨アクション生成エンジン
- * 品質評価結果から AI Agent 向けの推奨アクションを生成
+ * AI Agent向け推奨アクション生成エンジン
  */
 
-import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
+import type * as Business from '../types/business/index.js';
+import type * as Functional from '../types/functional/index.js';
 
-import type { QualityAssessmentResult, Recommendation as QualityRecommendation } from './types.js';
+import type { QualityAssessmentResult, Recommendation } from './types.js';
+
+// 型エイリアス
+type Actor = Functional.Actor;
+type BusinessRequirementDefinition = Business.BusinessRequirementDefinition;
+type UseCase = Functional.UseCase;
 
 /**
  * 推奨アクションを生成
@@ -15,8 +20,8 @@ export function generateRecommendations(
   businessRequirements: BusinessRequirementDefinition,
   actors: Actor[],
   useCases: UseCase[]
-): QualityRecommendation[] {
-  const recommendations: QualityRecommendation[] = [];
+): Recommendation[] {
+  const recommendations: Recommendation[] = [];
 
   // 完全性の問題に対する推奨アクション
   generateCompletenessRecommendations(
@@ -51,7 +56,7 @@ function generateCompletenessRecommendations(
   businessRequirements: BusinessRequirementDefinition,
   actors: Actor[],
   useCases: UseCase[],
-  recommendations: QualityRecommendation[]
+  recommendations: Recommendation[]
 ): void {
   const completenessIssues = qualityResult.issues.filter(
     issue => issue.category === 'completeness'
@@ -175,7 +180,7 @@ function generateCompletenessRecommendations(
  */
 function generateConsistencyRecommendations(
   qualityResult: QualityAssessmentResult,
-  recommendations: QualityRecommendation[]
+  recommendations: Recommendation[]
 ): void {
   const consistencyIssues = qualityResult.issues.filter(issue => issue.category === 'consistency');
 
@@ -223,7 +228,7 @@ function generateConsistencyRecommendations(
  */
 function generateValidityRecommendations(
   qualityResult: QualityAssessmentResult,
-  recommendations: QualityRecommendation[]
+  recommendations: Recommendation[]
 ): void {
   const validityIssues = qualityResult.issues.filter(issue => issue.category === 'validity');
 
@@ -296,7 +301,7 @@ function generateValidityRecommendations(
 function generateTraceabilityRecommendations(
   qualityResult: QualityAssessmentResult,
   businessRequirements: BusinessRequirementDefinition,
-  recommendations: QualityRecommendation[]
+  recommendations: Recommendation[]
 ): void {
   const traceabilityIssues = qualityResult.issues.filter(
     issue => issue.category === 'traceability'

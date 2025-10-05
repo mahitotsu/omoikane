@@ -18,9 +18,15 @@ export { assessQuality } from './assessor.ts';
 export { generateRecommendations } from './recommendation-engine.ts';
 
 // 便利な統合関数
-import type { Actor, BusinessRequirementDefinition, UseCase } from '../types/delivery-elements.js';
+import type * as Business from '../types/business/index.js';
+import type * as Functional from '../types/functional/index.js';
 
 import type { QualityAssessmentResult, Recommendation } from './types.ts';
+
+// 型エイリアス
+type Actor = Functional.Actor;
+type BusinessRequirementDefinition = Business.BusinessRequirementDefinition;
+type UseCase = Functional.UseCase;
 
 import type {
     BusinessRuleStats,

@@ -6,7 +6,7 @@ TypeScript ITDelivery Framework - ユースケース・要件定義のための�
 
 Omoikane Metamodel は、ITデリバリプロジェクトにおけるユースケース・要件定義を型安全に記述するための TypeScript フレームワークです。
 
-**新しいレイヤードアーキテクチャ** (v2.0+):
+**レイヤードアーキテクチャ**:
 - **Foundation**: 基礎層（Ref<T>, DocumentBase, primitives）
 - **Business**: 業務層（BusinessRequirementDefinition, BusinessRule）
 - **Functional**: 機能層（Actor, UseCase）
@@ -26,13 +26,13 @@ Omoikane Metamodel は、ITデリバリプロジェクトにおけるユース�
 bun install
 ```
 
-## 使用方法（新型システム）
+## 使用方法
 
 ```typescript
 import { Functional, Business, Foundation } from 'omoikane-metamodel';
 import type { Ref } from 'omoikane-metamodel';
 
-// アクター定義（新型）
+// アクター定義
 const customer: Functional.Actor = {
   id: 'customer',
   name: '顧客',
@@ -41,7 +41,7 @@ const customer: Functional.Actor = {
   responsibilities: ['商品の閲覧・検索', 'アカウント登録・管理'],
 };
 
-// ユースケース定義（新型）
+// ユースケース定義
 const userRegistration: Functional.UseCase = {
   id: 'user-registration',
   name: 'ユーザー登録',
@@ -65,7 +65,7 @@ const userRegistration: Functional.UseCase = {
 
 ## API
 
-### 型定義（新型システム）
+### 型定義
 
 **Foundation 層**:
 - `Ref<T>`: 統一参照型 `{id: string}`

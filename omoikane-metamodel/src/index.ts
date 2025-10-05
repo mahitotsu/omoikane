@@ -10,7 +10,7 @@
  * - Cross-Cutting: 横断層（トレーサビリティ、バージョニング）
  */
 
-// ===== 新しいレイヤー型定義 =====
+// ===== レイヤー型定義 =====
 export * as Business from './types/business/index.js';
 export * as CrossCutting from './types/cross-cutting/index.js';
 export * as Foundation from './types/foundation/index.js';
@@ -26,36 +26,7 @@ export {
     createRef, extractRefIds, isApprovable, isCategorizable, isTraceableDocument, isValidRef, isVersionable
 } from './types/foundation/index.js';
 
-// ===== レガシー互換性レイヤー（後方互換性のため） =====
-// ⚠️ 以下の型とヘルパー関数は後方互換性のために維持されています
-// 新しいコードでは、上記の Business.*, Functional.*, Foundation.* 名前空間を使用してください
-// 削除予定: Phase 3 (全てのツールが新型に移行後)
-
-/**
- * @deprecated 新しいコードでは Business.* と Functional.* 名前空間の型を使用してください
- */
-export type {
-    Actor,
-    ActorRef,
-    AlternativeFlow,
-    AssumptionRef,
-    BusinessGoalRef,
-    BusinessRequirementCoverage,
-    BusinessRequirementDefinition,
-    BusinessRequirementDefinitionRef,
-    BusinessRequirementItem,
-    BusinessRequirementScope, BusinessRule,
-    BusinessRuleRef, BusinessScopeRef,
-    ConstraintRef,
-    DeliveryElement,
-    SecurityPolicy,
-    SecurityPolicyRef, StakeholderRef,
-    SuccessMetricRef,
-    UseCase,
-    UseCaseRef,
-    UseCaseStep
-} from './types/delivery-elements.js';
-
+// ===== Quality Utilities =====
 export type {
     AnyUseCase,
     SecurityPolicyCoverageEntry,
@@ -66,20 +37,6 @@ export type {
 export type {
     BusinessRuleCoverageEntry, BusinessRuleStats, BusinessRuleSummary
 } from './quality/business-rules.ts';
-
-/**
- * @deprecated レガシー参照ヘルパー関数。新しいコードでは Foundation.createRef<T>() を使用してください
- */
-export {
-    actorRef,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef, businessRuleRef, businessScopeRef,
-    constraintRef, securityPolicyRef,
-    stakeholderRef,
-    successMetricRef,
-    useCaseRef
-} from './types/delivery-elements.js';
 
 export {
     buildBusinessRuleCoverage,
@@ -95,6 +52,8 @@ export {
     summarizeSecurityPolicies
 } from './quality/security-requirements.js';
 
+// ===== Utilities =====
+
 // stepNumber自動管理ユーティリティ
 export {
     enrichStepsWithNumbers,
@@ -109,3 +68,8 @@ export type {
 } from './types/relationship-analyzer.js';
 
 export { RelationshipAnalyzer } from './types/relationship-analyzer.js';
+
+// 品質評価
+export { assessQuality } from './quality/assessor.js';
+export type { QualityAssessmentResult } from './quality/types.js';
+
