@@ -38,8 +38,6 @@ const contactMismatchSteps = [
 
 export const reservationUpdate: ReservationUseCase = {
   id: 'reservation-update',
-  type: 'usecase',
-  owner: 'customer-experience',
   name: '予約変更',
   description: '来店者が確定済み予約の内容を更新する',
   actors: {

@@ -34,8 +34,6 @@ const visitorOfflineNotificationSteps = [
 
 export const reservationStaffCancel: ReservationUseCase = {
   id: 'reservation-staff-cancel',
-  type: 'usecase',
-  owner: 'store-operations',
   name: '店舗スタッフによる予約取消',
   description: '店舗スタッフが予約番号なしで特定した予約を、業務判断に基づいて取消する',
   actors: {

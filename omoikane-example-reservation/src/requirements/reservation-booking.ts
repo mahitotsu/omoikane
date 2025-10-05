@@ -20,8 +20,6 @@ import {
 
 export const reservationBooking: ReservationUseCase = {
   id: 'reservation-booking',
-  type: 'usecase',
-  owner: 'customer-experience',
   name: '予約登録',
   description: '来店者が希望日時に合わせて予約を登録する',
   actors: {

@@ -51,8 +51,6 @@ const alreadyCheckedInSelfServiceSteps = [
 
 export const reservationCancel: ReservationUseCase = {
   id: 'reservation-cancel',
-  type: 'usecase',
-  owner: 'customer-experience',
   name: '予約取消',
   description: '来店者が確定済み予約を取消し、枠を解放する',
   actors: {

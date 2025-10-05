@@ -19,8 +19,6 @@ import {
 
 export const reservationHistoryReview: ReservationUseCase = {
   id: 'reservation-history-review',
-  type: 'usecase',
-  owner: 'store-operations',
   name: '予約履歴確認',
   description: '店舗スタッフが予約状況と予約確定・取消履歴を確認し既読状態を更新する',
   actors: {

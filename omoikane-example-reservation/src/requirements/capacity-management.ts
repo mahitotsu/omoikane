@@ -18,8 +18,6 @@ import {
 
 export const capacityManagement: ReservationUseCase = {
   id: 'capacity-management',
-  type: 'usecase',
-  owner: 'store-operations',
   name: '枠管理',
   description: 'キャパシティプランナーが予約枠を登録・削除する',
   actors: {

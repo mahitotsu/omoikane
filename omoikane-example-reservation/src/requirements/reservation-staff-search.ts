@@ -19,8 +19,6 @@ import {
 
 export const reservationStaffSearch: ReservationUseCase = {
   id: 'reservation-staff-search',
-  type: 'usecase',
-  owner: 'store-operations',
   name: '店舗スタッフによる予約検索',
   description: '店舗スタッフが予約番号なしで条件を指定し、対象予約の一覧を取得する',
   actors: {

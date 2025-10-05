@@ -34,8 +34,6 @@ const visitorOfflineNotificationSteps = [
 
 export const reservationStaffChange: ReservationUseCase = {
   id: 'reservation-staff-change',
-  type: 'usecase',
-  owner: 'store-operations',
   name: '店舗スタッフによる予約変更',
   description:
     '店舗スタッフが予約番号なしで特定した予約内容を編集し、来店者の希望に合わせて調整する',

@@ -17,8 +17,6 @@ import {
 
 export const reservationCheckIn: ReservationUseCase = {
   id: 'reservation-check-in',
-  type: 'usecase',
-  owner: 'store-operations',
   name: '来店受付',
   description: '来店者が店舗到着を通知し受付手続きが完了する',
   actors: {

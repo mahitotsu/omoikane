@@ -20,8 +20,6 @@ import {
 
 export const userAccountRegistration: ReservationUseCase = {
   id: 'user-account-registration',
-  type: 'usecase',
-  owner: 'system-operations',
   name: 'ユーザー登録',
   description: 'システム管理者がユーザー情報と権限を指定して新規ユーザーを登録する',
   actors: { primary: typedActorRef('system-admin') },
@@ -108,8 +106,6 @@ export const userAccountRegistration: ReservationUseCase = {
 
 export const userAccountDeletion: ReservationUseCase = {
   id: 'user-account-deletion',
-  type: 'usecase',
-  owner: 'system-operations',
   name: 'ユーザー削除',
   description: 'システム管理者が不要なユーザーを削除しアクセスを無効化する',
   actors: { primary: typedActorRef('system-admin') },

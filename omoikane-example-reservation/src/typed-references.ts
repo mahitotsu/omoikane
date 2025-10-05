@@ -2,26 +2,27 @@
  * 型安全なアクター・ユースケース参照システム
  * IDE補完とコンパイル時型チェックを提供
  *
- * ⚠️ このファイルは自動生成されます
- * 手動編集は scripts/generate-typed-references.ts で行ってください
+ * ⚠️ このファイルは新型対応のため手動更新されました
  *
  * 最終更新: 2025-10-05T00:00:00.000Z
  */
 
-import type {
-  Actor,
-  AssumptionRef,
-  BusinessGoalRef,
-  BusinessRequirementCoverage,
-  BusinessRequirementDefinitionRef,
-  BusinessRuleRef,
-  BusinessScopeRef,
-  ConstraintRef,
-  SecurityPolicyRef,
-  StakeholderRef,
-  SuccessMetricRef,
-  UseCase,
+import {
+  createRef,
+  type Business,
+  type Functional,
+  type Foundation,
 } from 'omoikane-metamodel';
+
+// 型エイリアス
+type Actor = Functional.Actor;
+type UseCase = Functional.UseCase;
+type BusinessRequirementCoverage = Business.BusinessRequirementCoverage;
+type BusinessRequirementDefinition = Business.BusinessRequirementDefinition;
+type BusinessRequirementItem = Business.BusinessRequirementItem;
+type SecurityPolicy = Business.SecurityPolicy;
+type BusinessRule = Business.BusinessRule;
+type Ref<T> = Foundation.Ref<T>;
 
 export type KnownBusinessRequirementId = 'reservation-business-requirements';
 
@@ -118,142 +119,76 @@ export type KnownUseCaseId = 'reservation-history-review'
   | 'reservation-cancel'
   | 'reservation-update';
 
+// 新型ベースの参照ヘルパー関数
 export function businessRequirementRef<T extends KnownBusinessRequirementId>(
-  requirementId: T
-): BusinessRequirementDefinitionRef<T> {
-  return { requirementId, type: 'business-requirement-ref' };
+  id: T
+): Ref<BusinessRequirementDefinition> {
+  return createRef<BusinessRequirementDefinition>(id);
 }
 
-export function businessGoalRef<T extends KnownBusinessGoalId>(id: T): BusinessGoalRef<T> {
-  return { id, type: 'business-goal-ref' };
+export function businessGoalRef<T extends KnownBusinessGoalId>(id: T): Ref<BusinessRequirementItem> {
+  return createRef<BusinessRequirementItem>(id);
 }
 
-export function businessScopeRef<T extends KnownScopeItemId>(id: T): BusinessScopeRef<T> {
-  return { id, type: 'business-scope-ref' };
+export function businessScopeRef<T extends KnownScopeItemId>(id: T): Ref<BusinessRequirementItem> {
+  return createRef<BusinessRequirementItem>(id);
 }
 
-export function stakeholderRef<T extends KnownStakeholderId>(id: T): StakeholderRef<T> {
-  return { id, type: 'stakeholder-ref' };
+export function stakeholderRef<T extends KnownStakeholderId>(id: T): Ref<BusinessRequirementItem> {
+  return createRef<BusinessRequirementItem>(id);
 }
 
-export function successMetricRef<T extends KnownSuccessMetricId>(id: T): SuccessMetricRef<T> {
-  return { id, type: 'success-metric-ref' };
+export function successMetricRef<T extends KnownSuccessMetricId>(id: T): Ref<BusinessRequirementItem> {
+  return createRef<BusinessRequirementItem>(id);
 }
 
-export function assumptionRef<T extends KnownAssumptionId>(id: T): AssumptionRef<T> {
-  return { id, type: 'assumption-ref' };
+export function assumptionRef<T extends KnownAssumptionId>(id: T): Ref<BusinessRequirementItem> {
+  return createRef<BusinessRequirementItem>(id);
 }
 
-export function constraintRef<T extends KnownConstraintId>(id: T): ConstraintRef<T> {
-  return { id, type: 'constraint-ref' };
+export function constraintRef<T extends KnownConstraintId>(id: T): Ref<BusinessRequirementItem> {
+  return createRef<BusinessRequirementItem>(id);
 }
 
 export function securityPolicyRef<T extends KnownSecurityPolicyId>(
   id: T
-): SecurityPolicyRef<T> {
-  return { id, type: 'security-policy-ref' };
+): Ref<SecurityPolicy> {
+  return createRef<SecurityPolicy>(id);
 }
 
-export function businessRuleRef<T extends KnownBusinessRuleId>(id: T): BusinessRuleRef<T> {
-  return { id, type: 'business-rule-ref' };
+export function businessRuleRef<T extends KnownBusinessRuleId>(id: T): Ref<BusinessRule> {
+  return createRef<BusinessRule>(id);
 }
 
-export interface TypedActorRef<T extends KnownActorId = KnownActorId> {
-  readonly actorId: T;
-  readonly type: 'actor-ref';
+export function typedActorRef<T extends KnownActorId>(id: T): Ref<Actor> {
+  return createRef<Actor>(id);
 }
 
-export interface TypedUseCaseRef<T extends KnownUseCaseId = KnownUseCaseId> {
-  readonly useCaseId: T;
-  readonly type: 'usecase-ref';
+export function typedUseCaseRef<T extends KnownUseCaseId>(id: T): Ref<UseCase> {
+  return createRef<UseCase>(id);
 }
 
-export function typedActorRef<T extends KnownActorId>(actorId: T): TypedActorRef<T> {
-  return { actorId, type: 'actor-ref' };
-}
-
-export function typedUseCaseRef<T extends KnownUseCaseId>(useCaseId: T): TypedUseCaseRef<T> {
-  return { useCaseId, type: 'usecase-ref' };
-}
-
+// カバレッジヘルパー
 export function reservationBusinessRequirementCoverage(
-  coverage: ReservationBusinessRequirementCoverage
-): ReservationBusinessRequirementCoverage {
+  coverage: BusinessRequirementCoverage
+): BusinessRequirementCoverage {
   return coverage;
 }
 
-export interface EnhancedActorRef<T extends KnownActorId = KnownActorId> extends TypedActorRef<T> {
-  resolve(): Actor | undefined;
-}
-
-export function createActorRef<T extends KnownActorId>(
-  actorId: T,
-  actorRegistry?: Map<string, Actor>
-): EnhancedActorRef<T> {
-  return {
-    actorId,
-    type: 'actor-ref',
-    resolve(): Actor | undefined {
-      return actorRegistry?.get(actorId);
-    },
-  };
-}
-
-export interface ActorDefinition<T extends KnownActorId> {
-  actor: Actor;
-  ref: TypedActorRef<T>;
-}
-
-export function defineActor<T extends KnownActorId>(
-  id: T,
-  definition: Omit<Actor, 'id'>
-): ActorDefinition<T> {
-  const actor: Actor = {
-    id,
-    ...definition,
-  };
-
-  const ref: TypedActorRef<T> = {
-    actorId: id,
-    type: 'actor-ref',
-  };
-
-  return { actor, ref };
-}
-
+// 型エクスポート
 export type {
   Actor,
+  UseCase,
   BusinessRequirementCoverage,
-  BusinessRuleRef,
-  SecurityPolicyRef,
-  UseCase
-} from 'omoikane-metamodel';
-
-export type ReservationBusinessRequirementCoverage = BusinessRequirementCoverage<
-  KnownBusinessRequirementId,
-  KnownBusinessGoalId,
-  KnownScopeItemId,
-  KnownStakeholderId,
-  KnownSuccessMetricId,
-  KnownAssumptionId,
-  KnownConstraintId,
-  KnownSecurityPolicyId,
-  KnownBusinessRuleId
->;
-
-export type ReservationUseCase = UseCase<
-  KnownBusinessRequirementId,
-  KnownBusinessGoalId,
-  KnownScopeItemId,
-  KnownStakeholderId,
-  KnownSuccessMetricId,
-  KnownAssumptionId,
-  KnownConstraintId,
-  KnownSecurityPolicyId,
-  KnownBusinessRuleId
-> & {
-  businessRequirementCoverage: ReservationBusinessRequirementCoverage;
+  BusinessRequirementDefinition,
+  BusinessRequirementItem,
+  BusinessRule,
+  SecurityPolicy,
 };
+
+// プロジェクト固有の型エイリアス
+export type ReservationUseCase = UseCase;
+export type ReservationBusinessRequirementCoverage = BusinessRequirementCoverage;
 
 export const generatedStats = {
   actors: 4,
