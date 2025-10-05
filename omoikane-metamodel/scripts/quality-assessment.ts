@@ -89,22 +89,43 @@ async function findProjectFiles(projectDir: string): Promise<{
         const module = await importTsFile(filePath);
         if (!module) continue;
 
-        // business-requirements.ts の検出
+        // business-requirements.ts の検出（構造ベース）
         for (const exportedName of Object.keys(module)) {
           const value: any = (module as any)[exportedName];
-          if (value && typeof value === 'object' && value.type === 'business-requirement') {
+          
+          // Business.BusinessRequirementDefinition の検出
+          // 構造: businessGoals, scope, stakeholders, constraints, businessRules, securityPolicies
+          if (value && typeof value === 'object' && 
+              'businessGoals' in value && 
+              'scope' in value && 
+              'stakeholders' in value &&
+              Array.isArray(value.businessGoals)) {
             // 最初に見つかった業務要件定義を採用
             businessRequirements = value;
           }
 
-          // アクターの収集
-          if (value && typeof value === 'object' && value.type === 'actor') {
+          // Functional.Actor の検出
+          // 構造: id, name, description, role, responsibilities
+          if (value && typeof value === 'object' && 
+              'id' in value &&
+              'name' in value && 
+              'role' in value && 
+              'responsibilities' in value &&
+              Array.isArray(value.responsibilities)) {
             actors.push(value);
           }
 
-          // ユースケースの収集（重複排除）
-          if (value && typeof value === 'object' && value.type === 'usecase') {
-            const signature = JSON.stringify({ id: value.id, name: value.name, owner: value.owner });
+          // Functional.UseCase の検出（重複排除）
+          // 構造: id, name, description, actors, preconditions, postconditions, mainFlow
+          if (value && typeof value === 'object' && 
+              'id' in value &&
+              'name' in value &&
+              'actors' in value &&
+              'preconditions' in value &&
+              'postconditions' in value &&
+              'mainFlow' in value &&
+              Array.isArray(value.mainFlow)) {
+            const signature = JSON.stringify({ id: value.id, name: value.name });
             const existing = useCaseIdMap.get(value.id);
             if (!existing) {
               useCaseIdMap.set(value.id, { signature });

@@ -251,9 +251,12 @@ function assessConsistency(
   // 参照整合性チェック
   for (const useCase of useCases) {
     const primaryActor = useCase.actors.primary;
-    const primaryActorId = typeof primaryActor === 'string' ? primaryActor : primaryActor.actorId;
+    // 新型では primary は Ref<Actor> = {id: string} 形式
+    const primaryActorId = typeof primaryActor === 'object' && primaryActor !== null && 'id' in primaryActor
+      ? primaryActor.id
+      : (typeof primaryActor === 'string' ? primaryActor : undefined);
 
-    if (!actors.some(actor => actor.id === primaryActorId)) {
+    if (!primaryActorId || !actors.some(actor => actor.id === primaryActorId)) {
       issues.push({
         severity: 'critical',
         category: 'consistency',

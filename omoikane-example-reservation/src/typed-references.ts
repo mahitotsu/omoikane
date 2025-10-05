@@ -10,8 +10,8 @@
 import {
   createRef,
   type Business,
-  type Functional,
   type Foundation,
+  type Functional,
 } from 'omoikane-metamodel';
 
 // 型エイリアス
@@ -177,13 +177,11 @@ export function reservationBusinessRequirementCoverage(
 
 // 型エクスポート
 export type {
-  Actor,
-  UseCase,
-  BusinessRequirementCoverage,
+  Actor, BusinessRequirementCoverage,
   BusinessRequirementDefinition,
   BusinessRequirementItem,
   BusinessRule,
-  SecurityPolicy,
+  SecurityPolicy, UseCase
 };
 
 // プロジェクト固有の型エイリアス
