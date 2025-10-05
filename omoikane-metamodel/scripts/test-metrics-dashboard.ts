@@ -4,16 +4,16 @@
  */
 
 import {
-  assessProjectMaturity,
-  applyContext,
-  buildDependencyGraph,
-  analyzeGraph,
-  AIRecommendationEngine,
-  MetricsDashboard,
-  ProjectDomain,
-  DevelopmentStage,
-  TeamSize,
-  ProjectCriticality,
+    AIRecommendationEngine,
+    analyzeGraph,
+    applyContext,
+    assessProjectMaturity,
+    buildDependencyGraph,
+    DevelopmentStage,
+    MetricsDashboard,
+    ProjectCriticality,
+    ProjectDomain,
+    TeamSize,
 } from '../src/quality/maturity/index.js';
 
 // サンプルデータ

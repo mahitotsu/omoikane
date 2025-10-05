@@ -1,382 +1,243 @@
 #!/usr/bin/env bun
 /**
- * 品質評価スクリプト
- * 指定されたプロジェクトの品質を評価してレポートを生成
+ * 品質評価スクリプト v2.0
+ * Quality Assessment Framework v2.0を使用した総合品質評価
  */
 
 import { readdir } from 'fs/promises';
 import { extname, join } from 'path';
-import type {
-  BusinessRuleStats,
-  BusinessRuleSummary,
-  SecurityPolicyStats,
-  SecurityPolicySummary,
-} from '../src/quality/index.js';
-import { performQualityAssessment } from '../src/quality/index.js';
+import {
+  AIRecommendationEngine,
+  analyzeGraph,
+  applyContext,
+  assessProjectMaturity,
+  buildDependencyGraph,
+  inferContext,
+  MetricsDashboard,
+} from '../src/quality/maturity/index.js';
 
-/**
- * TypeScriptファイルを動的にインポート
- */
-async function importTsFile(filePath: string): Promise<any> {
+async function findProjectFiles(dir: string): Promise<string[]> {
+  const files: string[] = [];
+  const entries = await readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
+        files.push(...(await findProjectFiles(fullPath)));
+      }
+    } else if (entry.isFile() && extname(entry.name) === '.ts') {
+      files.push(fullPath);
+    }
+  }
+  return files;
+}
+
+async function loadTsFile(filePath: string): Promise<any> {
   try {
-    // 絶対パスに変換
-    const absolutePath = filePath.startsWith('/') ? filePath : join(process.cwd(), filePath);
-    const module = await import(`file://${absolutePath}`);
-    return module.default || module;
+    // file://プロトコルを使用して絶対パスをURLに変換
+    const fileUrl = `file://${filePath}`;
+    const module = await import(fileUrl);
+    // defaultエクスポート、または全ての名前付きエクスポートを返す
+    if (module.default) {
+      return module.default;
+    }
+    // 名前付きエクスポートを配列として返す
+    const exports = Object.keys(module)
+      .filter(key => key !== 'default' && key !== '__esModule')
+      .map(key => module[key]);
+    return exports.length === 1 ? exports[0] : exports.length > 1 ? exports : null;
   } catch (error) {
-    console.warn(
-      `Warning: Could not import ${filePath}:`,
-      error instanceof Error ? error.message : String(error)
-    );
     return null;
   }
 }
 
-/**
- * ディレクトリを再帰的に検索してTypeScriptファイルを収集
- */
-async function findAllTsFiles(dirPath: string): Promise<string[]> {
-  const files: string[] = [];
-
-  try {
-    const entries = await readdir(dirPath, { withFileTypes: true });
-
-    for (const entry of entries) {
-      const fullPath = join(dirPath, entry.name);
-
-      if (entry.isDirectory()) {
-        // ディレクトリの場合は再帰的に検索
-        const subFiles = await findAllTsFiles(fullPath);
-        files.push(...subFiles);
-      } else if (entry.isFile() && extname(entry.name) === '.ts') {
-        // TypeScriptファイルの場合は追加
-        files.push(fullPath);
-      }
-    }
-  } catch {
-    // ディレクトリが存在しない場合は静かに処理を続行
-  }
-
-  return files;
-}
-
-/**
- * プロジェクトディレクトリから要件定義ファイルを検索
- */
-async function findProjectFiles(projectDir: string): Promise<{
-  businessRequirements: any;
-  actors: any[];
-  useCases: any[];
-}> {
-  const srcDir = join(projectDir, 'src');
-
-  let businessRequirements: any = null;
+async function loadProjectData(projectDir: string) {
+  const files = await findProjectFiles(projectDir);
+  console.log(`  ファイル数: ${files.length}`);
+  
+  const businessRequirements: any[] = [];
   const actors: any[] = [];
   const useCases: any[] = [];
-  // ユースケースID毎の最初の構造署名を保存し、完全一致重複は抑止
-  const useCaseIdMap = new Map<string, { signature: string }>();
-  let suppressedDuplicateCount = 0;
 
-  try {
-    // srcディレクトリ以下のすべてのTypeScriptファイルを検索
-    const allTsFiles = await findAllTsFiles(srcDir);
-    // console.log(`🔍 src/ 以下の検索対象ファイル: ${allTsFiles.length}件`);
+  for (const file of files) {
+    const data = await loadTsFile(file);
+    if (!data) continue;
 
-    for (const filePath of allTsFiles) {
-      const fileName = filePath.split('/').pop() || '';
-
-      try {
-        const module = await importTsFile(filePath);
-        if (!module) continue;
-
-        // business-requirements.ts の検出（構造ベース）
-        for (const exportedName of Object.keys(module)) {
-          const value: any = (module as any)[exportedName];
-          
-          // Business.BusinessRequirementDefinition の検出
-          // 構造: businessGoals, scope, stakeholders, constraints, businessRules, securityPolicies
-          if (value && typeof value === 'object' && 
-              'businessGoals' in value && 
-              'scope' in value && 
-              'stakeholders' in value &&
-              Array.isArray(value.businessGoals)) {
-            // 最初に見つかった業務要件定義を採用
-            businessRequirements = value;
-          }
-
-          // Functional.Actor の検出
-          // 構造: id, name, description, role, responsibilities
-          if (value && typeof value === 'object' && 
-              'id' in value &&
-              'name' in value && 
-              'role' in value && 
-              'responsibilities' in value &&
-              Array.isArray(value.responsibilities)) {
-            actors.push(value);
-          }
-
-          // Functional.UseCase の検出（重複排除）
-          // 構造: id, name, description, actors, preconditions, postconditions, mainFlow
-          if (value && typeof value === 'object' && 
-              'id' in value &&
-              'name' in value &&
-              'actors' in value &&
-              'preconditions' in value &&
-              'postconditions' in value &&
-              'mainFlow' in value &&
-              Array.isArray(value.mainFlow)) {
-            const signature = JSON.stringify({ id: value.id, name: value.name });
-            const existing = useCaseIdMap.get(value.id);
-            if (!existing) {
-              useCaseIdMap.set(value.id, { signature });
-              useCases.push(value);
-            } else if (existing.signature !== signature) {
-              // IDが同じで構造が異なる場合は別物として追加（念のため）
-              useCases.push(value);
-            } else {
-              suppressedDuplicateCount++;
-            }
-          }
-        }
-      } catch {
-        // 個別ファイルの読み込み失敗はスキップ
+    const items = Array.isArray(data) ? data : [data];
+    console.log(`  ${file.split('/').pop()}: ${items.length} items`);
+    
+    for (const item of items) {
+      if (!item || typeof item !== 'object') continue;
+      
+      console.log(`    - type: ${item.type}, id: ${item.id}, keys: ${Object.keys(item).slice(0, 5).join(', ')}`);
+      
+      // ビジネス要件の判定
+      if (item.businessGoals || item.type === 'businessRequirement' || item.id?.includes('business')) {
+        businessRequirements.push(item);
+        console.log(`      → ビジネス要件`);
+      }
+      // アクターの判定
+      else if (item.role || item.type === 'actor' || item.id?.includes('actor')) {
+        actors.push(item);
+        console.log(`      → アクター`);
+      }
+      // ユースケースの判定
+      else if (item.actors || item.type === 'useCase' || item.id?.includes('usecase')) {
+        useCases.push(item);
+        console.log(`      → ユースケース`);
       }
     }
-
-    if (suppressedDuplicateCount > 0) {
-      console.log(
-        `ℹ️  同一構造のユースケース重複 ${suppressedDuplicateCount} 件を除外しました（再エクスポート等）。`
-      );
-    }
-  } catch (error) {
-    console.error('Error loading project files:', error);
   }
-
   return { businessRequirements, actors, useCases };
 }
 
-/**
- * 品質評価レポートを表示
- */
-function displayQualityReport(
-  assessment: any,
-  recommendations: any[],
-  projectName: string,
-  businessRuleSummary: BusinessRuleSummary,
-  businessRuleStats: BusinessRuleStats,
-  securityPolicySummary: SecurityPolicySummary,
-  securityPolicyStats: SecurityPolicyStats
+function displayV2Report(
+  healthScore: any,
+  maturityResult: any,
+  graphAnalysis: any,
+  recommendations: any
 ) {
-  console.log(`\n=== 品質評価レポート: ${projectName} ===\n`);
-
-  // 総合スコア
-  console.log('📊 品質評価結果:');
-  console.log(
-    `総合スコア: ${assessment.overallScore.value}/100 (${assessment.overallScore.level})`
-  );
-  console.log(
-    `完全性: ${assessment.scores.completeness.value}/100 (${assessment.scores.completeness.level})`
-  );
-  console.log(
-    `一貫性: ${assessment.scores.consistency.value}/100 (${assessment.scores.consistency.level})`
-  );
-  console.log(
-    `妥当性: ${assessment.scores.validity.value}/100 (${assessment.scores.validity.level})`
-  );
-  console.log(
-    `追跡可能性: ${assessment.scores.traceability.value}/100 (${assessment.scores.traceability.level})\n`
-  );
-
-  // 発見された問題
-  console.log('🔍 発見された問題:');
-  if (assessment.issues.length === 0) {
-    console.log('  問題は発見されませんでした ✨\n');
-  } else {
-    assessment.issues.forEach((issue: any, index: number) => {
-      const severityIcon =
-        issue.severity === 'critical' ? '🚨' : issue.severity === 'warning' ? '⚠️' : 'ℹ️';
-      console.log(
-        `  ${index + 1}. ${severityIcon} [${issue.severity.toUpperCase()}] ${issue.description}`
-      );
-      console.log(`     影響: ${issue.impact}`);
-      console.log(`     対応: ${issue.suggestion}\n`);
-    });
+  console.log('\n=== 📊 品質評価レポート v2.0 ===\n');
+  
+  console.log('【総合健全性スコア】');
+  console.log(`スコア: ${healthScore.overall}/100`);
+  console.log(`レベル: ${healthScore.level.toUpperCase()}\n`);
+  
+  console.log('【カテゴリ別評価】');
+  for (const [category, score] of Object.entries(healthScore.categories)) {
+    console.log(`  ${category}: ${score}/100`);
   }
-
-  // カバレッジレポート（統合）
-  console.log('📈 カバレッジレポート:');
-  const { coverage } = assessment;
-  console.log(
-    `  ビジネスゴール: ${coverage.businessGoals.covered}/${coverage.businessGoals.total} (${Math.round(coverage.businessGoals.coverage * 100)}%)`
-  );
-  console.log(
-    `  スコープ項目: ${coverage.scopeItems.covered}/${coverage.scopeItems.total} (${Math.round(coverage.scopeItems.coverage * 100)}%)`
-  );
-  console.log(
-    `  ステークホルダー: ${coverage.stakeholders.covered}/${coverage.stakeholders.total} (${Math.round(coverage.stakeholders.coverage * 100)}%)`
-  );
-  console.log(
-    `  成功指標: ${coverage.successMetrics.covered}/${coverage.successMetrics.total} (${Math.round(coverage.successMetrics.coverage * 100)}%)`
-  );
-  console.log(
-    `  前提条件: ${coverage.assumptions.covered}/${coverage.assumptions.total} (${Math.round(coverage.assumptions.coverage * 100)}%)`
-  );
-  console.log(
-    `  制約条件: ${coverage.constraints.covered}/${coverage.constraints.total} (${Math.round(coverage.constraints.coverage * 100)}%)`
-  );
-  // 追加: ビジネスルールとセキュリティポリシーもここで表示
-  if (businessRuleSummary.rules.length === 0) {
-    console.log('  ビジネスルール: 0/0 (—)');
-  } else {
-    const brPercent = Math.round(businessRuleStats.coverageRatio * 100);
-    console.log(
-      `  ビジネスルール: ${businessRuleStats.totalCoveredRules}/${businessRuleStats.totalRules} (${brPercent}%)`
-    );
+  console.log();
+  
+  console.log('【成熟度レベル】');
+  console.log(`レベル: ${maturityResult.projectLevel}/5\n`);
+  
+  console.log('【依存関係グラフ】');
+  console.log(`  ノード数: ${graphAnalysis.statistics.nodeCount}`);
+  console.log(`  エッジ数: ${graphAnalysis.statistics.edgeCount}`);
+  console.log(`  循環依存: ${graphAnalysis.circularDependencies.length}件`);
+  console.log(`  孤立ノード: ${graphAnalysis.isolatedNodes.length}件\n`);
+  
+  console.log('【AI推奨事項】');
+  console.log(`  総数: ${recommendations.recommendations.length}件`);
+  console.log(`  最優先: ${recommendations.topPriority.length}件`);
+  console.log(`  クイックウィン: ${recommendations.quickWins.length}件\n`);
+  
+  if (recommendations.topPriority.length > 0) {
+    console.log('【最優先推奨事項（上位5件）】');
+    for (let i = 0; i < Math.min(5, recommendations.topPriority.length); i++) {
+      const rec = recommendations.topPriority[i];
+      console.log(`\n  ${i + 1}. ${rec.title}`);
+      console.log(`     優先度: ${rec.priority}`);
+      console.log(`     工数: ${rec.effort.hours}時間`);
+      console.log(`     問題: ${rec.problem}`);
+    }
+    console.log();
   }
-  if (securityPolicySummary.policies.length === 0) {
-    console.log('  セキュリティポリシー: 0/0 (—)\n');
-  } else {
-    const spPercent = Math.round(securityPolicyStats.coverageRatio * 100);
-    console.log(
-      `  セキュリティポリシー: ${securityPolicyStats.totalCoveredPolicies}/${securityPolicyStats.totalPolicies} (${spPercent}%)\n`
-    );
+  
+  console.log('【強み】');
+  for (const strength of healthScore.strengths) {
+    console.log(`  ✓ ${strength}`);
   }
-
-  // 詳細（未カバーのみ）
-  console.log('🧩 ビジネスルール詳細（未カバー一覧）:');
-  if (businessRuleSummary.rules.length === 0) {
-    console.log('  定義なし\n');
-  } else if (businessRuleSummary.uncoveredRules.length === 0) {
-    console.log('  未カバーはありません ✅\n');
-  } else {
-    businessRuleSummary.uncoveredRules.forEach((entry: any, index: number) => {
-      const description = entry.rule.description || entry.rule.id;
-      console.log(`  ${index + 1}. ${entry.rule.id} — ${description}`);
-      const coveringUseCases = entry.coveredByUseCases.map((useCase: any) => useCase.id).join(', ');
-      console.log(`     カバーするユースケース: ${coveringUseCases || 'なし'}`);
-    });
-    console.log('');
+  console.log();
+  
+  console.log('【弱み】');
+  for (const weakness of healthScore.weaknesses) {
+    console.log(`  ✗ ${weakness}`);
   }
-
-  console.log('️ セキュリティポリシー詳細（未カバー一覧）:');
-  if (securityPolicySummary.policies.length === 0) {
-    console.log('  定義なし\n');
-  } else if (securityPolicySummary.uncoveredPolicies.length === 0) {
-    console.log('  未カバーはありません ✅\n');
-  } else {
-    securityPolicySummary.uncoveredPolicies.forEach((entry: any, index: number) => {
-      const description = entry.policy.description || entry.policy.id;
-      console.log(`  ${index + 1}. ${entry.policy.id} — ${description}`);
-      const coveringUseCases = entry.coveredByUseCases.map((useCase: any) => useCase.id).join(', ');
-      console.log(`     カバーするユースケース: ${coveringUseCases || 'なし'}`);
-    });
-    console.log('');
-  }
-
-  // 孤立要素
-  if (coverage.orphanedElements.length > 0) {
-    console.log('🔗 孤立要素:');
-    coverage.orphanedElements.forEach((orphaned: any, index: number) => {
-      console.log(`  ${index + 1}. ${orphaned.element.type}: ${orphaned.element.id}`);
-      console.log(`     理由: ${orphaned.reason}`);
-      console.log(
-        `     推奨: ${orphaned.suggestedUsage[0] || '要素を削除するか使用方法を検討してください'}\n`
-      );
-    });
-  }
-
-  // AI Agent向け推奨アクション
-  console.log('🤖 AI Agent向け推奨アクション:');
-  if (recommendations.length === 0) {
-    console.log('  追加の推奨アクションはありません ✅\n');
-  } else {
-    recommendations.forEach((rec: any, index: number) => {
-      const priorityIcon = rec.priority === 'high' ? '🔴' : rec.priority === 'medium' ? '🟡' : '🟢';
-      console.log(`  ${index + 1}. ${priorityIcon} [${rec.priority.toUpperCase()}] ${rec.action}`);
-      console.log(`     理由: ${rec.rationale}`);
-      console.log(`     影響要素: ${rec.affectedElements.join(', ')}`);
-      if (rec.template) {
-        console.log(`     テンプレート: ${rec.template.type}`);
-      }
-      console.log('');
-    });
-  }
-
-  console.log('=== レポート終了 ===\n');
+  console.log();
 }
 
-/**
- * メイン実行関数
- */
 async function main() {
-  const args = process.argv.slice(2);
-  const projectDir = args[0] || process.cwd();
-
-  console.log(`🔍 プロジェクト品質評価を開始: ${projectDir}`);
+  const projectDir = process.argv[2] || process.cwd();
+  console.log(`\n品質評価を実行中: ${projectDir}\n`);
 
   try {
-    // プロジェクトファイルを読み込み
-    const { businessRequirements, actors, useCases } = await findProjectFiles(projectDir);
+    console.log('📁 プロジェクトデータを読み込んでいます...');
+    const { businessRequirements, actors, useCases } = await loadProjectData(projectDir);
+    console.log(`  要件定義: ${businessRequirements.length}件`);
+    console.log(`  アクター: ${actors.length}件`);
+    console.log(`  ユースケース: ${useCases.length}件\n`);
 
-    if (!businessRequirements) {
-      console.error('❌ Error: business-requirements.ts が見つかりません');
-      process.exit(1);
-    }
+    console.log('📊 成熟度を評価しています...');
+    const maturityResult = assessProjectMaturity(businessRequirements, actors, useCases);
+    console.log(`  完了: レベル ${maturityResult.projectLevel}/5\n`);
 
-    if (actors.length === 0) {
-      console.warn('⚠️ Warning: アクターが見つかりません');
-    }
+    console.log('🎯 コンテキストを分析しています...');
+    const partialContext = inferContext(projectDir, businessRequirements);
+    // デフォルト値で完全なコンテキストを構築
+    const context = {
+      projectName: partialContext.projectName || 'Unknown Project',
+      domain: partialContext.domain || 'general',
+      stage: partialContext.stage || 'poc',
+      teamSize: partialContext.teamSize || 'solo',
+      criticality: partialContext.criticality || 'experimental',
+      tags: partialContext.tags || [],
+    };
+    const contextResult = applyContext(context as any);
+    console.log(`  完了: ${context.domain} / ${context.stage}\n`);
 
-    if (useCases.length === 0) {
-      console.warn('⚠️ Warning: ユースケースが見つかりません');
-    }
+    console.log('🔗 依存関係を分析しています...');
+    const graph = buildDependencyGraph(businessRequirements, actors, useCases);
+    const graphAnalysis = analyzeGraph(graph);
+    console.log(`  完了: ${graphAnalysis.statistics.nodeCount}ノード\n`);
 
-    console.log(`📋 読み込み完了:`);
-    console.log(`  - 業務要件: ${businessRequirements ? '✓' : '✗'}`);
-    console.log(`  - アクター: ${actors.length}件`);
-    console.log(`  - ユースケース: ${useCases.length}件`);
+    console.log('🤖 AI推奨事項を生成しています...');
+    const recommendationEngine = new AIRecommendationEngine();
+    const recommendations = recommendationEngine.generateRecommendations({
+      maturity: maturityResult,
+      context: context as any,
+      contextResult,
+      graph: graphAnalysis,
+    });
+    console.log(`  完了: ${recommendations.recommendations.length}件\n`);
 
-    // 品質評価実行
-    const {
-      assessment,
+    console.log('📈 メトリクスを記録しています...');
+    const dashboard = new MetricsDashboard();
+    const snapshot = dashboard.createSnapshot({
+      maturity: maturityResult,
+      graph: graphAnalysis,
       recommendations,
-      businessRuleSummary,
-      businessRuleStats,
-      securityPolicySummary,
-      securityPolicyStats,
-    } = performQualityAssessment(businessRequirements, actors, useCases);
+      context: context as any,
+    });
+    const healthScore = dashboard.calculateHealthScore(snapshot);
+    console.log(`  完了\n`);
 
-    // レポート表示
-    const projectName = projectDir.split('/').pop() || 'Unknown Project';
-    displayQualityReport(
-      assessment,
-      recommendations,
-      projectName,
-      businessRuleSummary,
-      businessRuleStats,
-      securityPolicySummary,
-      securityPolicyStats
-    );
+    displayV2Report(healthScore, maturityResult, graphAnalysis, recommendations);
 
-    // 終了コード決定
-    const criticalIssues = assessment.issues.filter((issue: any) => issue.severity === 'critical');
-    if (criticalIssues.length > 0) {
-      console.log(`❌ 品質評価完了: ${criticalIssues.length}件の重大な問題が発見されました`);
+    if (process.argv.includes('--export')) {
+      const format = process.argv.includes('--html') ? 'html' :
+                     process.argv.includes('--json') ? 'json' : 'markdown';
+      const exported = dashboard.export({ format });
+      const fs = await import('fs/promises');
+      const filename = `quality-report-${Date.now()}.${format}`;
+      await fs.writeFile(filename, exported);
+      console.log(`✅ レポートをエクスポート: ${filename}\n`);
+    }
+
+    const alerts = dashboard.generateAlerts(snapshot);
+    if (alerts.length > 0) {
+      console.log('⚠️  警告:');
+      for (const alert of alerts) {
+        console.log(`  ${alert.message}`);
+      }
+      console.log();
+    }
+
+    if (healthScore.overall < 40) {
+      console.log('❌ 品質が基準を満たしていません\n');
       process.exit(1);
-    } else if (assessment.overallScore.value < 80) {
-      console.log(`⚠️ 品質評価完了: 品質スコアが低いです (${assessment.overallScore.value}/100)`);
-      process.exit(1);
+    } else if (healthScore.overall < 75) {
+      console.log('⚠️  品質改善の余地があります\n');
+      process.exit(0);
     } else {
-      console.log(`✅ 品質評価完了: 良好な品質です (${assessment.overallScore.value}/100)`);
+      console.log('✅ 品質基準を満たしています\n');
       process.exit(0);
     }
   } catch (error) {
-    console.error('❌ Error during quality assessment:', error);
+    console.error('❌ エラーが発生しました:', error);
     process.exit(1);
   }
 }
 
-// スクリプトとして実行された場合のみ main() を呼び出し
-if (import.meta.main) {
-  main();
-}
+main();

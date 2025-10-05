@@ -4,8 +4,8 @@
  * 品質メトリクスの可視化、トレンド追跡、レポート生成
  */
 
-import type { MaturityLevel, MaturityDimension } from './maturity-model.js';
 import type { ProjectContext } from './context-model.js';
+import type { MaturityDimension, MaturityLevel } from './maturity-model.js';
 
 /**
  * メトリクススナップショット（特定時点の測定値）

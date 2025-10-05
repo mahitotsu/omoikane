@@ -4,26 +4,24 @@
  * 品質メトリクスの収集、分析、可視化
  */
 
-import type {
-  ProjectMaturityAssessment,
-  MaturityLevel,
-  MaturityDimension,
-} from './maturity-model.js';
+import type { AIAgentRecommendations } from './ai-recommendation-model.js';
 import type { ProjectContext } from './context-model.js';
 import type { GraphAnalysisResult } from './dependency-graph-model.js';
-import type { AIAgentRecommendations } from './ai-recommendation-model.js';
 import type {
-  MetricsSnapshot,
-  MetricsTrend,
-  ProjectHealthScore,
-  Milestone,
-  DashboardReport,
-  DashboardConfig,
-  MetricsComparison,
-  DashboardDataStore,
-  ChartData,
-  MetricsAlert,
-  ExportOptions,
+    MaturityDimension,
+    ProjectMaturityAssessment
+} from './maturity-model.js';
+import type {
+    ChartData,
+    DashboardConfig,
+    DashboardDataStore,
+    DashboardReport,
+    ExportOptions,
+    MetricsAlert,
+    MetricsComparison,
+    MetricsSnapshot,
+    MetricsTrend,
+    ProjectHealthScore
 } from './metrics-dashboard-model.js';
 
 /**
