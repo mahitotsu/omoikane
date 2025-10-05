@@ -4,14 +4,19 @@ TypeScript ITDelivery Framework - ユースケース・要件定義のための�
 
 ## 概要
 
-Omoikane
-Metamodelは、ITデリバリプロジェクトにおけるユースケース・要件定義を型安全に記述するためのTypeScriptフレームワークです。
+Omoikane Metamodel は、ITデリバリプロジェクトにおけるユースケース・要件定義を型安全に記述するための TypeScript フレームワークです。
+
+**新しいレイヤードアーキテクチャ** (v2.0+):
+- **Foundation**: 基礎層（Ref<T>, DocumentBase, primitives）
+- **Business**: 業務層（BusinessRequirementDefinition, BusinessRule）
+- **Functional**: 機能層（Actor, UseCase）
+- **Cross-Cutting**: 横断層（TraceabilityMatrix）
 
 ## 主な機能
 
-- **型安全なユースケース定義**: UseCase, Actor, UseCaseStepの型定義
-- **stepId自動管理**: stepNumberの手動管理を廃止し、配列インデックスから自動生成
-- **型安全な参照システム**: ActorRefとUseCaseRefによる安全な参照
+- **型安全なドキュメント定義**: レイヤード型システムによる明確な構造
+- **統一参照システム**: `Ref<T>` ジェネリック型による型安全な参照
+- **Git ベース管理**: type/owner フィールド不要、Git による変更履歴管理
 - **段階的詳細化対応**: シンプルから複雑まで段階的に詳細化可能
 - **品質評価フレームワーク**: 設計品質の自動評価とAI Agent向け改善提案
 
@@ -21,58 +26,66 @@ Metamodelは、ITデリバリプロジェクトにおけるユースケース・
 bun install
 ```
 
-## 使用方法
+## 使用方法（新型システム）
 
 ```typescript
-import { UseCase, Actor, UseCaseStep } from 'omoikane-metamodel';
+import { Functional, Business, Foundation } from 'omoikane-metamodel';
+import type { Ref } from 'omoikane-metamodel';
 
-// アクター定義
-const customer: Actor = {
+// アクター定義（新型）
+const customer: Functional.Actor = {
   id: 'customer',
-  type: 'actor',
-  owner: 'business-analyst',
   name: '顧客',
   description: 'ECサイトで商品を購入する一般ユーザー',
   role: 'primary',
   responsibilities: ['商品の閲覧・検索', 'アカウント登録・管理'],
 };
 
-// ユースケース定義（stepId自動管理）
-const userRegistration: UseCase = {
+// ユースケース定義（新型）
+const userRegistration: Functional.UseCase = {
   id: 'user-registration',
-  type: 'usecase',
-  owner: 'business-analyst',
   name: 'ユーザー登録',
   description: '新規ユーザーがアカウントを作成する',
   actors: {
-    primary: 'customer',
+    primary: Foundation.createRef<Functional.Actor>('customer'),
   },
   preconditions: ['顧客がECサイトにアクセスしている'],
   postconditions: ['新しいユーザーアカウントが作成されている'],
   mainFlow: [
     {
       stepId: 'access-registration',
-      actor: 'customer',
+      actor: Foundation.createRef<Functional.Actor>('customer'),
       action: '新規登録ページにアクセスする',
       expectedResult: '登録フォームが表示される',
     },
   ],
-  businessValue: '新規顧客の獲得',
   priority: 'high',
 };
 ```
 
 ## API
 
-### 型定義
+### 型定義（新型システム）
 
+**Foundation 層**:
+- `Ref<T>`: 統一参照型 `{id: string}`
+- `DocumentBase`: 基本ドキュメント型（id, name, description）
+- `TraceableDocument`: トレース可能ドキュメント（extends DocumentBase）
+
+**Business 層**:
+- `BusinessRequirementDefinition`: 業務要件定義
+- `BusinessRule`: ビジネスルール
+- `SecurityPolicy`: セキュリティポリシー
+
+**Functional 層**:
 - `Actor`: システムの利用者・関係者
-- `UseCase`: ユースケース（stepId自動管理対応）
+- `UseCase`: ユースケース
 - `UseCaseStep`: ユースケースのステップ
-- `AlternativeFlow`: 代替フロー（returnToStepId対応）
+- `AlternativeFlow`: 代替フロー
 
 ### ユーティリティ
 
+- `Foundation.createRef<T>(id)`: 型安全な参照作成
 - `enrichStepsWithNumbers()`: stepIdから自動でstepNumberを生成
 - `findStepByIdOrNumber()`: stepIdまたはstepNumberでステップを検索
 

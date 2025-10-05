@@ -1,8 +1,21 @@
 // ITデリバリプロジェクトの基本要素型定義
+//
+// ⚠️ LEGACY COMPATIBILITY LAYER ⚠️
+// このファイルは後方互換性のために維持されています。
+// 新しいコードでは以下を使用してください:
+//   - Foundation.* (基礎型: Ref<T>, DocumentBase, etc.)
+//   - Business.* (業務要件: BusinessRequirementDefinition, etc.)
+//   - Functional.* (機能要素: Actor, UseCase, etc.)
+//   - CrossCutting.* (横断要素: TraceabilityMatrix, etc.)
+//
+// 削除予定: Phase 3 (全てのツールが新型に移行後)
+// 最終更新: 2025-10-05
 
 /**
  * ITデリバリプロジェクトにおけるドキュメント要素の基底型
  * 変更履歴・バージョン・ステータスはGitで管理
+ * 
+ * @deprecated 新しいコードでは Foundation.DocumentBase を使用してください
  */
 export interface DeliveryElement {
   readonly id: string;
@@ -12,6 +25,8 @@ export interface DeliveryElement {
 
 /**
  * アクター（システム利用者・関係者）
+ * 
+ * @deprecated 新しいコードでは Functional.Actor を使用してください
  */
 export interface Actor extends DeliveryElement {
   readonly type: 'actor';
@@ -23,6 +38,8 @@ export interface Actor extends DeliveryElement {
 
 /**
  * 業務要件項目（ゴール・スコープ・指標などの要素）
+ * 
+ * @deprecated 新しいコードでは Business.BusinessRequirementItem を使用してください
  */
 export interface BusinessRequirementItem {
   id: string;
@@ -32,6 +49,8 @@ export interface BusinessRequirementItem {
 
 /**
  * 業務要件におけるスコープ定義
+ * 
+ * @deprecated 新しいコードでは Business.BusinessRequirementScope を使用してください
  */
 export interface BusinessRequirementScope {
   inScope: BusinessRequirementItem[];
@@ -40,6 +59,8 @@ export interface BusinessRequirementScope {
 
 /**
  * 業務要件定義（システムが提供すべき業務価値と成果の整理）
+ * 
+ * @deprecated 新しいコードでは Business.BusinessRequirementDefinition を使用してください
  */
 export interface BusinessRequirementDefinition extends DeliveryElement {
   readonly type: 'business-requirement';
@@ -55,8 +76,14 @@ export interface BusinessRequirementDefinition extends DeliveryElement {
   businessRules?: BusinessRule[];
 }
 
+/**
+ * @deprecated 新しいコードでは Business.SecurityPolicy を使用してください
+ */
 export interface SecurityPolicy extends BusinessRequirementItem {}
 
+/**
+ * @deprecated 新しいコードでは Business.BusinessRule を使用してください
+ */
 export interface BusinessRule extends BusinessRequirementItem {
   category?: string;
 }
@@ -111,6 +138,8 @@ export interface BusinessRuleRef<BusinessRuleId extends string = string> {
 
 /**
  * ユースケースから業務要件へのトレーサビリティ情報
+ * 
+ * @deprecated 新しいコードでは Business.BusinessRequirementCoverage を使用してください
  */
 export interface BusinessRequirementCoverage<
   RequirementId extends string = string,
@@ -137,6 +166,8 @@ export interface BusinessRequirementCoverage<
 
 /**
  * ユースケース（段階的詳細化対応）
+ * 
+ * @deprecated 新しいコードでは Functional.UseCase を使用してください
  */
 export interface UseCase<
   RequirementId extends string = string,
