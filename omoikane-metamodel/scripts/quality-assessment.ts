@@ -200,8 +200,9 @@ function displayV2Report(
   console.log();
   
   console.log('【追加評価指標】');
-  console.log(`  完全性（Completeness）:   ${healthScore.categories.completeness}点 - 全要素の基準達成率`);
-  console.log(`  一貫性（Consistency）:     ${healthScore.categories.consistency}点 - 次元間のバランス`);
+  console.log(`  成熟度（Maturity）:         ${healthScore.categories.maturity}点 - プロジェクトの成熟度レベル（${maturityResult.projectLevel}/5を100点換算）`);
+  console.log(`  完全性（Completeness）:     ${healthScore.categories.completeness}点 - 全要素の基準達成率`);
+  console.log(`  一貫性（Consistency）:      ${healthScore.categories.consistency}点 - 次元間のバランス`);
   console.log(`  アーキテクチャ（Architecture）: ${healthScore.categories.architecture}点 - 依存関係の健全性\n`);
   
   console.log('【依存関係グラフ】');
