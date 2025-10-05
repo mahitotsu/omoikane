@@ -146,11 +146,52 @@ function displayV2Report(
   console.log('【成熟度レベル】');
   console.log(`  レベル: ${maturityResult.projectLevel}/5\n`);
   
+  console.log('【成熟度評価 - 5次元詳細】');
+  const dimensionNames: Record<string, string> = {
+    'structure': '構造の完全性（Structure）',
+    'detail': '詳細度（Detail）',
+    'traceability': 'トレーサビリティ（Traceability）',
+    'testability': 'テスト可能性（Testability）',
+    'maintainability': '保守性（Maintainability）',
+  };
+  
+  if (maturityResult.overallDimensions && maturityResult.overallDimensions.length > 0) {
+    for (const dim of maturityResult.overallDimensions) {
+      const name = dimensionNames[dim.dimension] || dim.dimension;
+      const percentage = (dim.completionRate * 100).toFixed(1);
+      const satisfied = dim.evaluations.filter((e: any) => e.satisfied).length;
+      const total = dim.evaluations.length;
+      console.log(`  ${name}: ${percentage}% (${satisfied}/${total}基準達成)`);
+    }
+  } else {
+    console.log('  評価なし');
+  }
+  console.log();
+  
   console.log('【依存関係グラフ】');
   console.log(`  ノード数: ${graphAnalysis.statistics.nodeCount}`);
   console.log(`  エッジ数: ${graphAnalysis.statistics.edgeCount}`);
   console.log(`  循環依存: ${graphAnalysis.circularDependencies.length}件`);
-  console.log(`  孤立ノード: ${graphAnalysis.isolatedNodes.length}件\n`);
+  if (graphAnalysis.circularDependencies.length > 0) {
+    console.log('  循環依存の詳細:');
+    for (const cycle of graphAnalysis.circularDependencies.slice(0, 3)) {
+      console.log(`    • ${cycle.join(' → ')}`);
+    }
+    if (graphAnalysis.circularDependencies.length > 3) {
+      console.log(`    ... 他${graphAnalysis.circularDependencies.length - 3}件`);
+    }
+  }
+  console.log(`  孤立ノード: ${graphAnalysis.isolatedNodes.length}件`);
+  if (graphAnalysis.isolatedNodes.length > 0) {
+    console.log('  孤立ノードの詳細:');
+    for (const node of graphAnalysis.isolatedNodes.slice(0, 5)) {
+      console.log(`    • ${node}`);
+    }
+    if (graphAnalysis.isolatedNodes.length > 5) {
+      console.log(`    ... 他${graphAnalysis.isolatedNodes.length - 5}件`);
+    }
+  }
+  console.log();
   
   console.log('【AI推奨事項】');
   console.log(`  総数: ${recommendations.recommendations.length}件`);
@@ -167,6 +208,9 @@ function displayV2Report(
       console.log(`     問題: ${rec.problem}`);
     }
     console.log();
+  } else {
+    console.log('【最優先推奨事項】');
+    console.log('  なし\n');
   }
   
   if (recommendations.quickWins.length > 0) {
@@ -176,17 +220,29 @@ function displayV2Report(
       console.log(`  • ${rec.title} (${rec.effort.hours}h)`);
     }
     console.log();
+  } else {
+    console.log('【クイックウィン（すぐに実行可能）】');
+    console.log('  なし\n');
   }
   
+  
   console.log('【強み】');
-  for (const strength of healthScore.strengths) {
-    console.log(`  ✓ ${strength}`);
+  if (healthScore.strengths && healthScore.strengths.length > 0) {
+    for (const strength of healthScore.strengths) {
+      console.log(`  ✓ ${strength}`);
+    }
+  } else {
+    console.log('  特定の強みなし（全カテゴリが80点未満）');
   }
   console.log();
   
   console.log('【弱み】');
-  for (const weakness of healthScore.weaknesses) {
-    console.log(`  ✗ ${weakness}`);
+  if (healthScore.weaknesses && healthScore.weaknesses.length > 0) {
+    for (const weakness of healthScore.weaknesses) {
+      console.log(`  ✗ ${weakness}`);
+    }
+  } else {
+    console.log('  特定の弱みなし（全カテゴリが60点以上）');
   }
   console.log();
 }
