@@ -8,6 +8,9 @@ export * from './business-rules.ts';
 export * from './security-requirements.ts';
 export * from './types.ts';
 
+// 成熟度評価（新機能）
+export * from './maturity/index.js';
+
 // カバレッジ分析
 export { analyzeCoverage } from './coverage-analyzer.ts';
 
