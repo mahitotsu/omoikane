@@ -14,4 +14,5 @@ export * from './dependency-graph-model.js';
 export * from './maturity-assessor.js';
 export * from './maturity-criteria.js';
 export * from './maturity-model.js';
-
+export * from './metrics-dashboard-model.js';
+export * from './metrics-dashboard.js';
