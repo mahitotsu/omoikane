@@ -143,7 +143,7 @@ export class MetricsDashboard {
     const consistencyScore = Math.max(0, 100 - (variance * 200));
     
     // トレーサビリティスコア
-    const traceabilityScore = (snapshot.dimensionScores.get('TRACEABILITY' as MaturityDimension) || 0) * 100;
+    const traceabilityScore = (snapshot.dimensionScores.get('traceability' as MaturityDimension) || 0) * 100;
     
     // アーキテクチャスコア（循環依存・孤立ノードがないほど高い）
     let architectureScore = 100;
