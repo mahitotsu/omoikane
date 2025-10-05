@@ -125,6 +125,36 @@ async function loadProjectData(projectDir: string) {
   return { businessRequirements, actors, useCases };
 }
 
+/**
+ * 文字列の表示幅を計算（全角=2, 半角=1）
+ */
+function getDisplayWidth(str: string): number {
+  let width = 0;
+  for (const char of str) {
+    // 全角文字の判定（簡易版）
+    const code = char.charCodeAt(0);
+    if (
+      (code >= 0x3000 && code <= 0x9FFF) ||  // CJK統合漢字、ひらがな、カタカナ
+      (code >= 0xFF00 && code <= 0xFFEF) ||  // 全角英数字
+      (code >= 0xAC00 && code <= 0xD7AF)     // ハングル
+    ) {
+      width += 2;
+    } else {
+      width += 1;
+    }
+  }
+  return width;
+}
+
+/**
+ * 表示幅を考慮したパディング
+ */
+function padEndByWidth(str: string, targetWidth: number): string {
+  const currentWidth = getDisplayWidth(str);
+  const padding = Math.max(0, targetWidth - currentWidth);
+  return str + ' '.repeat(padding);
+}
+
 function displayV2Report(
   healthScore: any,
   maturityResult: any,
@@ -134,39 +164,45 @@ function displayV2Report(
   console.log('\n=== 📊 品質評価レポート v2.0 ===\n');
   
   console.log('【総合健全性スコア】');
-  console.log(`スコア: ${healthScore.overall}/100`);
-  console.log(`レベル: ${healthScore.level.toUpperCase()}\n`);
+  console.log(`  スコア:   ${healthScore.overall}/100`);
+  console.log(`  レベル:   ${healthScore.level.toUpperCase()}`);
+  console.log(`  成熟度:   レベル${maturityResult.projectLevel}/5\n`);
   
-  console.log('【カテゴリ別評価】');
-  for (const [category, score] of Object.entries(healthScore.categories)) {
-    console.log(`  ${category}: ${score}/100`);
-  }
-  console.log();
-  
-  console.log('【成熟度レベル】');
-  console.log(`  レベル: ${maturityResult.projectLevel}/5\n`);
-  
-  console.log('【成熟度評価 - 5次元詳細】');
+  console.log('【5次元成熟度評価】');
   const dimensionNames: Record<string, string> = {
-    'structure': '構造の完全性（Structure）',
-    'detail': '詳細度（Detail）',
-    'traceability': 'トレーサビリティ（Traceability）',
-    'testability': 'テスト可能性（Testability）',
-    'maintainability': '保守性（Maintainability）',
+    'structure': '構造の完全性',
+    'detail': '詳細度',
+    'traceability': 'トレーサビリティ',
+    'testability': 'テスト可能性',
+    'maintainability': '保守性',
   };
   
   if (maturityResult.overallDimensions && maturityResult.overallDimensions.length > 0) {
+    // 次元名の最大表示幅を計算（全角文字を考慮）
+    const maxNameWidth = Math.max(
+      ...maturityResult.overallDimensions.map((dim: any) => 
+        getDisplayWidth(dimensionNames[dim.dimension] || dim.dimension)
+      )
+    );
+    
     for (const dim of maturityResult.overallDimensions) {
       const name = dimensionNames[dim.dimension] || dim.dimension;
       const percentage = (dim.completionRate * 100).toFixed(1);
       const satisfied = dim.evaluations.filter((e: any) => e.satisfied).length;
       const total = dim.evaluations.length;
-      console.log(`  ${name}: ${percentage}% (${satisfied}/${total}基準達成)`);
+      const bar = '█'.repeat(Math.floor(dim.completionRate * 20)) + '░'.repeat(20 - Math.floor(dim.completionRate * 20));
+      const paddedName = padEndByWidth(name, maxNameWidth);
+      console.log(`  ${paddedName} ${bar} ${percentage.padStart(5)}% (${satisfied}/${total})`);
     }
   } else {
     console.log('  評価なし');
   }
   console.log();
+  
+  console.log('【追加評価指標】');
+  console.log(`  完全性（Completeness）:   ${healthScore.categories.completeness}点 - 全要素の基準達成率`);
+  console.log(`  一貫性（Consistency）:     ${healthScore.categories.consistency}点 - 次元間のバランス`);
+  console.log(`  アーキテクチャ（Architecture）: ${healthScore.categories.architecture}点 - 依存関係の健全性\n`);
   
   console.log('【依存関係グラフ】');
   console.log(`  ノード数: ${graphAnalysis.statistics.nodeCount}`);

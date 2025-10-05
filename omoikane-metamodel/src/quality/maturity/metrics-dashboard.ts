@@ -188,11 +188,20 @@ export class MetricsDashboard {
     const strengths: string[] = [];
     const weaknesses: string[] = [];
     
+    const categoryLabels: Record<string, string> = {
+      maturity: '成熟度レベル',
+      completeness: '完全性',
+      consistency: '一貫性',
+      traceability: 'トレーサビリティ',
+      architecture: 'アーキテクチャ',
+    };
+    
     for (const [key, value] of Object.entries(categories)) {
+      const label = categoryLabels[key] || key;
       if (value >= 80) {
-        strengths.push(`${key}: ${value}点`);
+        strengths.push(`${label}: ${value}点`);
       } else if (value < 60) {
-        weaknesses.push(`${key}: ${value}点`);
+        weaknesses.push(`${label}: ${value}点`);
       }
     }
     
