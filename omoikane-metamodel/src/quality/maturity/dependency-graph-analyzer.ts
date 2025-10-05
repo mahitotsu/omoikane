@@ -5,25 +5,24 @@
  */
 
 import type {
-  BusinessRequirementDefinition,
-  Actor,
-  UseCase,
+    Actor,
+    BusinessRequirementDefinition,
+    UseCase,
 } from '../../types/index.js';
 import type {
-  DependencyGraph,
-  GraphNode,
-  GraphEdge,
-  GraphAnalysisResult,
-  GraphStatistics,
-  CircularDependency,
-  NodeImportance,
-  ChangeImpactAnalysis,
-  LayerAnalysis,
+    ChangeImpactAnalysis,
+    CircularDependency,
+    DependencyGraph,
+    GraphAnalysisResult,
+    GraphEdge,
+    GraphNode,
+    GraphStatistics,
+    LayerAnalysis,
+    NodeImportance,
 } from './dependency-graph-model.js';
 import {
-  NodeType,
-  EdgeType,
-  DependencyStrength,
+    EdgeType,
+    NodeType
 } from './dependency-graph-model.js';
 
 /**

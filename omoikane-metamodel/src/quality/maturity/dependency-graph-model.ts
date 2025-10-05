@@ -4,7 +4,6 @@
  * 要素間の依存関係を分析し、変更の影響範囲や循環依存を検出
  */
 
-import type { Ref } from '../../types/foundation/index.js';
 
 /**
  * ノードタイプ

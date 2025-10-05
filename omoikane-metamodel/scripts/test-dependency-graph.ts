@@ -4,13 +4,13 @@
  * 依存関係グラフ分析のテスト
  */
 
-import type { BusinessRequirementDefinition, Actor, UseCase } from '../src/types/index.ts';
 import {
-  buildDependencyGraph,
-  analyzeGraph,
-  analyzeChangeImpact,
-  analyzeLayering,
+    analyzeChangeImpact,
+    analyzeGraph,
+    analyzeLayering,
+    buildDependencyGraph,
 } from '../src/quality/maturity/index.ts';
+import type { Actor, BusinessRequirementDefinition, UseCase } from '../src/types/index.ts';
 
 console.log('🔍 依存関係グラフ分析のテスト\n');
 console.log('='.repeat(60));
