@@ -5,14 +5,14 @@
  */
 
 import {
-  ProjectContext,
-  ProjectDomain,
-  DevelopmentStage,
-  TeamSize,
-  ProjectCriticality,
-  applyContext,
-  generateContextSummary,
-  inferContext,
+    DevelopmentStage,
+    ProjectContext,
+    ProjectCriticality,
+    ProjectDomain,
+    TeamSize,
+    applyContext,
+    generateContextSummary,
+    inferContext,
 } from '../src/quality/maturity/index.ts';
 
 console.log('🔍 コンテキスト対応評価システムのテスト\n');

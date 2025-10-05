@@ -4,23 +4,22 @@
  * プロジェクトコンテキストに基づいて評価ルールを動的に適用
  */
 
-import { MaturityDimension } from './maturity-model.js';
 import type {
-  ProjectContext,
-  ContextualEvaluationRule,
-  DimensionWeightAdjustment,
-  ContextApplicationResult,
+    ContextApplicationResult,
+    ContextualEvaluationRule,
+    ProjectContext
 } from './context-model.js';
 import {
-  ProjectDomain,
-  DevelopmentStage,
-  TeamSize,
-  ProjectCriticality,
-  DomainRecommendedFocus,
-  StageRecommendedFocus,
-  TeamSizeRecommendedFocus,
-  CriticalityRecommendedFocus,
+    CriticalityRecommendedFocus,
+    DevelopmentStage,
+    DomainRecommendedFocus,
+    ProjectCriticality,
+    ProjectDomain,
+    StageRecommendedFocus,
+    TeamSize,
+    TeamSizeRecommendedFocus,
 } from './context-model.js';
+import { MaturityDimension } from './maturity-model.js';
 
 /**
  * 組み込みコンテキストルール
