@@ -1,8 +1,32 @@
 /**
- * AI Agent推奨エンジン v2.0
+ * @fileoverview AI Agent推奨エンジン v2.0 - 型定義（AI Recommendation Model）
  * 
- * 成熟度評価・コンテキスト・依存関係分析を統合した
- * 高度な推奨アクション生成システム
+ * **目的:**
+ * 成熟度評価、コンテキスト、依存関係分析を統合した
+ * 高度な推奨アクション生成システムのデータモデルを提供します。
+ * 
+ * **主要な型定義:**
+ * 1. RecommendationPriority: 推奨の優先度（4段階）
+ * 2. RecommendationCategory: 推奨のカテゴリー（7種類）
+ * 3. ExecutableAction: 実行可能なアクション（AIエージェント用）
+ * 4. StructuredRecommendation: 構造化推奨（問題、影響、解決策、効果）
+ * 5. RecommendationBundle: 推奨バンドル（関連する推奨の集合）
+ * 6. QuickWin: クイックウィン（低工数・高効果の推奨）
+ * 7. LongTermStrategy: 長期戦略（戦略的改善の推奨）
+ * 8. AIAgentRecommendations: 統合推奨結果
+ * 
+ * **設計思想:**
+ * - AIエージェントが自律的に実行できる形式
+ * - 問題→影響→解決策→効果の明確な構造
+ * - ROI計算による優先順位付け
+ * - コンテキスト対応の柔軟な推奨生成
+ * 
+ * **拡張ポイント:**
+ * - 新しいカテゴリーを追加: RecommendationCategoryに列挙値を追加
+ * - カスタムメトリクスを追加: StructuredRecommendationにフィールド追加
+ * - 新しい推奨タイプを追加: AIAgentRecommendationsにフィールド追加
+ * 
+ * @module quality/maturity/ai-recommendation-model
  */
 
 import type {
@@ -21,8 +45,24 @@ import type {
     ProjectMaturityAssessment
 } from './maturity-model.js';
 
+// ============================================================================
+// 推奨の優先度とカテゴリー（Recommendation Priority and Category）
+// ============================================================================
+
 /**
  * 推奨の優先度
+ * 
+ * **用途:**
+ * 推奨アクションの緊急度・重要度を4段階で定義します。
+ * 
+ * **優先度の定義:**
+ * - CRITICAL: 致命的、即座に対応が必要（例: セキュリティ脆弱性、規制違反）
+ * - HIGH: 高優先度、近日中に対応が必要（例: 主要機能の欠陥、重大なバグ）
+ * - MEDIUM: 中優先度、計画的に対応（例: 改善提案、パフォーマンス最適化）
+ * - LOW: 低優先度、余裕があれば対応（例: 軽微な改善、将来的な拡張）
+ * 
+ * **使用例:**
+ * ROI計算、アラート生成、レポート生成で優先順位付けに使用されます。
  */
 export enum RecommendationPriority {
   CRITICAL = 'critical',
@@ -33,6 +73,21 @@ export enum RecommendationPriority {
 
 /**
  * 推奨のカテゴリー
+ * 
+ * **用途:**
+ * 推奨アクションの改善対象を7つのカテゴリーで分類します。
+ * 
+ * **カテゴリーの定義:**
+ * - STRUCTURE: 構造の完全性（要素の欠落、関係の不整合）
+ * - DETAIL: 詳細度（説明の充実度、具体性）
+ * - TRACEABILITY: トレーサビリティ（追跡可能性、関連付け）
+ * - TESTABILITY: テスト容易性（テストケース、検証性）
+ * - MAINTAINABILITY: 保守性（文書化、可読性、拡張性）
+ * - ARCHITECTURE: アーキテクチャ（依存関係、モジュール構造）
+ * - QUALITY: 品質全般（総合的な品質改善）
+ * 
+ * **使用例:**
+ * カテゴリー別に推奨を集計し、どの観点で改善が必要かを可視化します。
  */
 export enum RecommendationCategory {
   STRUCTURE = 'structure',
@@ -44,8 +99,43 @@ export enum RecommendationCategory {
   QUALITY = 'quality',
 }
 
+// ============================================================================
+// 実行可能なアクション（Executable Action）
+// ============================================================================
+
 /**
  * 実行可能なアクション
+ * 
+ * **用途:**
+ * AIエージェントが自律的に実行できるアクションを定義します。
+ * 
+ * **構成:**
+ * - id: アクション一意識別子
+ * - name: アクション名
+ * - command: 実行コマンド（オプション、将来のAI自律実行用）
+ * - parameters: パラメータ（オプション）
+ * - expectedOutcome: 期待される結果
+ * 
+ * **使用例:**
+ * ```typescript
+ * const action: ExecutableAction = {
+ *   id: 'action-add-precondition',
+ *   name: '前提条件を追加',
+ *   command: 'edit_element',
+ *   parameters: {
+ *     elementType: 'UseCase',
+ *     elementId: 'uc-user-login',
+ *     field: 'preconditions',
+ *     value: ['ユーザーが登録済みであること']
+ *   },
+ *   expectedOutcome: 'ユースケースに前提条件が追加され、成熟度が向上する'
+ * };
+ * ```
+ * 
+ * **拡張方法:**
+ * - 新しいコマンドタイプを追加
+ * - パラメータスキーマを定義
+ * - AIエージェントの実行ロジックを実装
  */
 export interface ExecutableAction {
   /** アクションID */
@@ -64,8 +154,60 @@ export interface ExecutableAction {
   expectedOutcome: string;
 }
 
+// ============================================================================
+// 構造化推奨（Structured Recommendation）
+// ============================================================================
+
 /**
  * 構造化推奨
+ * 
+ * **用途:**
+ * 問題、影響、解決策、効果を構造化した推奨アクションを定義します。
+ * 
+ * **構成:**
+ * 1. 基本情報: id, title, priority, category
+ * 2. 問題の説明: problem（何が問題か）
+ * 3. 影響範囲: scope, affectedElements, severity
+ * 4. 解決策: description, steps, executables
+ * 5. 期待される効果: benefits（成熟度向上、リスク軽減など）
+ * 6. メタ情報: estimatedEffort, roi, source
+ * 
+ * **影響範囲:**
+ * - element: 単一要素に影響
+ * - module: モジュール全体に影響
+ * - project: プロジェクト全体に影響
+ * 
+ * **ROI計算:**
+ * ROI = 効果 / 工数（高いほど優先度が高い）
+ * 
+ * **使用例:**
+ * ```typescript
+ * const rec: StructuredRecommendation = {
+ *   id: 'rec-add-postcondition',
+ *   title: 'ユースケース「ユーザーログイン」に事後条件を追加',
+ *   priority: RecommendationPriority.HIGH,
+ *   category: RecommendationCategory.STRUCTURE,
+ *   problem: '事後条件が定義されていないため、成功状態が不明確です',
+ *   impact: {
+ *     scope: 'element',
+ *     affectedElements: ['uc-user-login'],
+ *     severity: 'high'
+ *   },
+ *   solution: {
+ *     description: '事後条件を追加してユースケースの完全性を向上させます',
+ *     steps: ['ログイン成功時の状態を明確化', '事後条件を追加'],
+ *     executables: [...]
+ *   },
+ *   benefits: ['成熟度レベルが2→3に向上', 'テスト設計が容易になる'],
+ *   estimatedEffort: 2,
+ *   roi: 5.0,
+ *   source: 'maturity_assessment'
+ * };
+ * ```
+ * 
+ * **拡張方法:**
+ * - 新しいフィールドを追加（例: assignee, deadline）
+ * - カスタムメトリクスを追加
  */
 export interface StructuredRecommendation {
   /** 推奨ID */
