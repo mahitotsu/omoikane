@@ -19,7 +19,7 @@ import {
 export const capacityManagement: ReservationUseCase = {
   id: 'capacity-management',
   name: '枠管理',
-  description: 'キャパシティプランナーが予約枠を登録・削除する',
+  description: 'キャパシティプランナーが営業日程とサービス提供計画に基づいて予約枠を登録・削除し、適切な受付キャパシティを維持する。既存予約との衝突を防ぎ、変更内容を即座に来店者向けの空き枠一覧に反映することで、過剰予約や空予約のリスクを最小化する。',
   actors: {
     primary: typedActorRef('capacity-planner'),
   },

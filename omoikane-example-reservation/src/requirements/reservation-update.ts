@@ -39,7 +39,7 @@ const contactMismatchSteps = [
 export const reservationUpdate: ReservationUseCase = {
   id: 'reservation-update',
   name: '予約変更',
-  description: '来店者が確定済み予約の内容を更新する',
+  description: '来店者が確定済みの予約内容を更新する。予約番号と連絡先による本人確認を行い、日時やサービス内容の変更を営業時間外でもセルフサービスで実行できる。旧枠の取消と新枠の確定を一連の操作として記録し、履歴の追跡可能性を維持する。',
   actors: {
     primary: typedActorRef('visitor'),
     secondary: [typedActorRef('store-staff')],

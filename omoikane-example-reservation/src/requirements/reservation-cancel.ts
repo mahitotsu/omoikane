@@ -52,7 +52,7 @@ const alreadyCheckedInSelfServiceSteps = [
 export const reservationCancel: ReservationUseCase = {
   id: 'reservation-cancel',
   name: '予約取消',
-  description: '来店者が確定済み予約を取消し、枠を解放する',
+  description: '来店者が確定済みの予約を取消し、予約していた枠を解放する。予約番号と連絡先による本人確認を行い、取消理由を記録することで、枠の適切な再利用と監査性を確保する。営業時間外でもセルフサービスで取消可能。',
   actors: {
     primary: typedActorRef('visitor'),
     secondary: [typedActorRef('store-staff')],
