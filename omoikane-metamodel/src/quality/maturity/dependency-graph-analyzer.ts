@@ -1,7 +1,36 @@
 /**
- * 依存関係グラフ分析エンジン
+ * @fileoverview 依存関係グラフ分析エンジン（Dependency Graph Analyzer）
  * 
- * メタモデルから依存関係グラフを構築し、各種分析を実行
+ * **目的:**
+ * メタモデル要素間の依存関係を有向グラフとして構築し、各種分析を実行します。
+ * 
+ * **グラフ構築:**
+ * - ノード: ビジネス要求、アクター、ユースケース、ビジネスゴール、ビジネスルール、セキュリティポリシー
+ * - エッジ: USES（使用）、CONTAINS（包含）、REFERENCES（参照）、EXTENDS（拡張）、INCLUDES（インクルード）
+ * 
+ * **分析機能:**
+ * 1. 循環依存検出（Circular Dependencies）: トポロジカルソートで検出
+ * 2. 孤立要素検出（Orphaned Elements）: 入次数・出次数が0のノード
+ * 3. レイヤー分析（Layer Analysis）: トポロジカルソートによる階層化
+ * 4. ノード重要度分析（Node Importance）: PageRankアルゴリズム
+ * 5. 変更影響分析（Change Impact Analysis）: 依存ノードの追跡
+ * 6. 統計情報（Graph Statistics）: ノード数、エッジ数、密度、平均次数
+ * 
+ * **グラフ理論アルゴリズム:**
+ * - トポロジカルソート（Kahn's Algorithm）: 循環依存検出とレイヤー分け
+ * - PageRank: ノードの重要度計算
+ * - DFS（深さ優先探索）: 変更影響分析
+ * 
+ * **出力:**
+ * - DependencyGraph: 構築されたグラフ
+ * - GraphAnalysisResult: 全分析結果（循環依存、孤立要素、レイヤー、重要度、統計）
+ * 
+ * **拡張ポイント:**
+ * - 新しいノードタイプを追加する場合: NodeTypeに追加し、buildDependencyGraphで構築
+ * - 新しいエッジタイプを追加する場合: EdgeTypeに追加し、該当箇所でaddEdge
+ * - 新しい分析手法を追加する場合: analyze〇〇関数を作成し、analyzeDependencyGraphで呼び出す
+ * 
+ * @module quality/maturity/dependency-graph-analyzer
  */
 
 import type {
@@ -25,8 +54,47 @@ import {
     NodeType
 } from './dependency-graph-model.js';
 
+// ============================================================================
+// 公開API: グラフ構築
+// ============================================================================
+
 /**
- * メタモデルから依存関係グラフを構築
+ * メタモデルから依存関係グラフを構築します。
+ * 
+ * **構築フロー:**
+ * 1. 全要素をノードとして登録（BusinessRequirement, Actor, UseCase, Goal, Rule, Policyなど）
+ * 2. 要素間の関係をエッジとして登録（USES, CONTAINS, REFERENCES, EXTENDS, INCLUDESなど）
+ * 3. 隣接リストを構築（効率的なグラフ探索のため）
+ * 4. 逆隣接リストを構築（逆方向の探索用）
+ * 
+ * **ノードタイプ:**
+ * - BUSINESS_REQUIREMENT: ビジネス要求
+ * - BUSINESS_GOAL: ビジネスゴール
+ * - BUSINESS_RULE: ビジネスルール
+ * - SECURITY_POLICY: セキュリティポリシー
+ * - ACTOR: アクター
+ * - USECASE: ユースケース
+ * 
+ * **エッジタイプ:**
+ * - USES: アクターがユースケースを使用
+ * - CONTAINS: 要素が別の要素を包含
+ * - REFERENCES: ユースケースが要素を参照
+ * - EXTENDS: ユースケースが別のユースケースを拡張
+ * - INCLUDES: ユースケースが別のユースケースをインクルード
+ * 
+ * @param requirements - ビジネス要求定義リスト
+ * @param actors - アクターリスト
+ * @param useCases - ユースケースリスト
+ * @returns 構築された依存関係グラフ
+ * 
+ * **使用例:**
+ * ```typescript
+ * const graph = buildDependencyGraph(requirements, actors, useCases);
+ * console.log(`ノード数: ${graph.nodes.size}, エッジ数: ${graph.edges.length}`);
+ * ```
+ * 
+ * **拡張ポイント:**
+ * - 新しい要素タイプを追加する場合: ノード登録とエッジ登録のロジックを追加
  */
 export function buildDependencyGraph(
   requirements: BusinessRequirementDefinition[],
@@ -129,8 +197,38 @@ export function buildDependencyGraph(
   };
 }
 
+// ============================================================================
+// 公開API: グラフ分析
+// ============================================================================
+
 /**
- * グラフの完全分析を実行
+ * 依存関係グラフを総合的に分析します。
+ * 
+ * **分析内容:**
+ * 1. グラフ統計: ノード数、エッジ数、密度、平均次数
+ * 2. 循環依存検出: トポロジカルソートで検出
+ * 3. ノード重要度計算: PageRankアルゴリズム
+ * 4. 孤立ノード検出: 入次数・出次数が0のノード
+ * 5. トポロジカル順序: 依存関係の順序
+ * 6. 警告と推奨: 品質問題の検出と改善提案
+ * 
+ * **警告条件:**
+ * - 循環依存が存在する
+ * - 孤立ノードが存在する（未使用要素）
+ * - 10以上の要素から依存されるノードが存在する（ハブノード）
+ * 
+ * @param graph - 依存関係グラフ
+ * @returns グラフ分析結果（統計、循環依存、重要度、孤立ノード、警告、推奨）
+ * 
+ * **使用例:**
+ * ```typescript
+ * const analysis = analyzeGraph(graph);
+ * console.log(`循環依存: ${analysis.circularDependencies.length}件`);
+ * console.log(`孤立ノード: ${analysis.isolatedNodes.length}件`);
+ * ```
+ * 
+ * **拡張ポイント:**
+ * - 新しい分析手法を追加する場合: 計算ロジックを追加し、結果に含める
  */
 export function analyzeGraph(graph: DependencyGraph): GraphAnalysisResult {
   const statistics = calculateStatistics(graph);
@@ -175,8 +273,37 @@ export function analyzeGraph(graph: DependencyGraph): GraphAnalysisResult {
   };
 }
 
+// ============================================================================
+// 公開API: 変更影響分析
+// ============================================================================
+
 /**
- * 変更影響分析
+ * 変更影響分析を実行します。
+ * 
+ * **分析内容:**
+ * 1. 直接的な影響: 変更ノードに直接依存するノード
+ * 2. 間接的な影響: DFSで到達可能な全ノード
+ * 3. 影響範囲の算出: ノード数、エッジ数、影響度（割合）
+ * 4. 影響の深さ: 最大依存チェーンの長さ
+ * 
+ * **使用シナリオ:**
+ * - 要素を変更する前に影響範囲を予測
+ * - リファクタリングの安全性を評価
+ * - テストの優先順位付け（影響の大きい要素から）
+ * 
+ * @param graph - 依存関係グラフ
+ * @param changedNodeIds - 変更対象のノードIDリスト
+ * @returns 変更影響分析結果（直接影響、間接影響、影響範囲、深さ）
+ * 
+ * **使用例:**
+ * ```typescript
+ * const impact = analyzeChangeImpact(graph, ['UC001']);
+ * console.log(`影響を受けるノード: ${impact.impactedNodes.size}件`);
+ * console.log(`影響度: ${(impact.impactScope.percentage * 100).toFixed(1)}%`);
+ * ```
+ * 
+ * **拡張ポイント:**
+ * - 影響の重み付けを追加する場合: ノードタイプやエッジタイプに応じて係数を乗算
  */
 export function analyzeChangeImpact(
   graph: DependencyGraph,
@@ -252,8 +379,40 @@ export function analyzeChangeImpact(
   };
 }
 
+// ============================================================================
+// 公開API: レイヤー分析
+// ============================================================================
+
 /**
- * レイヤー分析
+ * レイヤー分析を実行します。
+ * 
+ * **分析内容:**
+ * 1. トポロジカルソートによるレイヤー分け
+ * 2. 各レイヤーのノードリスト
+ * 3. レイヤー違反の検出（下位レイヤーが上位レイヤーに依存）
+ * 4. 違反の深刻度評価
+ * 
+ * **レイヤーの定義:**
+ * - レベル0: 他に依存しないノード（最下層）
+ * - レベル1: レベル0のみに依存
+ * - レベルN: レベルN-1以下のみに依存
+ * 
+ * **レイヤー違反:**
+ * - 下位レイヤーが上位レイヤーに依存している場合
+ * - 深刻度: レベル差に応じて判定
+ * 
+ * @param graph - 依存関係グラフ
+ * @returns レイヤー分析結果（レイヤーリスト、違反リスト）
+ * 
+ * **使用例:**
+ * ```typescript
+ * const layering = analyzeLayering(graph);
+ * console.log(`レイヤー数: ${layering.layers.length}`);
+ * console.log(`レイヤー違反: ${layering.violations.length}件`);
+ * ```
+ * 
+ * **拡張ポイント:**
+ * - レイヤー命名ルールを追加する場合: descriptionの生成ロジックを変更
  */
 export function analyzeLayering(graph: DependencyGraph): LayerAnalysis {
   const layers: Array<{ level: number; nodes: string[]; description: string }> = [];
