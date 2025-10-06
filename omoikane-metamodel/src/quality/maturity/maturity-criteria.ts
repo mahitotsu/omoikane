@@ -1,8 +1,24 @@
 /**
- * 成熟度評価基準定義
+ * @fileoverview 成熟度評価基準定義
  * 
- * 各成熟度レベルに到達するために必要な基準を定義
- * レベル別・ディメンション別に体系化
+ * 目的: 各成熟度レベルに到達するために必要な基準を定義
+ * 構成: レベル別・ディメンション別に体系化された基準リスト
+ * 
+ * 基準の構造:
+ * - id: 一意の識別子（評価ロジックで使用）
+ * - name: 基準の名前
+ * - description: 基準の説明
+ * - level: 対象レベル（1-5）
+ * - dimension: 評価ディメンション（構造、詳細度、トレーサビリティ、テスト容易性、保守性）
+ * - required: 必須基準かどうか（trueの場合、このレベルに到達するために必須）
+ * - condition: 評価条件（評価ロジックの参考）
+ * - weight: 基準の重要度（0-1スケール）
+ * 
+ * 拡張ポイント:
+ * - 新しい基準を追加: 対応する配列（UseCaseMaturityCriteria/ActorMaturityCriteria）に追加
+ * - 基準を評価: maturity-assessor.ts の evaluateXxxCriterion 関数に対応するcaseを追加
+ * - レベルを変更: level プロパティを変更（レベル決定ロジックは自動的に適用される）
+ * - 必須/オプションを変更: required プロパティを変更
  */
 
 import {
@@ -11,11 +27,22 @@ import {
     MaturityLevel,
 } from './maturity-model.js';
 
+// ============================================================================
+// ユースケース成熟度基準（24基準）
+// ============================================================================
+
 /**
  * ユースケース用の成熟度基準
+ * 
+ * 構成:
+ * - レベル1（INITIAL）: 3基準（全て必須） - 基本的な定義
+ * - レベル2（REPEATABLE）: 5基準（全て必須） - 詳細化と条件定義
+ * - レベル3（DEFINED）: 5基準（4必須、1オプション） - 完全な構造とカバレッジ
+ * - レベル4（MANAGED）: 5基準（2必須、3オプション） - 管理情報と非機能要件
+ * - レベル5（OPTIMIZED）: 4基準（2必須、2オプション） - 完全性と最適化
  */
 export const UseCaseMaturityCriteria: MaturityCriterion[] = [
-  // ===== レベル1: INITIAL =====
+  // ===== レベル1: INITIAL - 基本定義 =====
   {
     id: 'uc-initial-basic-info',
     name: '基本情報の存在',
@@ -47,7 +74,7 @@ export const UseCaseMaturityCriteria: MaturityCriterion[] = [
     weight: 1.0,
   },
 
-  // ===== レベル2: REPEATABLE =====
+  // ===== レベル2: REPEATABLE - 詳細化 =====
   {
     id: 'uc-repeatable-description',
     name: '十分な説明',
@@ -246,11 +273,26 @@ export const UseCaseMaturityCriteria: MaturityCriterion[] = [
   },
 ];
 
+// ============================================================================
+// アクター成熟度基準（8基準）
+// ============================================================================
+
 /**
  * アクター用の成熟度基準
+ * 
+ * 構成:
+ * - レベル1（INITIAL）: 1基準（必須） - 基本的な定義
+ * - レベル2（REPEATABLE）: 2基準（全て必須） - 説明と役割
+ * - レベル3（DEFINED）: 2基準（全て必須） - 責務の明確化
+ * - レベル4（MANAGED）: 2基準（全て必須） - カバレッジと高品質な説明
+ * - レベル5（OPTIMIZED）: 2基準（1必須、1オプション） - ゴールと包括的な説明
+ * 
+ * 注意:
+ * - actor-managed-usecase-coverage: 実際のユースケース参照を確認（評価時に useCases 引数が必要）
+ * - actor-optimized-goals: Actor型にgoalsプロパティが未実装（TODO）
  */
 export const ActorMaturityCriteria: MaturityCriterion[] = [
-  // ===== レベル1: INITIAL =====
+  // ===== レベル1: INITIAL - 基本定義 =====
   {
     id: 'actor-initial-basic-info',
     name: '基本情報の存在',
@@ -262,7 +304,7 @@ export const ActorMaturityCriteria: MaturityCriterion[] = [
     weight: 1.0,
   },
 
-  // ===== レベル2: REPEATABLE =====
+  // ===== レベル2: REPEATABLE - 詳細化 =====
   {
     id: 'actor-repeatable-description',
     name: '説明の存在',
@@ -284,7 +326,7 @@ export const ActorMaturityCriteria: MaturityCriterion[] = [
     weight: 0.8,
   },
 
-  // ===== レベル3: DEFINED =====
+  // ===== レベル3: DEFINED - 責務の明確化 =====
   {
     id: 'actor-defined-responsibilities',
     name: '責務の明確化',
@@ -306,7 +348,7 @@ export const ActorMaturityCriteria: MaturityCriterion[] = [
     weight: 0.6,
   },
 
-  // ===== レベル4: MANAGED =====
+  // ===== レベル4: MANAGED - カバレッジと品質 =====
   {
     id: 'actor-managed-usecase-coverage',
     name: 'ユースケースカバレッジ',
@@ -351,11 +393,25 @@ export const ActorMaturityCriteria: MaturityCriterion[] = [
   },
 ];
 
+// ============================================================================
+// 業務要件成熟度基準（11基準）
+// ============================================================================
+
 /**
  * 業務要件定義用の成熟度基準
+ * 
+ * 構成:
+ * - レベル1（INITIAL）: 1基準（必須） - 基本的な定義
+ * - レベル2（REPEATABLE）: 3基準（全て必須） - 要約、ゴール、スコープ
+ * - レベル3（DEFINED）: 4基準（全て必須） - ステークホルダー、指標、前提、制約
+ * - レベル4（MANAGED）: 2基準（全て必須） - ビジネスルールとセキュリティ
+ * - レベル5（OPTIMIZED）: 1基準（必須） - 完全なカバレッジ
+ * 
+ * 注意:
+ * - br-optimized-coverage: プロジェクト全体のコンテキストが必要（TODO: 実装）
  */
 export const BusinessRequirementMaturityCriteria: MaturityCriterion[] = [
-  // ===== レベル1: INITIAL =====
+  // ===== レベル1: INITIAL - 基本定義 =====
   {
     id: 'br-initial-basic-info',
     name: '基本情報の存在',
@@ -367,7 +423,7 @@ export const BusinessRequirementMaturityCriteria: MaturityCriterion[] = [
     weight: 1.0,
   },
 
-  // ===== レベル2: REPEATABLE =====
+  // ===== レベル2: REPEATABLE - 要約とスコープ =====
   {
     id: 'br-repeatable-summary',
     name: '要約の存在',
@@ -399,7 +455,7 @@ export const BusinessRequirementMaturityCriteria: MaturityCriterion[] = [
     weight: 0.9,
   },
 
-  // ===== レベル3: DEFINED =====
+  // ===== レベル3: DEFINED - ステークホルダーと制約 =====
   {
     id: 'br-defined-stakeholders',
     name: 'ステークホルダー',
@@ -476,8 +532,17 @@ export const BusinessRequirementMaturityCriteria: MaturityCriterion[] = [
   },
 ];
 
+// ============================================================================
+// ヘルパー関数 - 基準の取得
+// ============================================================================
+
 /**
  * レベル別の基準を取得
+ * @param elementType - 要素タイプ
+ * @param level - 対象レベル
+ * @returns 指定されたレベルの基準リスト
+ * 
+ * 使用例: レベル3に到達するために必要な基準を確認
  */
 export function getCriteriaByLevel(
   elementType: 'business-requirement' | 'actor' | 'usecase',
@@ -489,6 +554,11 @@ export function getCriteriaByLevel(
 
 /**
  * ディメンション別の基準を取得
+ * @param elementType - 要素タイプ
+ * @param dimension - 対象ディメンション
+ * @returns 指定されたディメンションの基準リスト
+ * 
+ * 使用例: トレーサビリティディメンションの評価を確認
  */
 export function getCriteriaByDimension(
   elementType: 'business-requirement' | 'actor' | 'usecase',
@@ -500,6 +570,10 @@ export function getCriteriaByDimension(
 
 /**
  * 要素タイプ別の全基準を取得
+ * @param elementType - 要素タイプ
+ * @returns 指定された要素タイプの全基準リスト
+ * 
+ * 拡張ポイント: 新しい要素タイプを追加する際は、ここに新しいcaseを追加
  */
 export function getCriteriaByElementType(
   elementType: 'business-requirement' | 'actor' | 'usecase'
