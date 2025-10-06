@@ -1,7 +1,20 @@
 /**
- * 成熟度評価ロジック
+ * @fileoverview 成熟度評価エンジン
  * 
- * 定義された基準に基づいて要素とプロジェクトの成熟度を評価
+ * 目的: 定義された基準に基づいてプロジェクトの成熟度レベル(1-5)を評価する
+ * エントリーポイント: assessUseCaseMaturity, assessActorMaturity, assessProjectMaturity
+ * 
+ * アルゴリズム:
+ * 1. 要素タイプの基準を取得
+ * 2. 各基準を評価 → 満たす/満たさない
+ * 3. レベルを計算: 全ての必須基準を満たす最高レベル
+ * 4. ディメンション、次のステップ、工数見積を含む評価結果を構築
+ * 
+ * 拡張ポイント:
+ * - 新しい要素タイプを追加: maturity-criteria.ts の getCriteriaByElementType を更新
+ * - 新しい基準を追加: UseCaseMaturityCriteria/ActorMaturityCriteria 配列に追加
+ * - レベルロジックを変更: buildElementAssessment 関数を修正
+ * - 新しいディメンションを追加: maturity-model.ts の MaturityDimension enum を更新
  */
 
 import type {
@@ -25,8 +38,14 @@ import {
     ProjectMaturityAssessment,
 } from './maturity-model.js';
 
+// ============================================================================
+// 公開API - 要素評価
+// ============================================================================
+
 /**
- * ユースケースの成熟度評価
+ * ユースケースの成熟度レベルを評価
+ * @param useCase - 評価対象のユースケース
+ * @returns レベル、ディメンション、次のステップを含む評価結果
  */
 export function assessUseCaseMaturity(useCase: UseCase): ElementMaturityAssessment {
   const criteria = getCriteriaByElementType('usecase');
@@ -43,7 +62,12 @@ export function assessUseCaseMaturity(useCase: UseCase): ElementMaturityAssessme
 }
 
 /**
- * アクターの成熟度評価
+ * アクターの成熟度レベルを評価
+ * @param actor - 評価対象のアクター
+ * @param useCases - 全ユースケース（カバレッジ確認に必要）
+ * @returns レベル、ディメンション、次のステップを含む評価結果
+ * 
+ * 注意: useCases は 'actor-managed-usecase-coverage' 基準に必要
  */
 export function assessActorMaturity(actor: Actor, useCases: UseCase[] = []): ElementMaturityAssessment {
   const criteria = getCriteriaByElementType('actor');
@@ -60,7 +84,9 @@ export function assessActorMaturity(actor: Actor, useCases: UseCase[] = []): Ele
 }
 
 /**
- * 業務要件定義の成熟度評価
+ * 業務要件の成熟度レベルを評価
+ * @param requirement - 評価対象の業務要件
+ * @returns レベル、ディメンション、次のステップを含む評価結果
  */
 export function assessBusinessRequirementMaturity(
   requirement: BusinessRequirementDefinition
@@ -78,8 +104,26 @@ export function assessBusinessRequirementMaturity(
   );
 }
 
+// ============================================================================
+// 公開API - プロジェクト評価
+// ============================================================================
+
 /**
- * プロジェクト全体の成熟度評価
+ * プロジェクト全体の成熟度を評価
+ * @param requirements - 業務要件（現在は最初の1つを使用）
+ * @param actors - 全アクター
+ * @param useCases - 全ユースケース
+ * @returns プロジェクト評価（レベル、要素内訳、ディメンション、推奨事項）
+ * 
+ * アルゴリズム:
+ * 1. 各要素を個別に評価
+ * 2. プロジェクトレベル = 全要素レベルの最小値（最弱リンクの原則）
+ * 3. レベル分布のヒストグラムを計算
+ * 4. 全要素のディメンションスコアを集約
+ * 5. 強み（上位ディメンション）と改善領域（下位ディメンション）を特定
+ * 6. 優先順位付けされた推奨アクションを生成
+ * 
+ * 拡張: 複数の業務要件をサポートする場合は brAssessment ロジックを修正
  */
 export function assessProjectMaturity(
   requirements: BusinessRequirementDefinition[],
@@ -88,7 +132,7 @@ export function assessProjectMaturity(
 ): ProjectMaturityAssessment {
   const timestamp = new Date().toISOString();
   
-  // 各要素の評価（アクター評価にはユースケース情報が必要）
+  // 全要素を評価
   const actorAssessments: ElementMaturityAssessment[] = actors.map(actor => 
     assessActorMaturity(actor, useCases)
   );
@@ -107,7 +151,7 @@ export function assessProjectMaturity(
     ...(brAssessment ? [brAssessment] : [])
   ];
   
-  // 全体の成熟度レベルを計算（最も低い要素のレベル）
+  // プロジェクトレベル = 全要素の最小レベル（最弱リンク）
   const allLevels = allAssessments.map(a => a.overallLevel);
   const projectLevel = Math.min(...allLevels) as MaturityLevel;
   
@@ -124,14 +168,14 @@ export function assessProjectMaturity(
     distribution[level]++;
   });
   
-  // ディメンション別の全体評価
+  // ディメンションスコアを集約
   const overallDimensions = calculateOverallDimensions(allAssessments);
   
-  // 強み・改善領域を特定
+  // 強み（高スコア）と改善領域（低スコア）を特定
   const strengths = identifyStrengths(overallDimensions);
   const improvementAreas = identifyImprovementAreas(overallDimensions);
   
-  // 推奨アクションを生成
+  // 優先順位付けされた推奨事項を生成
   const recommendedActions = generateProjectRecommendations(
     allAssessments,
     overallDimensions,
@@ -154,8 +198,20 @@ export function assessProjectMaturity(
   };
 }
 
+// ============================================================================
+// 内部関数 - 基準評価ロジック
+// ============================================================================
+
 /**
- * ユースケースの基準評価
+ * ユースケース基準を評価
+ * @param useCase - 確認対象のユースケース
+ * @param criterion - 評価する基準
+ * @returns 満足フラグ、スコア、根拠を含む評価結果
+ * 
+ * 拡張ポイント: 新しいユースケース基準を追加する際は、ここに新しい基準IDのcaseを追加
+ * 各caseは以下を設定する必要がある:
+ * 1. satisfied = true/false
+ * 2. evidence = 説明メッセージ（推奨事項で使用される）
  */
 function evaluateUseCaseCriterion(
   useCase: UseCase,
@@ -165,6 +221,7 @@ function evaluateUseCaseCriterion(
   let evidence = '';
   
   switch (criterion.id) {
+    // レベル1: INITIAL
     case 'uc-initial-basic-info':
       satisfied = !!(useCase.id && useCase.name && useCase.description);
       evidence = satisfied ? 'ID、名前、説明が全て定義されている' : '基本情報が不足';
@@ -179,7 +236,8 @@ function evaluateUseCaseCriterion(
       satisfied = (useCase.mainFlow?.length ?? 0) >= 1;
       evidence = satisfied ? `メインフロー ${useCase.mainFlow?.length ?? 0} ステップ` : 'メインフローが未定義';
       break;
-      
+    
+    // レベル2: REPEATABLE
     case 'uc-repeatable-description':
       satisfied = (useCase.description?.length ?? 0) >= 50;
       evidence = `説明文字数: ${useCase.description?.length ?? 0}文字`;
@@ -204,7 +262,8 @@ function evaluateUseCaseCriterion(
       satisfied = !!useCase.priority;
       evidence = satisfied ? `優先度: ${useCase.priority}` : '優先度未設定';
       break;
-      
+    
+    // レベル3: DEFINED
     case 'uc-defined-step-detail':
       const hasCompleteSteps = useCase.mainFlow?.every(step =>
         step.stepId && step.actor && step.action && step.expectedResult
@@ -232,7 +291,8 @@ function evaluateUseCaseCriterion(
       satisfied = !!useCase.complexity;
       evidence = satisfied ? `複雑度: ${useCase.complexity}` : '複雑度未評価';
       break;
-      
+    
+    // レベル4: MANAGED
     case 'uc-managed-effort':
       satisfied = !!useCase.estimatedEffort;
       evidence = satisfied ? `見積工数: ${useCase.estimatedEffort}` : '工数未見積';
@@ -257,7 +317,8 @@ function evaluateUseCaseCriterion(
       satisfied = (useCase.businessRules?.length ?? 0) >= 1;
       evidence = satisfied ? `ビジネスルール ${useCase.businessRules?.length ?? 0}個` : 'ビジネスルール未定義';
       break;
-      
+    
+    // レベル5: OPTIMIZED
     case 'uc-optimized-ui-requirements':
       satisfied = (useCase.uiRequirements?.length ?? 0) >= 1;
       evidence = satisfied ? `UI要件 ${useCase.uiRequirements?.length ?? 0}個` : 'UI要件未定義';
@@ -298,7 +359,13 @@ function evaluateUseCaseCriterion(
 }
 
 /**
- * アクターの基準評価
+ * アクター基準を評価
+ * @param actor - 確認対象のアクター
+ * @param criterion - 評価する基準
+ * @param useCases - 全ユースケース（カバレッジ確認用）
+ * @returns 評価結果
+ * 
+ * 拡張ポイント: 新しいアクター基準を追加する際は、ここに新しい基準IDのcaseを追加
  */
 function evaluateActorCriterion(
   actor: Actor,
@@ -309,11 +376,13 @@ function evaluateActorCriterion(
   let evidence = '';
   
   switch (criterion.id) {
+    // レベル1: INITIAL
     case 'actor-initial-basic-info':
       satisfied = !!(actor.id && actor.name);
       evidence = satisfied ? 'ID、名前が定義されている' : '基本情報が不足';
       break;
-      
+    
+    // レベル2: REPEATABLE
     case 'actor-repeatable-description':
       satisfied = !!actor.description && actor.description.length > 0;
       evidence = satisfied ? `説明: ${actor.description?.length ?? 0}文字` : '説明未定義';
@@ -323,7 +392,8 @@ function evaluateActorCriterion(
       satisfied = !!actor.role;
       evidence = satisfied ? `役割: ${actor.role}` : '役割未定義';
       break;
-      
+    
+    // レベル3: DEFINED
     case 'actor-defined-responsibilities':
       satisfied = (actor.responsibilities?.length ?? 0) >= 2;
       evidence = satisfied ? `責務 ${actor.responsibilities?.length ?? 0}個` : '責務不足';
@@ -333,9 +403,10 @@ function evaluateActorCriterion(
       satisfied = (actor.description?.length ?? 0) >= 30;
       evidence = `説明文字数: ${actor.description?.length ?? 0}文字`;
       break;
-      
+    
+    // レベル4: MANAGED
     case 'actor-managed-usecase-coverage':
-      // 実際にユースケースで参照されているか確認
+      // アクターがユースケースで実際に参照されているか確認（プライマリまたはセカンダリ）
       const usedInUseCases = useCases.filter(uc => {
         const primaryMatch = uc.actors?.primary === actor.id;
         const secondaryMatch = uc.actors?.secondary?.includes(actor.id) ?? false;
@@ -351,9 +422,11 @@ function evaluateActorCriterion(
       satisfied = (actor.description?.length ?? 0) >= 50;
       evidence = `説明文字数: ${actor.description?.length ?? 0}文字 (50文字以上必要)`;
       break;
-      
+    
+    // レベル5: OPTIMIZED
     case 'actor-optimized-goals':
-      // Actor型にgoalsプロパティがないため評価不可
+      // 注意: Actor型にはまだgoalsプロパティがない
+      // TODO: レベル5実装時にActor型にgoals: string[]を追加
       satisfied = false;
       evidence = 'ゴール未定義（Actor型に未実装）';
       break;
@@ -377,7 +450,12 @@ function evaluateActorCriterion(
 }
 
 /**
- * 業務要件定義の基準評価
+ * 業務要件基準を評価
+ * @param requirement - 確認対象の業務要件
+ * @param criterion - 評価する基準
+ * @returns 評価結果
+ * 
+ * 拡張ポイント: 新しい業務要件基準を追加する際は、ここに新しい基準IDのcaseを追加
  */
 function evaluateBusinessRequirementCriterion(
   requirement: BusinessRequirementDefinition,
@@ -387,11 +465,13 @@ function evaluateBusinessRequirementCriterion(
   let evidence = '';
   
   switch (criterion.id) {
+    // レベル1: INITIAL
     case 'br-initial-basic-info':
       satisfied = !!(requirement.id && requirement.name);
       evidence = satisfied ? 'ID、名前が定義されている' : '基本情報が不足';
       break;
-      
+    
+    // レベル2: REPEATABLE
     case 'br-repeatable-summary':
       satisfied = !!requirement.summary && requirement.summary.length > 0;
       evidence = satisfied ? `要約: ${requirement.summary.length}文字` : '要約未定義';
@@ -406,7 +486,8 @@ function evaluateBusinessRequirementCriterion(
       satisfied = (requirement.scope?.inScope?.length ?? 0) >= 1;
       evidence = satisfied ? `スコープ項目 ${requirement.scope?.inScope?.length ?? 0}個` : 'スコープ未定義';
       break;
-      
+    
+    // レベル3: DEFINED
     case 'br-defined-stakeholders':
       satisfied = (requirement.stakeholders?.length ?? 0) >= 2;
       evidence = satisfied ? `ステークホルダー ${requirement.stakeholders?.length ?? 0}人` : 'ステークホルダー不足';
@@ -426,7 +507,8 @@ function evaluateBusinessRequirementCriterion(
       satisfied = (requirement.constraints?.length ?? 0) >= 1;
       evidence = satisfied ? `制約条件 ${requirement.constraints?.length ?? 0}個` : '制約条件未定義';
       break;
-      
+    
+    // レベル4: MANAGED
     case 'br-managed-business-rules':
       satisfied = (requirement.businessRules?.length ?? 0) >= 3;
       evidence = satisfied ? `ビジネスルール ${requirement.businessRules?.length ?? 0}個` : 'ビジネスルール不足';
@@ -436,10 +518,12 @@ function evaluateBusinessRequirementCriterion(
       satisfied = (requirement.securityPolicies?.length ?? 0) >= 1;
       evidence = satisfied ? `セキュリティポリシー ${requirement.securityPolicies?.length ?? 0}個` : 'セキュリティポリシー未定義';
       break;
-      
+    
+    // レベル5: OPTIMIZED
     case 'br-optimized-coverage':
-      // この評価はプロジェクト全体のコンテキストが必要
-      satisfied = false; // TODO: 実際のカバレッジ計算
+      // 注意: プロジェクト全体のコンテキスト（全ユースケース）が必要
+      // TODO: 実際のカバレッジ計算を実装
+      satisfied = false;
       evidence = 'カバレッジ計算は別途実装が必要';
       break;
       
@@ -456,8 +540,31 @@ function evaluateBusinessRequirementCriterion(
   };
 }
 
+// ============================================================================
+// 内部関数 - 評価結果の構築
+// ============================================================================
+
 /**
- * 要素の評価結果を構築
+ * 評価結果から要素評価を構築
+ * @param elementId - 要素ID
+ * @param elementType - 要素のタイプ
+ * @param criteria - この要素タイプの全基準
+ * @param evaluations - 各基準の評価結果
+ * @returns レベル、ディメンション、次のステップを含む完全な評価
+ * 
+ * アルゴリズム:
+ * 1. 基準を満たす/満たさないに分割
+ * 2. 全体レベルを決定: 全ての必須基準を満たす最高レベル
+ * 3. 全体完成率を計算（重み付き平均）
+ * 4. ディメンションスコアを計算
+ * 5. 未達成基準に基づいて次のステップを生成
+ * 6. 未達成基準数に基づいて工数を見積もり
+ * 
+ * レベル決定ロジック:
+ * - レベル1から開始、全ての必須基準が満たされているか確認
+ * - 満たされていればは次のレベルへ
+ * - 満たされていなければ停止し、前のレベルを返す
+ * - これによりレベルのスキップを防ぐ
  */
 function buildElementAssessment(
   elementId: string,
@@ -473,11 +580,11 @@ function buildElementAssessment(
     .filter(e => !e.satisfied)
     .map(e => e.criterion);
   
-  // 成熟度レベルを決定（満たした最高レベル）
+  // 成熟度レベルを決定（全ての必須基準を満たす最高レベル）
   const achievedLevels = new Set(satisfiedCriteria.map(c => c.level));
   let overallLevel = MaturityLevel.INITIAL;
   
-  // レベル1から順に必須基準が全て満たされているか確認
+  // レベル1から5まで順次確認
   for (let level = MaturityLevel.INITIAL; level <= MaturityLevel.OPTIMIZED; level++) {
     const levelCriteria = getCriteriaByLevel(elementType, level);
     const requiredCriteria = levelCriteria.filter(c => c.required);
@@ -488,22 +595,22 @@ function buildElementAssessment(
     if (allRequiredSatisfied) {
       overallLevel = level;
     } else {
-      break; // 必須基準が満たされていないレベルに到達したら終了
+      break; // 必須基準が満たされていない最初のレベルで停止
     }
   }
   
-  // 完成率を計算（重み付き、0-1スケール）
+  // 全体完成率を計算（重み付き、0-1スケール）
   const totalWeight = criteria.reduce((sum, c) => sum + c.weight, 0);
   const satisfiedWeight = satisfiedCriteria.reduce((sum, c) => sum + c.weight, 0);
   const overallCompletionRate = totalWeight > 0 ? satisfiedWeight / totalWeight : 0;
   
-  // ディメンション別の評価
+  // ディメンション別スコアを計算
   const dimensions = calculateDimensionMaturity(
     elementType,
     evaluations
   );
   
-  // 次のステップを生成
+  // 実行可能な次のステップを生成
   const nextSteps = generateNextSteps(
     elementType,
     overallLevel,
@@ -511,7 +618,7 @@ function buildElementAssessment(
     dimensions
   );
   
-  // 工数見積もり
+  // 工数見積もり（時間）
   const estimatedEffort = estimateEffort(unsatisfiedCriteria.length);
   
   return {
@@ -529,6 +636,16 @@ function buildElementAssessment(
 
 /**
  * ディメンション別の成熟度を計算
+ * @param elementType - 要素のタイプ
+ * @param evaluations - この要素の全評価
+ * @returns ディメンションスコアの配列
+ * 
+ * アルゴリズム:
+ * 1. 各ディメンション（全5ディメンション）について
+ * 2. ディメンションで評価をフィルタ
+ * 3. 完成率 = 満たされた重み / 合計重み を計算
+ * 4. 現在のレベル = 満たされた最大レベル を決定
+ * 5. 次のレベルに不足している基準を見つける
  */
 function calculateDimensionMaturity(
   elementType: 'business-requirement' | 'actor' | 'usecase',
@@ -546,14 +663,14 @@ function calculateDimensionMaturity(
     const dimensionCriteria = getCriteriaByDimension(elementType, dimension);
     const dimensionEvaluations = evaluations.filter(e => e.criterion.dimension === dimension);
     
-    // 達成率を計算
+    // 完成率を計算（重み付き）
     const totalWeight = dimensionCriteria.reduce((sum, c) => sum + c.weight, 0);
     const satisfiedWeight = dimensionEvaluations
       .filter(e => e.satisfied)
       .reduce((sum, e) => sum + e.criterion.weight, 0);
     const completionRate = totalWeight > 0 ? satisfiedWeight / totalWeight : 0;
     
-    // 現在のレベルを決定（満たした最高レベル）
+    // 現在のレベルを決定（満たされた最大レベル）
     const satisfiedLevels = dimensionEvaluations
       .filter(e => e.satisfied)
       .map(e => e.criterion.level);
@@ -561,7 +678,7 @@ function calculateDimensionMaturity(
       ? Math.max(...satisfiedLevels) as MaturityLevel
       : MaturityLevel.INITIAL;
     
-    // 次のレベルに必要な不足基準
+    // 次のレベルに不足している基準を見つける
     const nextLevel = Math.min(currentLevel + 1, MaturityLevel.OPTIMIZED) as MaturityLevel;
     const missingCriteria = dimensionCriteria.filter(c =>
       c.level === nextLevel && !dimensionEvaluations.find(e => e.criterion.id === c.id)?.satisfied
@@ -577,8 +694,21 @@ function calculateDimensionMaturity(
   });
 }
 
+// ============================================================================
+// 内部関数 - プロジェクトレベル集約
+// ============================================================================
+
 /**
- * 全体のディメンション成熟度を計算
+ * 全要素にわたるディメンション成熟度を計算
+ * @param assessments - 全要素の評価
+ * @returns 集約されたディメンションスコア
+ * 
+ * アルゴリズム:
+ * 1. 各ディメンションについて
+ * 2. 全要素からディメンションデータを収集
+ * 3. 平均完成率を計算
+ * 4. 最小レベルを決定（最弱の要素）
+ * 5. 要素全体の不足基準を収集
  */
 function calculateOverallDimensions(
   assessments: ElementMaturityAssessment[]
@@ -606,9 +736,13 @@ function calculateOverallDimensions(
       };
     }
     
+    // 全要素の平均完成率
     const avgCompletionRate = dimensionAssessments.reduce((sum, d) => sum + d.completionRate, 0) 
       / dimensionAssessments.length;
+    
+    // 最小レベル（最弱の要素がプロジェクトレベルを決定）
     const minLevel = Math.min(...dimensionAssessments.map(d => d.currentLevel)) as MaturityLevel;
+    
     const allEvaluations = dimensionAssessments.flatMap(d => d.evaluations);
     const allMissingCriteria = dimensionAssessments.flatMap(d => d.missingCriteria);
     
@@ -623,7 +757,11 @@ function calculateOverallDimensions(
 }
 
 /**
- * 強みを特定
+ * プロジェクトの強みを特定（高得点ディメンション）
+ * @param dimensions - ディメンションスコア
+ * @returns 強みの説明の配列
+ * 
+ * 閾値: 80%完成率
  */
 function identifyStrengths(dimensions: DimensionMaturity[]): string[] {
   const strengths: string[] = [];
@@ -639,7 +777,11 @@ function identifyStrengths(dimensions: DimensionMaturity[]): string[] {
 }
 
 /**
- * 改善領域を特定
+ * 改善領域を特定（低得点ディメンション）
+ * @param dimensions - ディメンションスコア
+ * @returns 改善領域の説明の配列
+ * 
+ * 閾値: 60%完成率未満
  */
 function identifyImprovementAreas(dimensions: DimensionMaturity[]): string[] {
   const areas: string[] = [];
@@ -654,8 +796,22 @@ function identifyImprovementAreas(dimensions: DimensionMaturity[]): string[] {
   return areas;
 }
 
+// ============================================================================
+// 内部関数 - 推奨事項生成
+// ============================================================================
+
 /**
- * 次のステップを生成
+ * 要素改善の次のステップを生成
+ * @param elementType - 要素のタイプ
+ * @param currentLevel - 現在の成熟度レベル
+ * @param unsatisfiedCriteria - まだ満たされていない基準
+ * @param dimensions - ディメンションスコア
+ * @returns 優先順位付けされた実行可能なステップのリスト
+ * 
+ * 優先順位付け:
+ * 1. 次のレベルに必要な必須基準（高優先度）
+ * 2. 重みの高いオプション基準（中優先度）
+ * 3. 下位レベルの未達成基準（低優先度）
  */
 function generateNextSteps(
   elementType: 'business-requirement' | 'actor' | 'usecase',
@@ -665,11 +821,11 @@ function generateNextSteps(
 ): NextStep[] {
   const steps: NextStep[] = [];
   
-  // 次のレベルに必要な必須基準を抽出
+  // 高優先度: 次のレベルに必要な必須基準
   const nextLevel = Math.min(currentLevel + 1, MaturityLevel.OPTIMIZED) as MaturityLevel;
   const nextLevelRequired = unsatisfiedCriteria
     .filter(c => c.level === nextLevel && c.required)
-    .sort((a, b) => b.weight - a.weight);
+    .sort((a, b) => b.weight - a.weight); // 重みの降順でソート
   
   nextLevelRequired.forEach(criterion => {
     steps.push({
@@ -681,7 +837,7 @@ function generateNextSteps(
     });
   });
   
-  // 弱いディメンションの改善を提案
+  // 中優先度: 弱いディメンションを改善
   const weakDimensions = dimensions
     .filter(d => d.completionRate < 0.7)
     .sort((a, b) => a.completionRate - b.completionRate);
@@ -702,11 +858,20 @@ function generateNextSteps(
     }
   });
   
-  return steps.slice(0, 5); // 上位5件まで
+  return steps.slice(0, 5); // 上位5件に制限
 }
 
 /**
- * プロジェクト全体の推奨アクションを生成
+ * プロジェクト全体の推奨事項を生成
+ * @param elementAssessments - 全要素の評価
+ * @param dimensions - プロジェクト全体のディメンションスコア
+ * @param projectLevel - プロジェクト全体の成熟度レベル
+ * @returns 優先順位付けされたプロジェクトレベルのアクション
+ * 
+ * 戦略:
+ * 1. 最弱の要素を特定（最低レベル）
+ * 2. プロジェクト全体の弱いディメンションに焦点を当てる
+ * 3. 体系的な改善を提案
  */
 function generateProjectRecommendations(
   elementAssessments: ElementMaturityAssessment[],
@@ -715,7 +880,7 @@ function generateProjectRecommendations(
 ): NextStep[] {
   const recommendations: NextStep[] = [];
   
-  // 最もレベルが低い要素を特定
+  // 最低成熟度レベルの要素を特定
   const lowestLevel = Math.min(...elementAssessments.map(a => a.overallLevel));
   const lowestElements = elementAssessments.filter(a => a.overallLevel === lowestLevel);
   
@@ -729,7 +894,7 @@ function generateProjectRecommendations(
     });
   }
   
-  // 弱いディメンションの全体的な改善
+  // プロジェクト全体で最弱のディメンションを強化
   const weakestDimension = dimensions.sort((a, b) => a.completionRate - b.completionRate)[0];
   if (weakestDimension && weakestDimension.completionRate < 0.7) {
     recommendations.push({
@@ -744,8 +909,20 @@ function generateProjectRecommendations(
   return recommendations;
 }
 
+// ============================================================================
+// 内部関数 - ユーティリティ関数
+// ============================================================================
+
 /**
- * 工数見積もり
+ * 未達成基準を満たすのに必要な工数を見積もる
+ * @param unsatisfiedCount - 未達成基準の数
+ * @returns 人間が読める工数見積もり
+ * 
+ * 閾値:
+ * - 1-3: 小（1-2時間）
+ * - 4-8: 中（半日）
+ * - 9-15: 大（1-2日）
+ * - 16+: 特大（3日以上）
  */
 function estimateEffort(unsatisfiedCount: number): string {
   if (unsatisfiedCount <= 3) return '小 (1-2時間)';
@@ -755,7 +932,9 @@ function estimateEffort(unsatisfiedCount: number): string {
 }
 
 /**
- * ディメンション名を取得
+ * ディメンションの日本語名を取得
+ * @param dimension - ディメンションのenum値
+ * @returns 人間が読めるディメンション名（日本語）
  */
 function getDimensionName(dimension: MaturityDimension): string {
   const names: { [key in MaturityDimension]: string } = {
