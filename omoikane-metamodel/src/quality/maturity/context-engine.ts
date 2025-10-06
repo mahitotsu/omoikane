@@ -1,7 +1,29 @@
 /**
- * コンテキスト対応評価エンジン
+ * @fileoverview コンテキスト対応評価エンジン（Context-Aware Evaluation Engine）
  * 
- * プロジェクトコンテキストに基づいて評価ルールを動的に適用
+ * **目的:**
+ * プロジェクトコンテキスト（ドメイン、ステージ、チーム規模、クリティカリティ）に基づいて
+ * 成熟度評価ルールを動的に適用し、最適な評価基準と推奨を提供します。
+ * 
+ * **コンテキストの5つの次元:**
+ * 1. ドメイン: finance, healthcare, ecommerce, saas, enterprise, government, education, other
+ * 2. ステージ: poc, mvp, production, maintenance
+ * 3. チーム規模: small (1-5), medium (6-15), large (16+)
+ * 4. クリティカリティ: mission_critical, high, medium, low
+ * 5. 文書化レベル: minimal, moderate, comprehensive
+ * 
+ * **主要機能:**
+ * 1. applyContext: コンテキストに基づいてルールを適用
+ * 2. inferContext: メタモデルからコンテキストを推論
+ * 3. generateContextualRecommendations: コンテキストに応じた推奨を生成
+ * 4. generateContextSummary: コンテキストのサマリーを生成
+ * 
+ * **拡張ポイント:**
+ * - 新しいドメインを追加する場合: ProjectDomainとBUILT_IN_RULESに追加
+ * - 新しいステージを追加する場合: DevelopmentStageとBUILT_IN_RULESに追加
+ * - 新しいルールを追加する場合: BUILT_IN_RULESに追加
+ * 
+ * @module quality/maturity/context-engine
  */
 
 import type {
@@ -21,8 +43,29 @@ import {
 } from './context-model.js';
 import { MaturityDimension } from './maturity-model.js';
 
+// ============================================================================
+// ビルトイン評価ルール（Built-in Evaluation Rules）
+// ============================================================================
+
 /**
  * 組み込みコンテキストルール
+ * 
+ * **構成:**
+ * - ドメイン別ルール: 8ドメイン × 各次元の重み設定
+ * - ステージ別ルール: 4ステージ × 各次元の重み設定
+ * - チーム規模別ルール: 3サイズ × 各次元の重み設定
+ * - クリティカリティ別ルール: 4レベル × 各次元の重み設定
+ * 
+ * **重み設定の意味:**
+ * - weight > 1.0: 該当次元の重要度を強調
+ * - weight = 1.0: デフォルトの重要度
+ * - weight < 1.0: 該当次元の重要度を緩和
+ * 
+ * **拡張方法:**
+ * 1. 新しいルールをBUILT_IN_RULESに追加
+ * 2. conditionでコンテキストの条件を定義
+ * 3. dimensionWeightsで各次元の重み設定
+ * 4. recommendedFocusで推奨フォーカスを設定
  */
 const BUILT_IN_RULES: ContextualEvaluationRule[] = [
   // ドメイン別ルール
@@ -269,8 +312,49 @@ const BUILT_IN_RULES: ContextualEvaluationRule[] = [
   },
 ];
 
+// ============================================================================
+// 公開API（Public API）
+// ============================================================================
+
 /**
  * コンテキストを適用して評価ルールを取得
+ * 
+ * **処理フロー:**
+ * 1. ビルトインルール + カスタムルールを結合
+ * 2. コンテキスト条件に一致するルールをフィルタリング
+ * 3. 各ルールの重み設定を集約（掛け算で適用）
+ * 4. クリティカリティによる全体調整を適用
+ * 5. 推奨フォーカス、緩和要件、厳格化要件をマージ
+ * 
+ * **重み計算:**
+ * - 各ルールの重みを順次掛け算
+ * - 最後にクリティカリティ係数を掛ける
+ * - 例: domain_weight(1.5) × stage_weight(1.2) × criticality(1.3) = 2.34
+ * 
+ * **推奨フォーカス:**
+ * - domain, stage, team_size, criticalityの4つの推奨フォーカスをマージ
+ * - 重複は除去される
+ * 
+ * **使用例:**
+ * ```typescript
+ * const context: ProjectContext = {
+ *   domain: ProjectDomain.FINANCE,
+ *   stage: DevelopmentStage.PRODUCTION,
+ *   teamSize: TeamSize.LARGE,
+ *   criticality: ProjectCriticality.MISSION_CRITICAL,
+ *   documentationLevel: 'comprehensive'
+ * };
+ * const result = applyContext(context);
+ * // → TRACEABILITY次元の重みが強調される
+ * ```
+ * 
+ * **拡張ポイント:**
+ * - customRulesで独自ルールを追加可能
+ * - 各ルールのconditionで複雑な条件を記述可能
+ * 
+ * @param context プロジェクトコンテキスト
+ * @param customRules カスタム評価ルール（オプション）
+ * @returns コンテキスト適用結果（重み設定、推奨フォーカス、緩和/厳格化要件、適用サマリー）
  */
 export function applyContext(
   context: ProjectContext,
@@ -324,8 +408,46 @@ export function applyContext(
 }
 
 /**
- * コンテキスト推論
- * プロジェクトの特性から推奨コンテキストを提案
+ * コンテキスト推論（Context Inference）
+ * 
+ * **目的:**
+ * プロジェクト名やタグからプロジェクトコンテキストを自動推論します。
+ * 
+ * **推論ロジック:**
+ * 1. ドメイン推論: キーワードマッチング
+ *    - "shop", "cart", "ecommerce" → ECOMMERCE
+ *    - "bank", "finance", "payment" → FINANCE
+ *    - "health", "medical", "hospital" → HEALTHCARE
+ *    - "iot", "device", "sensor" → IOT
+ *    - "analytics", "data", "ml" → DATA_ANALYTICS
+ * 
+ * 2. ステージ推論: キーワードマッチング
+ *    - "poc", "prototype" → POC
+ *    - "mvp" → MVP
+ *    - "legacy", "migration" → LEGACY_MIGRATION
+ * 
+ * 3. チーム規模推論: （現在は未実装、今後拡張可能）
+ * 
+ * 4. クリティカリティ推論: （現在は未実装、今後拡張可能）
+ * 
+ * **使用例:**
+ * ```typescript
+ * const inferred = inferContext('finance-payment-system', ['bank', 'production']);
+ * // → { domain: FINANCE, ... }
+ * ```
+ * 
+ * **注意:**
+ * - 推論結果はPartial<ProjectContext>のため、必ず明示的な設定と組み合わせて使用
+ * - キーワードは大文字小文字を区別しない
+ * 
+ * **拡張ポイント:**
+ * - 新しいドメインキーワードを追加
+ * - チーム規模の推論ロジックを追加
+ * - クリティカリティの推論ロジックを追加
+ * 
+ * @param projectName プロジェクト名（オプション）
+ * @param tags プロジェクトタグ（オプション）
+ * @returns 推論されたコンテキスト（部分的）
  */
 export function inferContext(
   projectName?: string,
@@ -362,6 +484,34 @@ export function inferContext(
 
 /**
  * コンテキストに基づいた推奨アクションを生成
+ * 
+ * **生成内容:**
+ * 1. ドメイン別推奨: ドメインの特性と推奨フォーカス
+ * 2. ステージ別推奨: ステージの特性と推奨最低レベル
+ * 3. チーム規模別推奨: チーム規模の特性と推奨フォーカス
+ * 4. クリティカリティ別推奨: 重要度の特性と厳格性
+ * 5. 適用されたルールのサマリー: applicationResult.adjustmentSummaryに含まれる
+ * 
+ * **推奨フォーマット:**
+ * - 各推奨はアイコン付き（🎯 📅 👥 ⚠️）
+ * - 読みやすさのため階層構造を使用
+ * 
+ * **使用例:**
+ * ```typescript
+ * const context: ProjectContext = { ... };
+ * const result = applyContext(context);
+ * const recommendations = generateContextualRecommendations(context, result);
+ * recommendations.forEach(r => console.log(r));
+ * // → "🎯 financeドメイン: トレーサビリティと正確性が最重要"
+ * ```
+ * 
+ * **拡張ポイント:**
+ * - 新しい推奨タイプを追加可能
+ * - 推奨フォーマットをカスタマイズ可能
+ * 
+ * @param context プロジェクトコンテキスト
+ * @param applicationResult コンテキスト適用結果
+ * @returns 推奨アクションの配列
  */
 export function generateContextualRecommendations(
   context: ProjectContext,
@@ -401,6 +551,12 @@ export function generateContextualRecommendations(
 
 /**
  * ディメンション名を取得
+ * 
+ * **内部ヘルパー関数**
+ * MaturityDimensionの列挙値を日本語名に変換します。
+ * 
+ * @param dimension 成熟度次元
+ * @returns 日本語のディメンション名
  */
 function getDimensionName(dimension: MaturityDimension): string {
   const names: { [key in MaturityDimension]: string } = {
@@ -415,6 +571,34 @@ function getDimensionName(dimension: MaturityDimension): string {
 
 /**
  * コンテキスト情報を含む評価サマリーを生成
+ * 
+ * **サマリー構成:**
+ * 1. プロジェクトコンテキスト: ドメイン、ステージ、チーム規模、クリティカリティ、タグ
+ * 2. 適用された評価ルール: ルール名、各次元の重み調整、理由
+ * 3. 最終ディメンション重み係数: 各次元の最終重み（ビジュアルバー付き）
+ * 4. 推奨事項: ドメイン、ステージ、チーム規模、クリティカリティ別の推奨
+ * 
+ * **出力フォーマット:**
+ * - セクション区切り: "=" を60文字繰り返し
+ * - アイコン: 📋 🔧 📊 💡
+ * - ビジュアルバー: "█" を重み係数 × 10 回繰り返し
+ * 
+ * **使用例:**
+ * ```typescript
+ * const context: ProjectContext = { ... };
+ * const result = applyContext(context);
+ * const summary = generateContextSummary(context, result);
+ * console.log(summary);
+ * // → 4つのセクションに分かれた詳細サマリーが表示される
+ * ```
+ * 
+ * **拡張ポイント:**
+ * - 新しいセクションを追加可能
+ * - ビジュアル表現をカスタマイズ可能
+ * 
+ * @param context プロジェクトコンテキスト
+ * @param applicationResult コンテキスト適用結果
+ * @returns 評価サマリー文字列（改行区切り）
  */
 export function generateContextSummary(
   context: ProjectContext,
