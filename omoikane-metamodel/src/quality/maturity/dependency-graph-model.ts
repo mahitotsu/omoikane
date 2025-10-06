@@ -1,12 +1,67 @@
 /**
- * 依存関係グラフ分析モデル
+ * @fileoverview 依存関係グラフ分析モデル（Dependency Graph Analysis Model）
  * 
- * 要素間の依存関係を分析し、変更の影響範囲や循環依存を検出
+ * **目的:**
+ * メタモデル要素間の依存関係をグラフ構造でモデル化し、
+ * 変更影響分析、循環依存検出、重要度計算を支援します。
+ * 
+ * **主要な型定義:**
+ * 1. NodeType: ノードタイプ（8種類の要素タイプ）
+ * 2. EdgeType: エッジタイプ（7種類の依存関係）
+ * 3. GraphNode: グラフノード（要素を表現）
+ * 4. GraphEdge: グラフエッジ（依存関係を表現）
+ * 5. DependencyGraph: 依存関係グラフ（ノード・エッジの集合）
+ * 6. CircularDependency: 循環依存情報
+ * 7. ImpactAnalysisResult: 変更影響分析結果
+ * 8. GraphAnalysisResult: グラフ分析総合結果
+ * 
+ * **グラフ理論の応用:**
+ * - Kahn's Algorithm: 循環依存検出（トポロジカルソート）
+ * - DFS (Depth-First Search): 変更影響分析（到達可能性）
+ * - PageRank: ノード重要度計算
+ * - Strongly Connected Components: 強連結成分検出
+ * 
+ * **用途:**
+ * - 変更時の影響範囲を特定
+ * - 循環依存を検出して警告
+ * - 重要な要素を特定して優先順位付け
+ * - アーキテクチャの健全性を評価
+ * 
+ * **拡張ポイント:**
+ * - 新しいノードタイプを追加: NodeTypeに列挙値を追加
+ * - 新しいエッジタイプを追加: EdgeTypeに列挙値を追加
+ * - カスタムグラフアルゴリズムを実装
+ * 
+ * @module quality/maturity/dependency-graph-model
  */
 
+// ============================================================================
+// ノードタイプとエッジタイプ（Node Type and Edge Type）
+// ============================================================================
 
 /**
  * ノードタイプ
+ * 
+ * **用途:**
+ * 依存関係グラフのノード（要素）のタイプを8種類で定義します。
+ * 
+ * **ノードタイプの定義:**
+ * - BUSINESS_REQUIREMENT: ビジネス要件定義
+ * - BUSINESS_GOAL: ビジネスゴール
+ * - BUSINESS_RULE: ビジネスルール
+ * - SECURITY_POLICY: セキュリティポリシー
+ * - ACTOR: アクター
+ * - USECASE: ユースケース
+ * - USECASE_STEP: ユースケースステップ
+ * - DATA_REQUIREMENT: データ要件
+ * 
+ * **使用例:**
+ * グラフ分析時に要素タイプ別の統計を取得したり、
+ * タイプ別にフィルタリングしたりします。
+ * 
+ * **拡張方法:**
+ * 新しい要素タイプを追加する場合は、ここに列挙値を追加し、
+ * dependency-graph-analyzer.tsのbuildGraph関数を更新します。
  */
 export enum NodeType {
   BUSINESS_REQUIREMENT = 'business-requirement',
@@ -21,6 +76,26 @@ export enum NodeType {
 
 /**
  * エッジタイプ（依存関係の種類）
+ * 
+ * **用途:**
+ * ノード間の依存関係（エッジ）のタイプを7種類で定義します。
+ * 
+ * **エッジタイプの定義:**
+ * - REFERENCES: 参照（弱い依存、読み取り専用）
+ * - IMPLEMENTS: 実装（強い依存、実現関係）
+ * - USES: 使用（中程度の依存、機能利用）
+ * - CONTAINS: 包含（親子関係、構成要素）
+ * - DEPENDS_ON: 依存（一般的な依存関係）
+ * - AFFECTS: 影響を与える（副作用、変更伝播）
+ * - TRIGGERS: トリガー（イベント発火、制御フロー）
+ * 
+ * **使用例:**
+ * エッジタイプごとに重み付けを変えて影響度を計算したり、
+ * 特定タイプのエッジだけをフィルタリングしたりします。
+ * 
+ * **拡張方法:**
+ * 新しい依存関係タイプを追加する場合は、ここに列挙値を追加し、
+ * dependency-graph-analyzer.tsのbuildGraph関数を更新します。
  */
 export enum EdgeType {
   /** 参照 */
@@ -45,8 +120,35 @@ export enum EdgeType {
   TRIGGERS = 'triggers',
 }
 
+// ============================================================================
+// グラフノードとエッジ（Graph Node and Edge）
+// ============================================================================
+
 /**
  * グラフノード
+ * 
+ * **用途:**
+ * 依存関係グラフのノード（要素）を表現します。
+ * 
+ * **構成:**
+ * - id: ノード一意識別子
+ * - name: ノード名
+ * - type: ノードタイプ
+ * - metadata: メタデータ（priority, complexity, maturityLevelなど）
+ * 
+ * **使用例:**
+ * ```typescript
+ * const node: GraphNode = {
+ *   id: 'uc-user-login',
+ *   name: 'ユーザーログイン',
+ *   type: NodeType.USECASE,
+ *   metadata: {
+ *     priority: 'high',
+ *     complexity: 'medium',
+ *     maturityLevel: 3
+ *   }
+ * };
+ * ```
  */
 export interface GraphNode {
   /** ノードID */
@@ -69,6 +171,27 @@ export interface GraphNode {
 
 /**
  * グラフエッジ（有向辺）
+ * 
+ * **用途:**
+ * ノード間の依存関係（エッジ）を表現します。
+ * 
+ * **構成:**
+ * - from: ソースノードID
+ * - to: ターゲットノードID
+ * - type: エッジタイプ
+ * - weight: エッジの重み（影響度、オプション）
+ * - label: 説明（オプション）
+ * 
+ * **使用例:**
+ * ```typescript
+ * const edge: GraphEdge = {
+ *   from: 'uc-user-login',
+ *   to: 'actor-user',
+ *   type: EdgeType.REFERENCES,
+ *   weight: 1.0,
+ *   label: 'ユーザーアクターを参照'
+ * };
+ * ```
  */
 export interface GraphEdge {
   /** ソースノードID */
@@ -87,8 +210,29 @@ export interface GraphEdge {
   label?: string;
 }
 
+// ============================================================================
+// 依存関係グラフ（Dependency Graph）
+// ============================================================================
+
 /**
  * 依存関係グラフ
+ * 
+ * **用途:**
+ * ノードとエッジの集合で構成される依存関係グラフを表現します。
+ * 
+ * **構成:**
+ * - nodes: ノード一覧（Map<id, GraphNode>）
+ * - edges: エッジ一覧（GraphEdge[]）
+ * - adjacencyList: 隣接リスト（from -> to[]、効率的な走査用）
+ * - reverseAdjacencyList: 逆隣接リスト（to -> from[]、逆方向走査用）
+ * 
+ * **データ構造:**
+ * - Map: O(1)のノード検索
+ * - adjacencyList: O(1)の後続ノード取得
+ * - reverseAdjacencyList: O(1)の先行ノード取得
+ * 
+ * **使用例:**
+ * グラフアルゴリズム（DFS, BFS, トポロジカルソート）で使用されます。
  */
 export interface DependencyGraph {
   /** ノード一覧 */
