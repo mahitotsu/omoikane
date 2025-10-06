@@ -1,7 +1,41 @@
 /**
- * AI Agent推奨エンジン v2.0 - 実装
+ * @fileoverview AI Agent推奨エンジン v2.0 - 実装（AI Recommendation Engine）
  * 
- * 成熟度・コンテキスト・依存関係を統合した推奨生成
+ * **目的:**
+ * 成熟度評価、コンテキスト分析、依存関係分析を統合し、AIエージェントが実行可能な
+ * 具体的な改善推奨を生成します。
+ * 
+ * **4つの推奨生成戦略:**
+ * 1. 成熟度ベース（Maturity-based）: 次のレベルに到達するための具体的アクション
+ * 2. コンテキストベース（Context-based）: プロジェクトステージ・チーム規模に応じた推奨
+ * 3. 依存関係ベース（Dependency-based）: 循環依存・孤立要素の解決
+ * 4. テンプレートベース（Template-based）: ベストプラクティスの適用
+ * 
+ * **推奨の構造:**
+ * - 優先度: critical > high > medium > low
+ * - カテゴリ: quality, maintainability, testability, documentation, architecture
+ * - 影響範囲: project, module, element
+ * - 工数見積もり: 時間数、複雑度
+ * - ROI計算: 効果/工数
+ * 
+ * **推奨のグルーピング:**
+ * - Top Priority: 最優先5件
+ * - Quick Wins: 低工数・高効果
+ * - Long-term Strategy: 戦略的改善
+ * - Bundles: 関連する推奨のまとまり
+ * 
+ * **出力:**
+ * - AIAgentRecommendations: 全推奨リスト + サマリー
+ * - StructuredRecommendation: 実行可能な具体的アクション
+ * - 工数見積もり、成熟度向上予測
+ * 
+ * **拡張ポイント:**
+ * - 新しい推奨戦略を追加する場合: generate〇〇Recommendations関数を追加
+ * - 新しいテンプレートを追加する場合: initializeBuiltInTemplatesに追加
+ * - 優先順位付けロジックを変更する場合: prioritizeRecommendations関数を修正
+ * - ROI計算を調整する場合: calculateROI関数を変更
+ * 
+ * @module quality/maturity/ai-recommendation-engine
  */
 
 import type {
@@ -30,8 +64,34 @@ import type {
     ProjectMaturityAssessment
 } from './maturity-model.js';
 
+// ============================================================================
+// AI推奨エンジンクラス
+// ============================================================================
+
 /**
- * AI推奨エンジン
+ * AI推奨エンジン（AI Recommendation Engine）
+ * 
+ * **責務:**
+ * - 複数の分析結果を統合して改善推奨を生成
+ * - 優先順位付けとフィルタリング
+ * - Quick Wins（低工数・高効果）の特定
+ * - 推奨のバンドリング（関連する推奨のグループ化）
+ * 
+ * **使用例:**
+ * ```typescript
+ * const engine = new AIRecommendationEngine();
+ * const recommendations = engine.generateRecommendations({
+ *   maturity: maturityAssessment,
+ *   context: projectContext,
+ *   graph: graphAnalysis
+ * }, { maxRecommendations: 20, generateBundles: true });
+ * ```
+ * 
+ * **内部状態:**
+ * - templates: ビルトインテンプレートのリスト
+ * 
+ * **拡張ポイント:**
+ * - カスタムテンプレートを追加する場合: コンストラクタでthis.templates.push()
  */
 export class AIRecommendationEngine {
   private templates: AIRecommendationTemplate[] = [];
@@ -40,8 +100,50 @@ export class AIRecommendationEngine {
     this.initializeBuiltInTemplates();
   }
   
+  // ============================================================================
+  // 公開API: 総合推奨生成
+  // ============================================================================
+  
   /**
- * 総合推奨を生成
+   * 総合推奨を生成します。
+   * 
+   * **処理フロー:**
+   * 1. 4つの戦略で推奨を生成（成熟度、コンテキスト、依存関係、テンプレート）
+   * 2. フィルタリング（オプション適用）
+   * 3. 優先順位付け（ROI計算、重要度評価）
+   * 4. Top 5、Quick Wins、Long-term Strategyを特定
+   * 5. バンドル生成（関連推奨のグループ化）
+   * 6. サマリー作成（総数、工数、成熟度向上予測）
+   * 
+   * **優先順位付けアルゴリズム:**
+   * - ROI = (成熟度向上 × 影響範囲) / (工数 × 複雑度)
+   * - critical問題は最優先
+   * - 依存関係のある推奨は順序を考慮
+   * 
+   * @param data - 分析結果データ（maturity, context, graph, requirements, actors, useCasesなど）
+   * @param options - 推奨生成オプション（maxRecommendations, generateBundles, priorityThresholdなど）
+   * @returns 総合推奨結果（AIAgentRecommendations）
+   * 
+   * **使用例:**
+   * ```typescript
+   * const recommendations = engine.generateRecommendations({
+   *   maturity: maturityAssessment,
+   *   context: projectContext,
+   *   graph: graphAnalysis
+   * }, {
+   *   maxRecommendations: 20,
+   *   generateBundles: true,
+   *   priorityThreshold: 'medium'
+   * });
+   * console.log(`トップ推奨: ${recommendations.topPriority[0].title}`);
+   * ```
+   * 
+   * **注意:**
+   * - データが不足している場合、該当する戦略の推奨はスキップされます
+   * - options.maxRecommendationsを指定しない場合、全推奨を返します
+   * 
+   * **拡張ポイント:**
+   * - 新しい推奨戦略を追加する場合: generate〇〇Recommendations呼び出しを追加
    */
   generateRecommendations(data: {
     maturity?: ProjectMaturityAssessment;
@@ -110,8 +212,33 @@ export class AIRecommendationEngine {
     };
   }
   
+  
+  // ============================================================================
+  // 推奨生成戦略1: 成熟度ベース
+  // ============================================================================
+  
   /**
-   * 成熟度評価から推奨を生成
+   * 成熟度評価結果から推奨を生成します。
+   * 
+   * **生成ロジック:**
+   * 1. 各要素のnextStepsを取得
+   * 2. StructuredRecommendation形式に変換
+   * 3. 優先度、工数、成熟度向上効果を計算
+   * 4. プロジェクト全体の改善推奨を追加（レベル5未満の場合）
+   * 
+   * **推奨の種類:**
+   * - 要素レベル: 各UseCase/Actor/BusinessRequirementの改善
+   * - プロジェクトレベル: 全体的な成熟度向上
+   * 
+   * @param maturity - プロジェクト成熟度評価結果
+   * @returns 成熟度ベースの推奨リスト
+   * 
+   * **注意:**
+   * - nextStepsが定義されていない要素はスキップされます
+   * - レベル2以下の要素は高優先度として扱われます
+   * 
+   * **拡張ポイント:**
+   * - 新しい要素タイプを追加する場合: maturity.elementsの構造を確認
    */
   private generateMaturityRecommendations(
     maturity: ProjectMaturityAssessment
@@ -170,8 +297,33 @@ export class AIRecommendationEngine {
     return recommendations;
   }
   
+  
+  // ============================================================================
+  // 推奨生成戦略2: コンテキストベース
+  // ============================================================================
+  
   /**
-   * コンテキストから推奨を生成
+   * プロジェクトコンテキストに応じた推奨を生成します。
+   * 
+   * **生成ロジック:**
+   * 1. ステージ別推奨（PoC/MVP: 軽量化、Production: 詳細化）
+   * 2. チーム規模別推奨（小規模: シンプル、大規模: 構造化）
+   * 3. 文書化レベル別推奨（低: 基本追加、高: 最適化）
+   * 4. コンテキスト適用結果の反映（適用されたルールの効果測定）
+   * 
+   * **コンテキスト考慮:**
+   * - stage: poc, mvp, production, maintenance
+   * - teamSize: small (1-5), medium (6-15), large (16+)
+   * - documentationLevel: minimal, moderate, comprehensive
+   * 
+   * @param context - プロジェクトコンテキスト
+   * @param contextResult - コンテキスト適用結果
+   * @param maturity - 成熟度評価結果（オプション、優先度判定に使用）
+   * @returns コンテキストベースの推奨リスト
+   * 
+   * **拡張ポイント:**
+   * - 新しいステージを追加する場合: stage判定条件を追加
+   * - 新しいチーム規模を追加する場合: teamSize判定条件を追加
    */
   private generateContextRecommendations(
     context: ProjectContext,
@@ -298,8 +450,33 @@ export class AIRecommendationEngine {
     return recommendations;
   }
   
+  // ============================================================================
+  // 推奨生成戦略3: 依存関係ベース
+  // ============================================================================
+  
   /**
-   * 依存関係グラフから推奨を生成
+   * 依存関係分析結果から推奨を生成します。
+   * 
+   * **生成ロジック:**
+   * 1. 循環依存（Circular Dependencies）の解決推奨
+   * 2. 孤立要素（Orphaned Elements）の統合推奨
+   * 3. 過度に依存されている要素（Hub Elements）の分割推奨
+   * 4. 依存関係の簡素化推奨
+   * 
+   * **問題検出:**
+   * - 循環依存: システムの理解を困難にする（高優先度）
+   * - 孤立要素: 未使用のリソース（中優先度）
+   * - ハブ要素: 単一障害点のリスク（中優先度）
+   * 
+   * @param graph - 依存関係グラフ分析結果
+   * @returns 依存関係ベースの推奨リスト
+   * 
+   * **注意:**
+   * - 循環依存の解決は複雑度が高いため、詳細な手順を提供します
+   * - 孤立要素は削除または統合の判断が必要です
+   * 
+   * **拡張ポイント:**
+   * - 新しいグラフメトリクスを追加する場合: graph.metricsの構造を確認
    */
   private generateDependencyRecommendations(
     graph: GraphAnalysisResult
@@ -429,8 +606,31 @@ export class AIRecommendationEngine {
     return recommendations;
   }
   
+  // ============================================================================
+  // 推奨生成戦略4: テンプレートベース
+  // ============================================================================
+  
   /**
-   * テンプレートベースの推奨生成
+   * テンプレートベースの推奨を生成します。
+   * 
+   * **生成ロジック:**
+   * 1. ビルトインテンプレートをスキャン
+   * 2. 適用条件（condition）をチェック
+   * 3. 条件を満たすテンプレートからStructuredRecommendationを生成
+   * 
+   * **テンプレートの種類:**
+   * - ベストプラクティス: 業界標準の適用
+   * - パターン: 設計パターンの導入
+   * - チェックリスト: 品質チェック項目
+   * 
+   * @param data - 全分析結果データ
+   * @returns テンプレートベースの推奨リスト
+   * 
+   * **注意:**
+   * - テンプレートのcondition関数がtrueを返した場合のみ推奨を生成
+   * 
+   * **拡張ポイント:**
+   * - 新しいテンプレートを追加する場合: initializeBuiltInTemplatesに追加
    */
   private generateTemplateRecommendations(data: {
     maturity?: ProjectMaturityAssessment;
@@ -451,8 +651,35 @@ export class AIRecommendationEngine {
     return recommendations;
   }
   
+  // ============================================================================
+  // フィルタリングと優先順位付け
+  // ============================================================================
+  
   /**
-   * 推奨のフィルタリング
+   * 推奨をフィルタリングします。
+   * 
+   * **フィルタリング条件:**
+   * 1. 最低優先度（minPriority）: これ以上の優先度のみ
+   * 2. カテゴリ（categories）: 指定カテゴリのみ
+   * 3. 実行可能性（executableOnly）: executables定義があるもののみ
+   * 4. 最大工数（maxEffortHours）: 指定時間以下のもののみ
+   * 5. 最大推奨数（maxRecommendations）: 上位N件のみ
+   * 
+   * @param recommendations - フィルタリング前の推奨リスト
+   * @param options - フィルタリングオプション
+   * @returns フィルタリング後の推奨リスト
+   * 
+   * **使用例:**
+   * ```typescript
+   * const filtered = filterRecommendations(recs, {
+   *   minPriority: 'medium',
+   *   maxEffortHours: 8,
+   *   executableOnly: true
+   * });
+   * ```
+   * 
+   * **拡張ポイント:**
+   * - 新しいフィルタ条件を追加する場合: optionsに追加し、ここで判定
    */
   private filterRecommendations(
     recommendations: StructuredRecommendation[],
@@ -499,7 +726,29 @@ export class AIRecommendationEngine {
   }
   
   /**
-   * 推奨の優先順位付け
+   * 推奨を優先順位付けします。
+   * 
+   * **優先順位付けアルゴリズム:**
+   * 1. ROI（投資対効果）を計算: (効果 / 工数)
+   * 2. critical推奨を最優先
+   * 3. ROIが高い順にソート
+   * 4. 同率の場合は優先度（priority）で判定
+   * 
+   * **ROI計算:**
+   * - 効果 = (成熟度向上 × 5) + (影響範囲の広さ × 3)
+   * - 工数 = 時間数 × 複雑度係数
+   * - 影響範囲: project(3) > module(2) > element(1)
+   * - 複雑度係数: simple(1) < moderate(1.5) < complex(2)
+   * 
+   * @param recommendations - 優先順位付け前の推奨リスト
+   * @param data - 分析結果データ（成熟度情報など）
+   * @returns 優先順位付け後の推奨リスト
+   * 
+   * **注意:**
+   * - critical推奨は常に最優先（ROIに関わらず）
+   * 
+   * **拡張ポイント:**
+   * - ROI計算式を変更する場合: calculateROI関数を修正
    */
   private prioritizeRecommendations(
     recommendations: StructuredRecommendation[],
@@ -538,7 +787,26 @@ export class AIRecommendationEngine {
   }
   
   /**
-   * クイックウィンの特定
+   * Quick Wins（速攻で成果を上げる推奨）を特定します。
+   * 
+   * **Quick Winsの条件:**
+   * - 工数: 4時間以内
+   * - 複雑度: simple
+   * - 優先度: high または medium
+   * 
+   * **目的:**
+   * - 短期間で実装可能
+   * - 即座に効果を実感できる
+   * - チームの士気向上
+   * 
+   * @param recommendations - 全推奨リスト
+   * @returns Quick Winsのリスト（ROI順、最大5件）
+   * 
+   * **使用例:**
+   * 初期段階で成果を見せる必要がある場合、これらを優先実装します。
+   * 
+   * **拡張ポイント:**
+   * - 条件を変更する場合: filter条件を調整
    */
   private identifyQuickWins(
     recommendations: StructuredRecommendation[]
@@ -553,7 +821,25 @@ export class AIRecommendationEngine {
   }
   
   /**
-   * 長期戦略推奨の特定
+   * Long-term Strategy（長期的な戦略推奨）を特定します。
+   * 
+   * **Long-term Strategyの条件:**
+   * - 工数: 16時間以上
+   * - 影響範囲: project全体
+   * 
+   * **目的:**
+   * - システム全体のアーキテクチャ改善
+   * - 長期的な品質向上
+   * - 技術的負債の解消
+   * 
+   * @param recommendations - 全推奨リスト
+   * @returns Long-term Strategyのリスト（ROI順、最大5件）
+   * 
+   * **使用例:**
+   * 中長期的なロードマップを作成する際に参照します。
+   * 
+   * **拡張ポイント:**
+   * - 条件を変更する場合: filter条件を調整
    */
   private identifyLongTermStrategy(
     recommendations: StructuredRecommendation[]
@@ -568,7 +854,31 @@ export class AIRecommendationEngine {
   }
   
   /**
-   * 推奨バンドルの生成
+   * 推奨バンドル（関連する推奨のグループ）を生成します。
+   * 
+   * **バンドル生成ロジック:**
+   * 1. カテゴリー別バンドル: 同じカテゴリの推奨を3件以上まとめる
+   * 2. 成熟度レベル別バンドル: 同じ目標レベルの推奨をまとめる
+   * 
+   * **バンドルの利点:**
+   * - 関連する改善を一括実施
+   * - 相乗効果の最大化
+   * - プロジェクト管理の簡素化
+   * 
+   * @param recommendations - 全推奨リスト
+   * @param maturity - 成熟度評価結果（オプション）
+   * @returns 推奨バンドルのリスト
+   * 
+   * **使用例:**
+   * ```typescript
+   * const bundles = generateBundles(recs, maturity);
+   * for (const bundle of bundles) {
+   *   console.log(`${bundle.name}: ${bundle.recommendations.length}件`);
+   * }
+   * ```
+   * 
+   * **拡張ポイント:**
+   * - 新しいバンドル基準を追加する場合: ここにロジックを追加
    */
   private generateBundles(
     recommendations: StructuredRecommendation[],
@@ -614,8 +924,27 @@ export class AIRecommendationEngine {
     return Math.min(criticalCount * 0.1 + highCount * 0.05, 1.0);
   }
   
+  // ============================================================================
+  // ユーティリティ関数: ROI計算とグルーピング
+  // ============================================================================
+  
   /**
-   * ROI計算
+   * ROI（投資対効果）を計算します。
+   * 
+   * **計算式:**
+   * - 効果スコア = 便益数 × 2 + 優先度係数
+   * - 優先度係数: critical(10), high(5), medium/low(2)
+   * - ROI = 効果スコア / 工数（時間）
+   * 
+   * **用途:**
+   * - 推奨の優先順位付け
+   * - Quick Winsの特定
+   * 
+   * @param rec - 推奨
+   * @returns ROIスコア（高いほど効果的）
+   * 
+   * **拡張ポイント:**
+   * - 計算式を調整する場合: benefitScoreやeffortScoreの算出ロジックを変更
    */
   private calculateROI(rec: StructuredRecommendation): number {
     const benefitScore = rec.benefits.length * 2 + 
@@ -626,7 +955,14 @@ export class AIRecommendationEngine {
   }
   
   /**
-   * カテゴリー別グルーピング
+   * カテゴリー別にグルーピングします。
+   * 
+   * **用途:**
+   * - バンドル生成
+   * - レポート作成
+   * 
+   * @param recommendations - 推奨リスト
+   * @returns カテゴリーごとの推奨マップ
    */
   private groupByCategory(
     recommendations: StructuredRecommendation[]
