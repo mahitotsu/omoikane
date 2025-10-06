@@ -196,6 +196,17 @@ console.log(`推奨事項: ${recommendations.recommendations.length}件`);
 
 詳細は [品質評価フレームワーク](./src/quality/README.md) を参照してください。
 
+## 📚 ドキュメント
+
+### 品質評価システム
+- **[品質評価ガイド](./docs/quality-assessment-guide.md)** - レポートの読み方と基本概念
+- **[推奨事項対処ガイド](./docs/recommendations-guide.md)** - 具体的な改善方法とコード例
+- **[メトリクス算出方法](./docs/metrics-calculation.md)** - 各指標の詳細な計算方法
+
+詳細は [docs/README.md](./docs/README.md) を参照してください。
+
 ## ライセンス
 
 MIT
+
+```
