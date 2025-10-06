@@ -1,7 +1,44 @@
 /**
- * メトリクスダッシュボード - 実装
+ * @fileoverview メトリクスダッシュボード（Metrics Dashboard）
  * 
- * 品質メトリクスの収集、分析、可視化
+ * **目的:**
+ * 品質メトリクスの収集、分析、可視化を一元管理し、
+ * プロジェクトの健全性をリアルタイムで追跡します。
+ * 
+ * **主要機能:**
+ * 1. スナップショット管理: 時系列でメトリクスを記録
+ * 2. トレンド分析: 過去データから傾向を分析
+ * 3. 健全性スコア計算: 5つの観点から総合評価
+ * 4. アラート生成: 閾値を超えた場合に警告
+ * 5. 比較分析: 2つのスナップショットを比較
+ * 6. レポート生成: JSON/Markdown/HTML形式でエクスポート
+ * 7. チャートデータ生成: 可視化用のデータ構造を提供
+ * 
+ * **データモデル:**
+ * - MetricsSnapshot: 特定時点のメトリクススナップショット
+ * - MetricsTrend: トレンド分析結果（成長率、予測値）
+ * - ProjectHealthScore: 総合健全性スコア（5観点）
+ * - MetricsAlert: アラート情報（severity, message, recommendation）
+ * - MetricsComparison: 2つのスナップショットの比較結果
+ * 
+ * **健全性スコアの5観点:**
+ * 1. maturity: 成熟度の総合スコア
+ * 2. coverage: カバレッジ率
+ * 3. dependency: 依存関係の健全性
+ * 4. recommendation: 推奨事項の実施率
+ * 5. trend: トレンドの方向性
+ * 
+ * **アルゴリズム:**
+ * - トレンド分析: 線形回帰（最小二乗法）で成長率を計算
+ * - 健全性スコア: 重み付け平均（configで設定可能）
+ * - アラート生成: 閾値ベース + ルールベース
+ * 
+ * **拡張ポイント:**
+ * - customMetricsで独自メトリクスを追加可能
+ * - healthThresholdsで閾値をカスタマイズ可能
+ * - exportFormatsで新しいエクスポート形式を追加可能
+ * 
+ * @module quality/maturity/metrics-dashboard
  */
 
 import type { AIAgentRecommendations } from './ai-recommendation-model.js';
@@ -24,13 +61,66 @@ import type {
     ProjectHealthScore
 } from './metrics-dashboard-model.js';
 
+// ============================================================================
+// メトリクスダッシュボードクラス（MetricsDashboard Class）
+// ============================================================================
+
 /**
  * メトリクスダッシュボード
+ * 
+ * **責務:**
+ * プロジェクトの品質メトリクスを時系列で管理し、分析・可視化を提供します。
+ * 
+ * **主要メソッド:**
+ * - createSnapshot: 新しいスナップショットを作成
+ * - analyzeTrends: トレンド分析を実行
+ * - calculateHealthScore: 健全性スコアを計算
+ * - generateAlerts: アラートを生成
+ * - compareSnapshots: 2つのスナップショットを比較
+ * - generateReport: レポートを生成
+ * - generateChartData: チャート用データを生成
+ * 
+ * **使用例:**
+ * ```typescript
+ * const dashboard = new MetricsDashboard({
+ *   maxSnapshots: 100,
+ *   healthThresholds: { excellent: 90, good: 75, fair: 60, poor: 40 }
+ * });
+ * 
+ * const snapshot = dashboard.createSnapshot({
+ *   maturity: assessmentResult,
+ *   graph: graphResult,
+ *   recommendations: aiRecommendations,
+ *   context: projectContext
+ * });
+ * 
+ * const trends = dashboard.analyzeTrends();
+ * const health = dashboard.calculateHealthScore();
+ * const alerts = dashboard.generateAlerts();
+ * ```
+ * 
+ * **拡張ポイント:**
+ * - DashboardConfigで動作をカスタマイズ
+ * - customMetricsで独自メトリクスを追加
+ * - exportFormatsで新しいエクスポート形式を追加
  */
 export class MetricsDashboard {
   private dataStore: DashboardDataStore;
   private config: DashboardConfig;
   
+  /**
+   * コンストラクタ
+   * 
+   * **設定項目:**
+   * - autoSnapshotInterval: 自動スナップショット間隔（分）
+   * - maxSnapshots: 保持する最大スナップショット数
+   * - trendAnalysisPeriod: トレンド分析期間（日）
+   * - healthThresholds: 健全性スコアの閾値
+   * - customMetrics: カスタムメトリクス定義
+   * - exportFormats: エクスポート形式
+   * 
+   * @param config ダッシュボード設定（オプション）
+   */
   constructor(config: Partial<DashboardConfig> = {}) {
     this.config = {
       autoSnapshotInterval: config.autoSnapshotInterval || 60,
@@ -54,8 +144,48 @@ export class MetricsDashboard {
     };
   }
   
+  // ============================================================================
+  // スナップショット管理（Snapshot Management）
+  // ============================================================================
+  
   /**
    * スナップショットを作成
+   * 
+   * **処理フロー:**
+   * 1. 成熟度評価結果から次元スコアを抽出
+   * 2. 要素数をカウント（ビジネス要件、アクター、ユースケース）
+   * 3. 依存関係グラフの統計を抽出
+   * 4. AI推奨事項の統計を抽出
+   * 5. スナップショットを作成してdataStoreに保存
+   * 6. maxSnapshotsを超えた場合は古いものを削除
+   * 
+   * **スナップショットの構成:**
+   * - timestamp: スナップショット作成日時
+   * - maturityLevel: 総合成熟度レベル
+   * - dimensionScores: 各次元のスコア
+   * - elementCounts: 要素数
+   * - graphMetrics: 依存関係グラフのメトリクス
+   * - recommendationMetrics: AI推奨事項のメトリクス
+   * - context: プロジェクトコンテキスト
+   * 
+   * **使用例:**
+   * ```typescript
+   * const snapshot = dashboard.createSnapshot({
+   *   maturity: assessmentResult,
+   *   graph: graphAnalysis,
+   *   recommendations: aiRecs,
+   *   context: projectContext
+   * });
+   * console.log(snapshot.maturityLevel); // → 3
+   * console.log(snapshot.dimensionScores.get(MaturityDimension.STRUCTURE)); // → 0.85
+   * ```
+   * 
+   * **注意:**
+   * - maxSnapshotsを超えた場合、最も古いスナップショットが自動削除される
+   * - スナップショットは時系列順にソートされる
+   * 
+   * @param data スナップショット作成に必要なデータ
+   * @returns 作成されたスナップショット
    */
   createSnapshot(data: {
     maturity: ProjectMaturityAssessment;
@@ -128,8 +258,54 @@ export class MetricsDashboard {
     return snapshot;
   }
   
+  // ============================================================================
+  // 健全性スコア計算（Health Score Calculation）
+  // ============================================================================
+  
   /**
    * プロジェクト健全性スコアを計算
+   * 
+   * **計算アルゴリズム:**
+   * 1. maturity: (成熟度レベル / 5) × 100
+   * 2. completeness: 完全性率 × 100
+   * 3. consistency: 100 - (次元間の分散 × 200) ※分散が小さいほど高スコア
+   * 4. traceability: トレーサビリティ次元スコア × 100
+   * 5. architecture: 100 - (循環依存数 × 10) - (孤立ノード数 × 5)
+   * 
+   * **総合スコア（加重平均）:**
+   * - maturity: 30%
+   * - completeness: 25%
+   * - consistency: 15%
+   * - traceability: 15%
+   * - architecture: 15%
+   * 
+   * **健全性レベル（configで設定可能）:**
+   * - excellent: 90以上
+   * - good: 75-89
+   * - fair: 60-74
+   * - poor: 40-59
+   * - critical: 40未満
+   * 
+   * **強み・弱みの判定:**
+   * - 強み: カテゴリースコア ≥ 80
+   * - 弱み: カテゴリースコア < 60
+   * 
+   * **使用例:**
+   * ```typescript
+   * const snapshot = dashboard.createSnapshot({ maturity: assessment });
+   * const health = dashboard.calculateHealthScore(snapshot);
+   * console.log(health.overall); // → 75
+   * console.log(health.level); // → "good"
+   * console.log(health.strengths); // → ["完全性: 85点"]
+   * console.log(health.weaknesses); // → ["アーキテクチャ: 55点"]
+   * ```
+   * 
+   * **拡張ポイント:**
+   * - healthThresholdsで閾値をカスタマイズ可能
+   * - 重み付けをconfigで変更可能（将来の拡張）
+   * 
+   * @param snapshot メトリクススナップショット
+   * @returns プロジェクト健全性スコア
    */
   calculateHealthScore(snapshot: MetricsSnapshot): ProjectHealthScore {
     // カテゴリー別スコア計算
@@ -293,8 +469,53 @@ export class MetricsDashboard {
     };
   }
   
+  // ============================================================================
+  // スナップショット比較（Snapshot Comparison）
+  // ============================================================================
+  
   /**
    * スナップショット比較
+   * 
+   * **比較内容:**
+   * 1. 成熟度レベルの変化
+   * 2. 完成率の変化
+   * 3. 各次元スコアの変化
+   * 4. 期間（日数・時間）
+   * 5. 改善/悪化の判定
+   * 
+   * **次元スコア変化の構造:**
+   * - before: 前のスコア
+   * - after: 後のスコア
+   * - change: 変化量（after - before）
+   * - improved: 改善したか（change > 0）
+   * 
+   * **期間計算:**
+   * - 日数と時間を計算（例: 7日5時間）
+   * 
+   * **使用例:**
+   * ```typescript
+   * const snapshot1 = dashboard.createSnapshot({ maturity: assessment1 });
+   * const snapshot2 = dashboard.createSnapshot({ maturity: assessment2 });
+   * const comparison = dashboard.compareSnapshots(snapshot1.id, snapshot2.id);
+   * 
+   * if (comparison) {
+   *   console.log(comparison.summary);
+   *   console.log(`期間: ${comparison.periodDays}日${comparison.periodHours}時間`);
+   *   comparison.dimensionChanges.forEach((change, dim) => {
+   *     console.log(`${dim}: ${change.change > 0 ? '↑' : '↓'} ${Math.abs(change.change * 100).toFixed(1)}%`);
+   *   });
+   * }
+   * ```
+   * 
+   * **注意:**
+   * - 存在しないIDを指定するとnullを返す
+   * 
+   * **拡張ポイント:**
+   * - 比較サマリーのフォーマットをカスタマイズ可能
+   * 
+   * @param beforeId 前のスナップショットID
+   * @param afterId 後のスナップショットID
+   * @returns スナップショット比較結果、存在しない場合はnull
    */
   compareSnapshots(beforeId: string, afterId: string): MetricsComparison | null {
     const before = this.dataStore.snapshots.find(s => s.id === beforeId);
@@ -356,8 +577,53 @@ export class MetricsDashboard {
     };
   }
   
+  // ============================================================================
+  // レポート生成（Report Generation）
+  // ============================================================================
+  
   /**
    * ダッシュボードレポート生成
+   * 
+   * **レポートタイプ:**
+   * - summary: サマリーレポート（最新スナップショット、健全性スコア、アラート）
+   * - detailed: 詳細レポート（トレンド分析、全スナップショット、推奨事項）
+   * - trend: トレンドレポート（時系列分析、予測値）
+   * - comparison: 比較レポート（期間内の変化）
+   * 
+   * **レポート構成:**
+   * 1. 基本情報: レポートタイプ、生成日時、対象期間
+   * 2. 最新スナップショット: 現在の状態
+   * 3. 健全性スコア: 総合評価、カテゴリー別評価
+   * 4. トレンド分析: 主要メトリクスの推移（成熟度、完成率、推奨数）
+   * 5. アラート: 現在の問題点
+   * 6. 推奨事項: 改善アクション
+   * 7. マイルストーン: 達成した目標
+   * 
+   * **トレンド分析:**
+   * - maturityLevel: 成熟度レベルの推移
+   * - completionRate: 完成率の推移
+   * - recommendationCount: 推奨事項数の推移
+   * 
+   * **使用例:**
+   * ```typescript
+   * const report = dashboard.generateReport('detailed');
+   * console.log(report.currentHealth.overall); // → 75
+   * console.log(report.alerts.length); // → 2
+   * report.trends.forEach(t => {
+   *   console.log(`${t.metric}: 成長率 ${t.growthRate.toFixed(2)}% (${t.direction})`);
+   * });
+   * ```
+   * 
+   * **注意:**
+   * - スナップショットが存在しない場合はエラーをスロー
+   * 
+   * **拡張ポイント:**
+   * - 新しいレポートタイプを追加可能
+   * - カスタムトレンド分析を追加可能
+   * 
+   * @param type レポートタイプ（デフォルト: summary）
+   * @returns ダッシュボードレポート
+   * @throws スナップショットが存在しない場合
    */
   generateReport(type: DashboardReport['type'] = 'summary'): DashboardReport {
     if (this.dataStore.snapshots.length === 0) {
@@ -433,8 +699,47 @@ export class MetricsDashboard {
     };
   }
   
+  // ============================================================================
+  // アラート生成（Alert Generation）
+  // ============================================================================
+  
   /**
    * アラート生成
+   * 
+   * **アラート条件:**
+   * 1. 成熟度レベルが2以下 → warning
+   * 2. 完成率が50%未満 → error
+   * 3. 循環依存が存在 → error
+   * 4. 孤立ノードが存在 → warning
+   * 5. ディメンションスコアが60%未満 → warning
+   * 
+   * **アラート情報:**
+   * - id: 一意識別子
+   * - severity: error, warning, info
+   * - message: アラートメッセージ
+   * - triggeredAt: アラート発生日時
+   * - metric: メトリクス名
+   * - threshold: 閾値（オプション）
+   * - actualValue: 実測値
+   * - recommendedAction: 推奨アクション
+   * 
+   * **使用例:**
+   * ```typescript
+   * const snapshot = dashboard.createSnapshot({ maturity: assessment });
+   * const alerts = dashboard.generateAlerts(snapshot);
+   * alerts.forEach(a => {
+   *   if (a.severity === 'error') {
+   *     console.error(a.message, a.recommendedAction);
+   *   }
+   * });
+   * ```
+   * 
+   * **拡張ポイント:**
+   * - 新しいアラート条件を追加可能
+   * - カスタム閾値を設定可能（将来の拡張）
+   * 
+   * @param snapshot メトリクススナップショット
+   * @returns アラートの配列
    */
   generateAlerts(snapshot: MetricsSnapshot): MetricsAlert[] {
     const alerts: MetricsAlert[] = [];
