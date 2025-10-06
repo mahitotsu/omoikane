@@ -45,10 +45,10 @@ export function assessUseCaseMaturity(useCase: UseCase): ElementMaturityAssessme
 /**
  * アクターの成熟度評価
  */
-export function assessActorMaturity(actor: Actor): ElementMaturityAssessment {
+export function assessActorMaturity(actor: Actor, useCases: UseCase[] = []): ElementMaturityAssessment {
   const criteria = getCriteriaByElementType('actor');
   const evaluations = criteria.map(criterion =>
-    evaluateActorCriterion(actor, criterion)
+    evaluateActorCriterion(actor, criterion, useCases)
   );
   
   return buildElementAssessment(
@@ -88,9 +88,9 @@ export function assessProjectMaturity(
 ): ProjectMaturityAssessment {
   const timestamp = new Date().toISOString();
   
-  // 各要素の評価
+  // 各要素の評価（アクター評価にはユースケース情報が必要）
   const actorAssessments: ElementMaturityAssessment[] = actors.map(actor => 
-    assessActorMaturity(actor)
+    assessActorMaturity(actor, useCases)
   );
   
   const useCaseAssessments: ElementMaturityAssessment[] = useCases.map(uc =>
@@ -302,7 +302,8 @@ function evaluateUseCaseCriterion(
  */
 function evaluateActorCriterion(
   actor: Actor,
-  criterion: MaturityCriterion
+  criterion: MaturityCriterion,
+  useCases: UseCase[] = []
 ): CriterionEvaluation {
   let satisfied = false;
   let evidence = '';
@@ -334,15 +335,32 @@ function evaluateActorCriterion(
       break;
       
     case 'actor-managed-usecase-coverage':
-      // この評価はプロジェクト全体のコンテキストが必要なため、ここでは簡易評価
-      satisfied = true; // TODO: 実際のユースケース参照を確認
-      evidence = 'ユースケースカバレッジは別途評価が必要';
+      // 実際にユースケースで参照されているか確認
+      const usedInUseCases = useCases.filter(uc => {
+        const primaryMatch = uc.actors?.primary === actor.id;
+        const secondaryMatch = uc.actors?.secondary?.includes(actor.id) ?? false;
+        return primaryMatch || secondaryMatch;
+      });
+      satisfied = usedInUseCases.length > 0;
+      evidence = satisfied 
+        ? `${usedInUseCases.length}個のユースケースで使用されている`
+        : 'どのユースケースからも参照されていない';
+      break;
+      
+    case 'actor-managed-description-quality':
+      satisfied = (actor.description?.length ?? 0) >= 50;
+      evidence = `説明文字数: ${actor.description?.length ?? 0}文字 (50文字以上必要)`;
       break;
       
     case 'actor-optimized-goals':
-      // Actor型にgoalsプロパティがないため、オプションとして扱う
+      // Actor型にgoalsプロパティがないため評価不可
       satisfied = false;
       evidence = 'ゴール未定義（Actor型に未実装）';
+      break;
+      
+    case 'actor-optimized-comprehensive-description':
+      satisfied = (actor.description?.length ?? 0) >= 80;
+      evidence = `説明文字数: ${actor.description?.length ?? 0}文字 (80文字以上必要)`;
       break;
       
     default:

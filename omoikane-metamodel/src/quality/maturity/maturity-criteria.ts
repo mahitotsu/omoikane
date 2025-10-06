@@ -317,6 +317,16 @@ export const ActorMaturityCriteria: MaturityCriterion[] = [
     condition: 'いずれかのユースケースで参照されている',
     weight: 0.9,
   },
+  {
+    id: 'actor-managed-description-quality',
+    name: '高品質な説明',
+    description: '説明が50文字以上で役割・責任・文脈が明確に記述されている',
+    level: MaturityLevel.MANAGED,
+    dimension: MaturityDimension.DETAIL,
+    required: true,
+    condition: 'description.length >= 50',
+    weight: 0.7,
+  },
 
   // ===== レベル5: OPTIMIZED =====
   {
@@ -325,9 +335,19 @@ export const ActorMaturityCriteria: MaturityCriterion[] = [
     description: 'アクターのゴールが明確に定義されている',
     level: MaturityLevel.OPTIMIZED,
     dimension: MaturityDimension.DETAIL,
-    required: false,
+    required: true,
     condition: 'goals.length >= 1',
     weight: 0.5,
+  },
+  {
+    id: 'actor-optimized-comprehensive-description',
+    name: '包括的な説明',
+    description: '説明が80文字以上で、ビジネス文脈・セキュリティ・運用面が包括的に記述されている',
+    level: MaturityLevel.OPTIMIZED,
+    dimension: MaturityDimension.DETAIL,
+    required: true,
+    condition: 'description.length >= 80',
+    weight: 0.6,
   },
 ];
 
