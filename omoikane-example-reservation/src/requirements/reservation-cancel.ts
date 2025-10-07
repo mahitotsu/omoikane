@@ -21,7 +21,16 @@ const reservationLookupStep = {
   actor: typedActorRef('visitor'),
   action: '予約照会ページで予約番号と連絡先を入力し対象予約を表示する',
   expectedResult: '本人と一致する予約のみが照会される',
-} as const;
+  inputData: ['予約番号', '連絡先情報'],
+  validationRules: [
+    '予約番号が有効な形式であること',
+    '連絡先情報が登録時と一致すること',
+  ],
+  errorHandling: [
+    '予約番号が存在しない場合はエラーメッセージを表示',
+    '連絡先が一致しない場合は本人確認手順を案内',
+  ],
+};
 
 const contactMismatchSteps = [
   {
@@ -34,7 +43,7 @@ const contactMismatchSteps = [
     action: '本人確認のため追加情報の提供を依頼する',
     expectedResult: '不正アクセスを防止したまま本人確認手続きが整う',
   },
-] as const;
+];
 
 const alreadyCheckedInSelfServiceSteps = [
   {
@@ -47,7 +56,7 @@ const alreadyCheckedInSelfServiceSteps = [
     action: '状況を確認し必要に応じて返金やクレーム対応などのフォローを記録する',
     expectedResult: 'アフターケアのタスクと責任者が履歴に残る',
   },
-] as const;
+];
 
 export const reservationCancel: ReservationUseCase = {
   id: 'reservation-cancel',
@@ -163,4 +172,13 @@ export const reservationCancel: ReservationUseCase = {
     businessRuleRef('business-rule-history-review-governance'),
   ],
   priority: 'medium',
+  complexity: 'medium',
+  acceptanceCriteria: [
+    '予約番号と連絡先による本人確認が正しく動作すること',
+    'キャンセルポリシーと費用が明確に表示されること',
+    'キャンセル後、枠が即座に空き状態に戻ること',
+    'キャンセル期限を超過している場合は適切なエラーメッセージが表示されること',
+    'キャンセル履歴が未確認状態で記録されること',
+  ],
+  businessValue: '来店者の予定変更に柔軟に対応し、枠の有効活用と店舗運営の効率化を実現',
 };
