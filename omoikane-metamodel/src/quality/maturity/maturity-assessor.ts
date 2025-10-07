@@ -22,6 +22,7 @@ import type {
     BusinessRequirementDefinition,
     UseCase,
 } from '../../types/index.js';
+import { normalizeActorRef } from '../../types/functional/actor.js';
 import {
     getCriteriaByDimension,
     getCriteriaByElementType,
@@ -408,13 +409,19 @@ function evaluateActorCriterion(
     case 'actor-managed-usecase-coverage':
       // アクターがユースケースで実際に参照されているか確認（プライマリまたはセカンダリ）
       const usedInUseCases = useCases.filter(uc => {
-        const primaryMatch = uc.actors?.primary === actor.id;
-        const secondaryMatch = uc.actors?.secondary?.includes(actor.id) ?? false;
+        // primary は ActorReference 型なので normalizeActorRef で ID に変換して比較
+        const primaryActorId = uc.actors?.primary ? normalizeActorRef(uc.actors.primary) : null;
+        const primaryMatch = primaryActorId === actor.id;
+        
+        // secondary は ActorReference[] 型なので各要素を normalizeActorRef で ID に変換
+        const secondaryActorIds = uc.actors?.secondary?.map(normalizeActorRef) ?? [];
+        const secondaryMatch = secondaryActorIds.includes(actor.id);
+        
         return primaryMatch || secondaryMatch;
       });
       satisfied = usedInUseCases.length > 0;
       evidence = satisfied 
-        ? `${usedInUseCases.length}個のユースケースで使用されている`
+        ? `${usedInUseCases.length}個のユースケースで使用されている: ${usedInUseCases.map(uc => uc.id).join(', ')}`
         : 'どのユースケースからも参照されていない';
       break;
       
