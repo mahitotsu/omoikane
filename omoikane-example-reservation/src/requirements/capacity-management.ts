@@ -106,4 +106,13 @@ export const capacityManagement: ReservationUseCase = {
     },
   ],
   priority: 'low',
+  complexity: 'simple',
+  acceptanceCriteria: [
+    '営業日時の入力が正しくバリデーションされること',
+    '重複する枠がある場合は警告が表示されること',
+    '枠の登録後、即座に来店者の予約画面に反映されること',
+    '削除対象に予約が入っている場合は警告が表示されること',
+    '枠の登録・削除履歴が記録されること',
+  ],
+  businessValue: '予約受付キャパシティの適切な管理により、過剰予約や空予約を防止し、店舗運営の効率を最大化',
 };

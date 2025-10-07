@@ -102,6 +102,15 @@ export const userAccountRegistration: ReservationUseCase = {
   ],
   businessRules: [businessRuleRef('business-rule-role-segregation')],
   priority: 'medium',
+  complexity: 'simple',
+  acceptanceCriteria: [
+    'ユーザーIDとロールが正しく入力バリデーションされること',
+    'ユーザー登録後、即座にシステムアクセスが可能になること',
+    '重複するユーザーIDがある場合はエラーが表示されること',
+    'ロールの権限が適切に適用されること',
+    '登録操作が監査ログに記録されること',
+  ],
+  businessValue: 'ユーザー管理の効率化とアクセス制御の適切な運用により、セキュリティとコンプライアンスを維持',
 };
 
 export const userAccountDeletion: ReservationUseCase = {
@@ -188,4 +197,13 @@ export const userAccountDeletion: ReservationUseCase = {
   ],
   businessRules: [businessRuleRef('business-rule-account-deletion-approval')],
   priority: 'medium',
+  complexity: 'simple',
+  acceptanceCriteria: [
+    '削除対象ユーザーが正しく検索・表示されること',
+    '削除前に影響範囲の確認が表示されること',
+    '承認が必要な場合は承認プロセスが開始されること',
+    '削除後、即座にシステムアクセスが無効化されること',
+    '削除操作が監査ログに記録されること',
+  ],
+  businessValue: 'ユーザーライフサイクル管理の適切な運用により、セキュリティリスクを最小化し、監査性を確保',
 };

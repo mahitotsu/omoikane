@@ -139,4 +139,13 @@ export const reservationStaffChange: ReservationUseCase = {
     businessRuleRef('business-rule-manual-notification'),
   ],
   priority: 'high',
+  complexity: 'medium',
+  acceptanceCriteria: [
+    '予約検索が正しく動作すること',
+    '変更可能な項目が明確に表示されること',
+    '変更後の空き枠が正しく確認できること',
+    '同時編集による競合が適切に検出されること',
+    '変更操作が監査ログに記録されること',
+  ],
+  businessValue: '店舗スタッフによる柔軟な予約変更対応を可能にし、顧客満足度と運営効率を向上',
 };

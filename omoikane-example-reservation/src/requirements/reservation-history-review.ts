@@ -120,4 +120,13 @@ export const reservationHistoryReview: ReservationUseCase = {
     businessRuleRef('business-rule-history-note-sharing'),
   ],
   priority: 'medium',
+  complexity: 'simple',
+  acceptanceCriteria: [
+    '未確認の履歴が正しく一覧表示されること',
+    '確認済みステータスへの更新が即座に反映されること',
+    'メモの追加が正しく記録されること',
+    '確認中に新しい履歴が追加された場合は再読み込みで表示されること',
+    'アクセス権限が適切に制御されること',
+  ],
+  businessValue: '予約操作の監査性と透明性を確保し、店舗スタッフ間の情報共有を促進',
 };

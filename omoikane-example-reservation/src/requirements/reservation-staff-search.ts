@@ -112,4 +112,13 @@ export const reservationStaffSearch: ReservationUseCase = {
     businessRuleRef('business-rule-search-sort-ascending'),
   ],
   priority: 'high',
+  complexity: 'simple',
+  acceptanceCriteria: [
+    '検索条件が正しく適用されること',
+    '複数条件でのAND検索が正しく動作すること',
+    '検索結果が予約日時の昇順で表示されること',
+    '検索条件なしの場合は結果が表示されないこと',
+    '検索結果から予約詳細画面に遷移できること',
+  ],
+  businessValue: '店舗スタッフの予約照会業務を効率化し、迅速な顧客対応を実現',
 };

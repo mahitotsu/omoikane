@@ -148,4 +148,13 @@ export const reservationStaffCancel: ReservationUseCase = {
     businessRuleRef('business-rule-manual-notification'),
   ],
   priority: 'high',
+  complexity: 'medium',
+  acceptanceCriteria: [
+    '予約検索が正しく動作すること',
+    'キャンセル理由が必須で記録されること',
+    '無断キャンセルの場合は専用フラグが設定されること',
+    '電話で連絡できない場合の代替手段が提供されること',
+    'キャンセル操作が監査ログに記録されること',
+  ],
+  businessValue: '店舗スタッフによる柔軟なキャンセル対応を可能にし、顧客満足度と運営効率を向上',
 };

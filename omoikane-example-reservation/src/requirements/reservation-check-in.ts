@@ -60,18 +60,35 @@ export const reservationCheckIn: ReservationUseCase = {
       actor: typedActorRef('store-staff'),
       action: '来店者から予約名または予約番号をヒアリングする',
       expectedResult: '必要な検索条件が揃いチェックイン準備が整う',
+      inputData: ['予約名または予約番号'],
+      validationRules: ['入力された情報が有効な形式であること'],
+      errorHandling: ['不正な形式の場合は再入力を促す'],
     },
     {
       stepId: 'open-console',
       actor: typedActorRef('store-staff'),
       action: 'チェックインコンソールで予約を検索し対象レコードを開く',
       expectedResult: '対象予約が表示され来店ステータス変更が可能になる',
+      validationRules: [
+        '予約が存在すること',
+        '予約が「確定済み」状態であること',
+      ],
+      errorHandling: [
+        '予約が見つからない場合は手動検索を案内',
+        'キャンセル済みの場合はその旨を表示',
+      ],
     },
     {
       stepId: 'register-arrival',
       actor: typedActorRef('store-staff'),
       action: 'チェックインコンソールで来店済みに更新し必要なメモを記録する',
       expectedResult: '予約カレンダー上のステータスが「来店済み」に変更される',
+      validationRules: [
+        'チェックイン時刻が予約枠の範囲内またはgrace period内であること',
+      ],
+      errorHandling: [
+        '大幅な遅刻の場合は受け入れ可否の確認を促す',
+      ],
     },
   ],
   alternativeFlows: [
@@ -114,4 +131,13 @@ export const reservationCheckIn: ReservationUseCase = {
     },
   ],
   priority: 'medium',
+  complexity: 'simple',
+  acceptanceCriteria: [
+    '予約検索が名前または予約番号で正しく動作すること',
+    'チェックイン後、予約ステータスが「来店済み」に更新されること',
+    '遅刻の場合、15分以内は受け入れ、超過時は判断が記録されること',
+    'チェックイン後は予約変更・取消ができなくなること',
+    '予約が見つからない場合は適切なエラーハンドリングが行われること',
+  ],
+  businessValue: '店舗スタッフの受付業務を効率化し、予約枠の適切な管理と顧客対応の品質向上を実現',
 };
