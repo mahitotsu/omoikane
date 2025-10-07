@@ -246,21 +246,21 @@ export const improvedOrderProcessing: UseCase = {
     },
     {
       stepId: 'checkout',
-      actor: typedActorRef('customer'),
+      actor: { id: 'customer' },
       action: 'チェックアウト画面で注文内容を確認',
       expectedResult: '注文詳細が表示される',
       // stepNumberは自動で2になる
     },
     {
       stepId: 'payment',
-      actor: typedActorRef('payment-service'),
+      actor: { id: 'payment-service' },
       action: '決済処理を実行',
       expectedResult: '決済が完了する',
       // stepNumberは自動で3になる
     },
     {
       stepId: 'shipping',
-      actor: typedActorRef('shipping-service'),
+      actor: { id: 'shipping-service' },
       action: '配送手配を行う',
       expectedResult: '配送が開始される',
       // stepNumberは自動で4になる
@@ -273,12 +273,12 @@ export const improvedOrderProcessing: UseCase = {
       condition: '決済サービスから決済失敗の応答を受信',
       steps: [
         {
-          actor: typedActorRef('payment-service'),
+          actor: { id: 'payment-service' },
           action: '決済失敗理由を分析',
           expectedResult: '失敗理由が特定される',
         },
         {
-          actor: typedActorRef('customer'),
+          actor: { id: 'customer' },
           action: '別の決済方法を選択',
           expectedResult: '代替決済手段が選択される',
         },
