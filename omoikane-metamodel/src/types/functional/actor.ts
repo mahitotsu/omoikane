@@ -129,6 +129,9 @@ export interface Actor extends DocumentBase {
   
   /** 責務・役割の説明（アクターが実行する操作や期待される振る舞い） */
   responsibilities: string[];
+  
+  /** アクターのゴール（このアクターが達成したい目標、オプション） */
+  goals?: string[];
 }
 
 // ============================================================================
@@ -160,7 +163,7 @@ export interface Actor extends DocumentBase {
  * // ユースケースステップでの使用
  * const step = {
  *   stepNumber: 1,
- *   actor: 'actor-001', // ActorReferenceとして使用
+ *   actor: typedActorRef('actor-001'), // ActorReferenceとして使用
  *   action: '商品を検索する'
  * };
  * ```

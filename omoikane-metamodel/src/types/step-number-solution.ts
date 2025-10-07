@@ -97,8 +97,8 @@ type UseCaseStep = Functional.UseCaseStep;
  * **使用例:**
  * ```typescript
  * const steps: UseCaseStep[] = [
- *   { stepId: 'login', actor: 'user', action: 'ログイン', expectedResult: '成功' },
- *   { stepId: 'search', actor: 'user', action: '検索', expectedResult: '結果表示' }
+ *   { stepId: 'login', actor: typedActorRef('user'), action: 'ログイン', expectedResult: '成功' },
+ *   { stepId: 'search', actor: typedActorRef('user'), action: '検索', expectedResult: '結果表示' }
  * ];
  * 
  * const enrichedSteps = enrichStepsWithNumbers(steps);
@@ -143,9 +143,9 @@ export function enrichStepsWithNumbers(steps: UseCaseStep[]): UseCaseStep[] {
  * const useCase: UseCase = {
  *   // ...
  *   mainFlow: [
- *     { stepId: 'login', actor: 'user', action: 'ログイン', expectedResult: '成功' },
- *     { stepId: 'search', actor: 'user', action: '検索', expectedResult: '結果表示' },
- *     { stepId: 'purchase', actor: 'user', action: '購入', expectedResult: '完了' }
+ *     { stepId: 'login', actor: typedActorRef('user'), action: 'ログイン', expectedResult: '成功' },
+ *     { stepId: 'search', actor: typedActorRef('user'), action: '検索', expectedResult: '結果表示' },
+ *     { stepId: 'purchase', actor: typedActorRef('user'), action: '購入', expectedResult: '完了' }
  *   ]
  * };
  * 
@@ -246,21 +246,21 @@ export const improvedOrderProcessing: UseCase = {
     },
     {
       stepId: 'checkout',
-      actor: 'customer',
+      actor: typedActorRef('customer'),
       action: 'チェックアウト画面で注文内容を確認',
       expectedResult: '注文詳細が表示される',
       // stepNumberは自動で2になる
     },
     {
       stepId: 'payment',
-      actor: 'payment-service',
+      actor: typedActorRef('payment-service'),
       action: '決済処理を実行',
       expectedResult: '決済が完了する',
       // stepNumberは自動で3になる
     },
     {
       stepId: 'shipping',
-      actor: 'shipping-service',
+      actor: typedActorRef('shipping-service'),
       action: '配送手配を行う',
       expectedResult: '配送が開始される',
       // stepNumberは自動で4になる
@@ -273,12 +273,12 @@ export const improvedOrderProcessing: UseCase = {
       condition: '決済サービスから決済失敗の応答を受信',
       steps: [
         {
-          actor: 'payment-service',
+          actor: typedActorRef('payment-service'),
           action: '決済失敗理由を分析',
           expectedResult: '失敗理由が特定される',
         },
         {
-          actor: 'customer',
+          actor: typedActorRef('customer'),
           action: '別の決済方法を選択',
           expectedResult: '代替決済手段が選択される',
         },

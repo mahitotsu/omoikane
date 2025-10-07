@@ -214,7 +214,7 @@ function generateCompletenessRecommendations(
                 name: '[ユースケース名]',
                 description: 'ユースケースの目的と概要を記述してください',
                 actors: {
-                  primary: 'actor-[main-user]',
+                  primary: typedActorRef('actor-[main-user]'),
                 },
                 mainFlow: [
                   '1. [アクター]が[アクション]する',

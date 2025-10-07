@@ -26,23 +26,23 @@
  *   id: 'uc-001',
  *   name: 'ログイン',
  *   actors: {
- *     primary: 'actor-001' // 購入者
+ *     primary: typedActorRef('actor-001') // 購入者
  *   },
  *   preconditions: ['ユーザーが登録済みである'],
  *   postconditions: ['ユーザーがログイン状態になる'],
  *   mainFlow: [
  *     {
- *       actor: 'actor-001',
+ *       actor: typedActorRef('actor-001'),
  *       action: 'ログイン画面を開く',
  *       expectedResult: 'ログインフォームが表示される'
  *     },
  *     {
- *       actor: 'actor-001',
+ *       actor: typedActorRef('actor-001'),
  *       action: 'メールアドレスとパスワードを入力する',
  *       expectedResult: '入力内容が受け付けられる'
  *     },
  *     {
- *       actor: 'actor-001',
+ *       actor: typedActorRef('actor-001'),
  *       action: 'ログインボタンをクリックする',
  *       expectedResult: 'ホーム画面に遷移する'
  *     }
@@ -66,7 +66,7 @@
  *       condition: 'パスワードが誤っている',
  *       steps: [
  *         {
- *           actor: 'system',
+ *           actor: typedActorRef('system'),
  *           action: 'エラーメッセージを表示する',
  *           expectedResult: 'ユーザーに誤りが通知される'
  *         }
@@ -179,7 +179,7 @@ export type FlowImpact = 'critical' | 'major' | 'minor';
  * ```typescript
  * // 基本的なステップ
  * const step1: UseCaseStep = {
- *   actor: 'actor-001',
+ *   actor: typedActorRef('actor-001'),
  *   action: 'ログイン画面を開く',
  *   expectedResult: 'ログインフォームが表示される'
  * };
@@ -187,7 +187,7 @@ export type FlowImpact = 'critical' | 'major' | 'minor';
  * // 詳細化されたステップ
  * const step2: UseCaseStep = {
  *   stepId: 'step-login',
- *   actor: 'actor-001',
+ *   actor: typedActorRef('actor-001'),
  *   action: 'メールアドレスとパスワードを入力する',
  *   expectedResult: '入力内容が受け付けられる',
  *   inputData: ['メールアドレス', 'パスワード'],
@@ -269,12 +269,12 @@ export interface UseCaseStep {
  *   condition: 'パスワードが誤っている',
  *   steps: [
  *     {
- *       actor: 'system',
+ *       actor: typedActorRef('system'),
  *       action: 'エラーメッセージを表示する',
  *       expectedResult: 'ユーザーに誤りが通知される'
  *     },
  *     {
- *       actor: 'system',
+ *       actor: typedActorRef('system'),
  *       action: 'ログイン試行回数をインクリメントする',
  *       expectedResult: '試行回数が記録される'
  *     }
@@ -288,12 +288,12 @@ export interface UseCaseStep {
  *   condition: 'ログイン失敗が5回を超える',
  *   steps: [
  *     {
- *       actor: 'system',
+ *       actor: typedActorRef('system'),
  *       action: 'アカウントをロックする',
  *       expectedResult: 'アカウントがロック状態になる'
  *     },
  *     {
- *       actor: 'system',
+ *       actor: typedActorRef('system'),
  *       action: 'ロック通知メールを送信する',
  *       expectedResult: 'ユーザーにメールが届く'
  *     }
@@ -353,12 +353,12 @@ export interface AlternativeFlow {
  * ```typescript
  * // 主アクターのみ
  * const actors1: UseCaseActors = {
- *   primary: 'actor-001' // 購入者
+ *   primary: typedActorRef('actor-001') // 購入者
  * };
  * 
  * // 主アクターと副アクター
  * const actors2: UseCaseActors = {
- *   primary: 'actor-001', // 購入者
+ *   primary: typedActorRef('actor-001'), // 購入者
  *   secondary: ['actor-002', 'actor-003'] // 管理者、決済システム
  * };
  * 
@@ -420,12 +420,12 @@ export interface UseCaseActors {
  * const phase1: UseCase = {
  *   id: 'uc-001',
  *   name: 'ログイン',
- *   actors: { primary: 'actor-001' },
+ *   actors: { primary: typedActorRef('actor-001') },
  *   preconditions: ['ユーザーが登録済みである'],
  *   postconditions: ['ユーザーがログイン状態になる'],
  *   mainFlow: [
  *     {
- *       actor: 'actor-001',
+ *       actor: typedActorRef('actor-001'),
  *       action: 'ログイン画面を開く',
  *       expectedResult: 'ログインフォームが表示される'
  *     }

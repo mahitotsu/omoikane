@@ -400,7 +400,7 @@ export interface BusinessRequirementCoverage<
  *   owner: 'pm@example.com',
  *   name: '商品を購入する',
  *   description: '購入者が商品を購入する',
- *   actors: { primary: 'actor-001' },
+ *   actors: { primary: typedActorRef('actor-001') },
  *   preconditions: ['ログイン済み'],
  *   postconditions: ['注文完了'],
  *   mainFlow: [...],
@@ -500,7 +500,7 @@ export interface UseCase<
  * // 旧:
  * const step: UseCaseStep = {
  *   stepId: 'step-1',
- *   actor: 'actor-001',
+ *   actor: typedActorRef('actor-001'),
  *   action: '商品を選択する',
  *   expectedResult: '商品が選択される'
  * };

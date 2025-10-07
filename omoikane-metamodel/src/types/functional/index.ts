@@ -34,7 +34,7 @@
  * const useCase: UseCase = {
  *   id: 'uc-001',
  *   name: 'ログイン',
- *   actors: { primary: 'actor-001' },
+ *   actors: { primary: typedActorRef('actor-001') },
  *   preconditions: ['ユーザーが登録済みである'],
  *   postconditions: ['ユーザーがログイン状態になる'],
  *   mainFlow: [...],

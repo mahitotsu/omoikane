@@ -17,12 +17,12 @@
  * - 新しいディメンションを追加: maturity-model.ts の MaturityDimension enum を更新
  */
 
+import { normalizeActorRef } from '../../types/functional/actor.js';
 import type {
     Actor,
     BusinessRequirementDefinition,
     UseCase,
 } from '../../types/index.js';
-import { normalizeActorRef } from '../../types/functional/actor.js';
 import {
     getCriteriaByDimension,
     getCriteriaByElementType,
@@ -432,10 +432,8 @@ function evaluateActorCriterion(
     
     // レベル5: OPTIMIZED
     case 'actor-optimized-goals':
-      // 注意: Actor型にはまだgoalsプロパティがない
-      // TODO: レベル5実装時にActor型にgoals: string[]を追加
-      satisfied = false;
-      evidence = 'ゴール未定義（Actor型に未実装）';
+      satisfied = (actor.goals?.length ?? 0) >= 1;
+      evidence = satisfied ? `ゴール ${actor.goals?.length ?? 0}個` : 'ゴール未定義';
       break;
       
     case 'actor-optimized-comprehensive-description':

@@ -35,7 +35,7 @@
  * analyzer.addUseCase({
  *   id: 'uc-001',
  *   name: 'ログイン',
- *   actors: { primary: 'actor-001' },
+ *   actors: { primary: typedActorRef('actor-001') },
  *   // ... その他のフィールド
  * });
  * 
@@ -236,7 +236,7 @@ export interface RelationshipAnalysis {
  * analyzer.addUseCase({
  *   id: 'uc-001',
  *   name: 'ログイン',
- *   actors: { primary: 'actor-001' },
+ *   actors: { primary: typedActorRef('actor-001') },
  *   // ... その他のフィールド
  * });
  * 
@@ -294,8 +294,10 @@ export class RelationshipAnalyzer {
    *   id: 'uc-001',
    *   name: 'ログイン',
    *   actors: {
-   *     primary: 'actor-001',
-   *     secondary: ['actor-002']
+   *     primary: typedActorRef('actor-001'),
+   *     secondary: [
+       typedActorRef('actor-002')
+     ]
    *   },
    *   // ... その他のフィールド
    * });
