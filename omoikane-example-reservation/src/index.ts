@@ -1,4 +1,14 @@
-// Omoikane Example Reservation - 来店予約管理ユースケースのサマリ
+/**
+ * Omoikane Example Reservation - 来店予約管理システム
+ * 
+ * このファイルは本プロジェクトのエントリーポイントであり、
+ * すべての要件定義要素（アクター、業務要件、ユースケース）をエクスポートします。
+ * 
+ * エクスポート順序:
+ * 1. actors - 全ユースケースから参照される共通定義
+ * 2. typed-references - 型安全な参照システム
+ * 3. requirements - 業務要件とユースケース定義
+ */
 
 export * from './actors.js';
 export * from './typed-references.js';

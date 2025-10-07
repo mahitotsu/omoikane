@@ -1,6 +1,12 @@
 /**
  * 共有アクター定義
- * 各ユースケースからは typedActorRef('actor-id') で参照する
+ * 
+ * 本システムで使用される4つのアクターを定義します。
+ * 各ユースケースからは typedActorRef('actor-id') で参照されます。
+ * 
+ * 設計上の注意:
+ * - アクターIDは typed-references.ts の KnownActorId 型と一致させること
+ * - goals は成熟度レベル5（OPTIMIZED）の要件
  */
 
 import type { Functional } from 'omoikane-metamodel';

@@ -1,5 +1,19 @@
 /**
  * 来店予約管理システム - 業務要件定義
+ * 
+ * 本システムの全体的な業務要件を定義します。
+ * すべてのユースケースは businessRequirementCoverage を通じて
+ * この業務要件定義とトレーサビリティを確保します。
+ * 
+ * 構成要素:
+ * - businessGoals: ビジネス目標
+ * - scopeItems: スコープ項目
+ * - stakeholders: ステークホルダー
+ * - successMetrics: 成功指標
+ * - assumptions: 前提条件
+ * - constraints: 制約条件
+ * - securityPolicies: セキュリティポリシー
+ * - businessRules: ビジネスルール
  */
 
 import type { Business } from 'omoikane-metamodel';
