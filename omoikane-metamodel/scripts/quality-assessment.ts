@@ -252,9 +252,44 @@ function displayV2Report(
   
   if (recommendations.quickWins.length > 0) {
     console.log('【クイックウィン（すぐに実行可能）】');
-    for (let i = 0; i < Math.min(5, recommendations.quickWins.length); i++) {
-      const rec = recommendations.quickWins[i];
-      console.log(`  • ${rec.title} (${rec.effort.hours}h)`);
+    
+    // グループ化: 同じtitleの推奨をまとめる
+    type QuickWin = (typeof recommendations.quickWins)[number];
+    const groupedQuickWins = new Map<string, QuickWin[]>();
+    for (const rec of recommendations.quickWins) {
+      if (!groupedQuickWins.has(rec.title)) {
+        groupedQuickWins.set(rec.title, []);
+      }
+      groupedQuickWins.get(rec.title)!.push(rec);
+    }
+    
+    // グループ化された推奨を表示（最大5グループ）
+    let groupCount = 0;
+    for (const [title, recs] of groupedQuickWins) {
+      if (groupCount >= 5) break;
+      
+      if (recs.length === 1) {
+        // 単一の推奨
+        console.log(`  • ${title} (${recs[0].effort.hours}h)`);
+      } else {
+        // 複数の推奨をグループ化
+        const totalHours = recs.reduce((sum: number, r: QuickWin) => sum + r.effort.hours, 0);
+        console.log(`  • ${title} (${recs[0].effort.hours}h × ${recs.length}件 = ${totalHours}h)`);
+        
+        // 対象要素を抽出
+        const targets: string[] = [];
+        for (const rec of recs) {
+          if (rec.impact.affectedElements && rec.impact.affectedElements.length > 0) {
+            targets.push(...rec.impact.affectedElements);
+          }
+        }
+        
+        if (targets.length > 0) {
+          console.log(`    対象: ${targets.join(', ')}`);
+        }
+      }
+      
+      groupCount++;
     }
     console.log();
   } else {
