@@ -236,12 +236,18 @@ function displayV2Report(
   console.log(`  クイックウィン: ${recommendations.quickWins.length}件\n`);
   
   if (recommendations.topPriority.length > 0) {
-    console.log('【最優先推奨事項（上位5件）】');
+    console.log('【最優先推奨事項（優先度順）】');
+    console.log('※ 優先度が高く、プロジェクトへの影響が大きい改善項目\n');
+    
+    type TopPriority = (typeof recommendations.topPriority)[number];
+    type QuickWin = (typeof recommendations.quickWins)[number];
+    
     for (let i = 0; i < Math.min(5, recommendations.topPriority.length); i++) {
-      const rec = recommendations.topPriority[i];
-      console.log(`\n  ${i + 1}. ${rec.title}`);
-      console.log(`     優先度: ${rec.priority}`);
-      console.log(`     工数: ${rec.effort.hours}時間`);
+      const rec: TopPriority = recommendations.topPriority[i];
+      const isQuickWin = recommendations.quickWins.some((qw: QuickWin) => qw.id === rec.id);
+      const quickWinMark = isQuickWin ? ' ⚡' : '';
+      console.log(`  ${i + 1}. ${rec.title}${quickWinMark}`);
+      console.log(`     優先度: ${rec.priority} | 工数: ${rec.effort.hours}時間 | 複雑度: ${rec.effort.complexity}`);
       console.log(`     問題: ${rec.problem}`);
     }
     console.log();
@@ -251,7 +257,8 @@ function displayV2Report(
   }
   
   if (recommendations.quickWins.length > 0) {
-    console.log('【クイックウィン（すぐに実行可能）】');
+    console.log('【クイックウィン（工数順・すぐ着手可能）】');
+    console.log('※ 工数が少なく（≤4h）、複雑度が低く、すぐに実行できる改善項目\n');
     
     // グループ化: 同じtitleの推奨をまとめる
     type QuickWin = (typeof recommendations.quickWins)[number];
