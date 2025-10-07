@@ -197,32 +197,32 @@ export * as CrossCutting from './types/cross-cutting/index.js';
 
 // 基礎型
 export type {
+    /** 変更履歴エントリ */
+    ChangeLogEntry,
+    /** 日付範囲型 */
+    DateRange,
+    /** 文書の基底型 */
+    DocumentBase,
     /** 一意識別子を持つオブジェクトのインターフェース */
     Identifiable,
+    /** メタデータ型 */
+    Metadata,
     /** 型安全な参照型 */
     Ref,
     /** 参照型の配列 */
     RefArray,
-    /** 文書の基底型 */
-    DocumentBase,
     /** トレーサビリティ対応文書 */
-    TraceableDocument,
-    /** メタデータ型 */
-    Metadata,
-    /** 変更履歴エントリ */
-    ChangeLogEntry,
-    /** 日付範囲型 */
-    DateRange
+    TraceableDocument
 } from './types/foundation/index.js';
 
 // インターフェース型
 export type {
-    /** バージョン管理可能なオブジェクト */
-    Versionable,
     /** 承認可能なオブジェクト */
     Approvable,
     /** カテゴリ化可能なオブジェクト */
-    Categorizable
+    Categorizable,
+    /** バージョン管理可能なオブジェクト */
+    Versionable
 } from './types/foundation/index.js';
 
 // プリミティブ型
@@ -241,16 +241,16 @@ export {
     createRef,
     /** 参照配列からIDを抽出 */
     extractRefIds,
-    /** 有効な参照かチェック */
-    isValidRef,
-    /** トレーサブル文書かチェック */
-    isTraceableDocument,
-    /** バージョン管理可能かチェック */
-    isVersionable,
     /** 承認可能かチェック */
     isApprovable,
     /** カテゴリ化可能かチェック */
-    isCategorizable
+    isCategorizable,
+    /** トレーサブル文書かチェック */
+    isTraceableDocument,
+    /** 有効な参照かチェック */
+    isValidRef,
+    /** バージョン管理可能かチェック */
+    isVersionable
 } from './types/foundation/index.js';
 
 // ============================================================================
