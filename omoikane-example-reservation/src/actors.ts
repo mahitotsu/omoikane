@@ -5,7 +5,7 @@
  * 各ユースケースからは typedActorRef('actor-id') で参照されます。
  * 
  * 設計上の注意:
- * - アクターIDは typed-references.ts の KnownActorId 型と一致させること
+ * - ここで定義したアクターIDから typed-references.ts の KnownActorId 型が自動生成される
  * - goals は成熟度レベル5（OPTIMIZED）の要件
  */
 
