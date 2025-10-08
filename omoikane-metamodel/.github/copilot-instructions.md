@@ -21,6 +21,7 @@
 │  ├─ Foundation (基礎層): Ref<T>, DocumentBase       │
 │  ├─ Business (業務層): BusinessRequirementDefinition│
 │  ├─ Functional (機能層): UseCase, Actor             │
+│  ├─ UI (UI層): Screen, ValidationRule, ScreenFlow  │
 │  └─ Cross-Cutting (横断層): TraceabilityMatrix      │
 ├─────────────────────────────────────────────────────┤
 │  Utility Layer (ユーティリティ層)                     │
@@ -41,12 +42,15 @@ src/
 │   │   ├── ref.ts               # 参照型 Ref<T>
 │   │   └── document.ts          # 文書基底型
 │   ├── business/                # Business層（業務）
-│   │   ├── business-requirement.ts
-│   │   ├── business-rule.ts
-│   │   └── security-policy.ts
+│   │   ├── requirements.ts      # 業務要件定義
+│   │   └── references.ts        # 参照型定義
 │   ├── functional/              # Functional層（機能）
 │   │   ├── actor.ts             # アクター定義
 │   │   └── use-case.ts          # ユースケース定義
+│   ├── ui/                      # UI層（画面・バリデーション）
+│   │   ├── screen.ts            # 画面定義
+│   │   ├── validation-rule.ts   # バリデーションルール
+│   │   └── screen-flow.ts       # 画面遷移フロー
 │   ├── cross-cutting/           # 横断的関心事
 │   │   └── traceability.ts
 │   ├── step-number-solution.ts  # stepNumber自動管理
@@ -59,7 +63,8 @@ src/
 │   └── metrics/                 # メトリクス定義
 ├── utils/                        # ユーティリティ
 └── scripts/                      # CLIスクリプト
-    └── run-quality-assessment.ts
+    ├── run-quality-assessment.ts
+    └── generate-typed-references.ts
 ```
 
 ## 開発ガイドライン
@@ -73,6 +78,7 @@ src/
 - **Foundation**: 最も基礎的な型、他レイヤーに依存しない
 - **Business**: Foundationに依存、Functionalには依存しない
 - **Functional**: FoundationとBusinessに依存可能
+- **UI**: Foundation、Business、Functionalに依存可能
 - **Cross-Cutting**: 全レイヤーに依存可能
 
 #### 型エクスポート
@@ -143,7 +149,124 @@ export function findStepByIdOrNumber(
 ): { step: UseCaseStep; stepNumber: number } | undefined;
 ```
 
-### 4. 品質評価フレームワーク
+### 4. 型検出システム（Type Detection System）
+
+#### 設計思想
+
+全てのドキュメント型に`type`フィールドを持たせ、実行時に型を識別できるようにします。
+これにより、インスタンスプロジェクトで型安全な参照関数を自動生成できます。
+
+#### 型フィールドの定義
+
+各ドキュメント型に`type?: 'type-literal'`を追加：
+
+```typescript
+// メタモデル側での定義
+export interface Actor extends DocumentBase {
+  type?: 'actor';  // 型識別子
+  role: ActorRole;
+  responsibilities: string[];
+  goals?: string[];
+}
+
+export interface UseCase extends TraceableDocument {
+  type?: 'usecase';  // 型識別子
+  actors: UseCaseActors;
+  mainFlow: UseCaseStep[];
+  // ...
+}
+
+export interface ValidationRule extends DocumentBase {
+  type?: 'validation-rule';  // 型識別子
+  ruleType: ValidationRuleType;
+  errorMessage: string;
+  // ...
+}
+```
+
+#### 自動生成スクリプト
+
+`scripts/generate-typed-references.ts`が以下を検出：
+
+- Actor (type: 'actor')
+- UseCase (type: 'usecase')
+- Screen (type: 'screen')
+- ValidationRule (type: 'validation-rule')
+- ScreenFlow (type: 'screen-flow')
+- BusinessRequirement (type: 'business-requirement')
+
+インスタンスプロジェクトで以下を生成：
+
+```typescript
+// 自動生成されるtyped-references.ts
+export type KnownActorId = 'visitor' | 'store-staff' | ...;
+export type KnownUseCaseId = 'reservation-booking' | ...;
+export type KnownValidationRuleId = 'validation-email-format' | ...;
+
+export function typedActorRef<T extends KnownActorId>(id: T): Ref<Actor> & { id: T } {
+  return { id };
+}
+
+export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): Ref<ValidationRule> {
+  return { id };
+}
+```
+
+### 5. UI層の統合
+
+#### 設計原則
+
+- **凝集度**: 入力フィールドは画面定義内にインライン定義
+- **再利用性**: バリデーションルールは独立した型として定義し参照で再利用
+- **トレーサビリティ**: UseCaseStepから画面への参照
+
+#### 提供型
+
+```typescript
+// 画面定義
+export interface Screen extends DocumentBase {
+  type?: 'screen';
+  screenType: ScreenType;  // 'form' | 'list' | 'detail' | 'confirmation' | ...
+  inputFields?: InputField[];
+  displayFields?: DisplayField[];
+  actions?: ScreenAction[];
+}
+
+// バリデーションルール（再利用可能）
+export interface ValidationRule extends DocumentBase {
+  type?: 'validation-rule';
+  ruleType: ValidationRuleType;
+  errorMessage: string;
+  validateOn?: ValidationTrigger[];
+}
+
+// 画面遷移フロー
+export interface ScreenFlow extends DocumentBase {
+  type?: 'screen-flow';
+  screens: Ref<Screen>[];
+  transitions: ScreenTransition[];
+  startScreen?: Ref<Screen>;
+  endScreens?: Ref<Screen>[];
+  relatedUseCase?: Ref<UseCase>;
+}
+```
+
+#### UseCaseStepとの統合
+
+```typescript
+export interface UseCaseStep {
+  stepId: string;
+  actor: Ref<Actor>;
+  action: string;
+  expectedResult: string;
+  
+  // UI関連（画面との関連付け）
+  screen?: Ref<Screen>;
+  inputFields?: string[];  // 画面内のフィールドID
+}
+```
+
+### 6. 品質評価フレームワーク
 
 #### 評価指標
 

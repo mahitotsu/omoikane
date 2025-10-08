@@ -8,17 +8,20 @@ Omoikane Metamodel は、ITデリバリプロジェクトにおけるユース�
 
 **レイヤードアーキテクチャ**:
 - **Foundation**: 基礎層（Ref<T>, DocumentBase, primitives）
-- **Business**: 業務層（BusinessRequirementDefinition, BusinessRule）
+- **Business**: 業務層（BusinessRequirementDefinition, BusinessRule, SecurityPolicy）
 - **Functional**: 機能層（Actor, UseCase）
+- **UI**: UI層（Screen, ValidationRule, ScreenFlow）
 - **Cross-Cutting**: 横断層（TraceabilityMatrix）
 
 ## 主な機能
 
 - **型安全なドキュメント定義**: レイヤード型システムによる明確な構造
 - **統一参照システム**: `Ref<T>` ジェネリック型による型安全な参照
+- **型検出システム**: `type`フィールドによる自動検出と型安全な参照関数生成
 - **Git ベース管理**: type/owner フィールド不要、Git による変更履歴管理
 - **段階的詳細化対応**: シンプルから複雑まで段階的に詳細化可能
 - **品質評価フレームワーク**: 設計品質の自動評価とAI Agent向け改善提案
+- **UI層の統合**: 画面定義、バリデーションルール、画面遷移フローの型安全な管理
 
 ## インストール
 
@@ -32,19 +35,21 @@ bun install
 import { Functional, Business, Foundation } from 'omoikane-metamodel';
 import type { Ref } from 'omoikane-metamodel';
 
-// アクター定義
+// アクター定義（型検出用のtypeフィールド付き）
 const customer: Functional.Actor = {
   id: 'customer',
   name: '顧客',
+  type: 'actor',  // 自動検出用
   description: 'ECサイトで商品を購入する一般ユーザー',
   role: 'primary',
   responsibilities: ['商品の閲覧・検索', 'アカウント登録・管理'],
 };
 
-// ユースケース定義
+// ユースケース定義（型検出用のtypeフィールド付き）
 const userRegistration: Functional.UseCase = {
   id: 'user-registration',
   name: 'ユーザー登録',
+  type: 'usecase',  // 自動検出用
   description: '新規ユーザーがアカウントを作成する',
   actors: {
     primary: Foundation.createRef<Functional.Actor>('customer'),
@@ -82,6 +87,14 @@ const userRegistration: Functional.UseCase = {
 - `UseCase`: ユースケース
 - `UseCaseStep`: ユースケースのステップ
 - `AlternativeFlow`: 代替フロー
+
+**UI 層**:
+- `Screen`: 画面定義
+- `ValidationRule`: バリデーションルール
+- `ScreenFlow`: 画面遷移フロー
+- `InputField`: 入力フィールド
+- `DisplayField`: 表示フィールド
+- `ScreenAction`: 画面アクション
 
 ### ユーティリティ
 

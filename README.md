@@ -16,9 +16,11 @@ Omoikaneは、ITデリバリプロジェクトにおけるユースケース・�
 **TypeScript ITDelivery メタモデル**
 
 - ユースケース・要件定義のための型定義とフレームワーク
-- 型安全な参照システム
+- 型安全な参照システムと型検出機能
+- UI層統合（Screen、ValidationRule、ScreenFlow）
 - stepId自動管理機能
 - 段階的詳細化対応
+- 品質評価フレームワーク
 
 ### 🏪 [Omoikane Example Reservation](./omoikane-example-reservation/)
 

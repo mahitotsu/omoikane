@@ -158,14 +158,136 @@ const actorRef = { id: 'customer' };
 ### インスタンス側（自動生成）
 
 ```typescript
-import { typedActorRef, typedUseCaseRef } from './typed-references.js';
+import { typedActorRef, typedUseCaseRef, typedValidationRuleRef } from './typed-references.js';
 
 // 型安全な参照（IDE補完あり）
 const actorRef = typedActorRef('customer');
 const useCaseRef = typedUseCaseRef('user-registration');
+const validationRef = typedValidationRuleRef('validation-email-format');
 ```
 
 **重要**: `typedActorRef`等はインスタンスプロジェクトで自動生成される関数です。メタモデル側のコード例では使用しないでください。
+
+## 型検出システム（Type Detection System）
+
+### 設計原則
+
+全てのドキュメント型に`type`フィールドを持たせ、実行時に型を識別できるようにします。
+これにより、インスタンスプロジェクトで型安全な参照関数を自動生成できます。
+
+### メタモデル側での定義
+
+```typescript
+// メタモデル側: 型フィールドを定義
+export interface Actor extends DocumentBase {
+  type?: 'actor';  // 型識別子
+  role: ActorRole;
+  // ...
+}
+
+export interface ValidationRule extends DocumentBase {
+  type?: 'validation-rule';  // 型識別子
+  ruleType: ValidationRuleType;
+  // ...
+}
+```
+
+### インスタンス側での使用
+
+```typescript
+// インスタンス側: typeフィールドに値を設定
+export const visitor: Actor = {
+  id: 'visitor',
+  name: '来店者',
+  type: 'actor',  // ← これで自動検出される
+  role: 'primary',
+  responsibilities: ['予約の登録・変更・取消'],
+};
+
+export const emailValidation: ValidationRule = {
+  id: 'validation-email-format',
+  name: 'メールアドレス形式検証',
+  type: 'validation-rule',  // ← これで自動検出される
+  ruleType: 'email',
+  errorMessage: '有効なメールアドレスを入力してください',
+};
+```
+
+### 自動生成される型定義
+
+```typescript
+// 自動生成されるtyped-references.ts
+export type KnownActorId = 'visitor' | 'store-staff' | ...;
+export type KnownValidationRuleId = 'validation-email-format' | ...;
+
+export function typedActorRef<T extends KnownActorId>(id: T): Ref<Actor> & { id: T } {
+  return { id };
+}
+
+export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): Ref<ValidationRule> {
+  return { id };
+}
+```
+
+## UI層の統合
+
+### 設計原則
+
+- **凝集度**: 入力フィールドは画面定義内にインライン定義
+- **再利用性**: バリデーションルールは独立した型として定義し参照で再利用
+- **トレーサビリティ**: UseCaseStepから画面への参照
+
+### バリデーションルールの定義
+
+```typescript
+// 再利用可能なバリデーションルール
+export const emailFormatValidation: ValidationRule = {
+  id: 'validation-email-format',
+  name: 'メールアドレス形式検証',
+  type: 'validation-rule',
+  ruleType: 'email',
+  errorMessage: '有効なメールアドレスを入力してください',
+  validateOn: ['blur', 'submit'],
+};
+```
+
+### 画面定義
+
+```typescript
+// 画面定義（バリデーションルールを参照）
+export const formScreen: Screen = {
+  id: 'form-screen',
+  name: 'フォーム画面',
+  type: 'screen',
+  screenType: 'form',
+  inputFields: [
+    {
+      id: 'email',
+      name: 'email',
+      label: 'メールアドレス',
+      fieldType: 'email',
+      required: true,
+      validationRules: [typedValidationRuleRef('validation-email-format')]
+    }
+  ]
+};
+```
+
+### UseCaseStepとの関連付け
+
+```typescript
+// ユースケースステップから画面を参照
+mainFlow: [
+  {
+    stepId: 'input-info',
+    actor: typedActorRef('visitor'),
+    action: '予約情報を入力する',
+    expectedResult: '入力内容が確認画面に表示される',
+    screen: typedScreenRef('form-screen'),
+    inputFields: ['email', 'phone', 'date']  // 画面内のフィールドID
+  }
+]
+```
 
 ## stepNumber 自動管理
 
