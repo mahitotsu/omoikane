@@ -31,6 +31,7 @@ import {
 export const reservationHistoryReview: ReservationUseCase = {
   id: 'reservation-history-review',
   name: '予約履歴確認',
+  type: 'usecase',
   description: '店舗スタッフが予約状況と予約確定・取消履歴を確認し既読状態を更新する。リアルタイムの予約状況把握と変更通知の見落とし防止により、店舗オペレーションの円滑化と顧客対応品質の向上を実現し、全ての閲覧操作を監査ログに記録することで説明責任を確保する。',
   actors: {
     primary: typedActorRef('store-staff'),

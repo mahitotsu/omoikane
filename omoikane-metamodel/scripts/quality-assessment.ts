@@ -57,13 +57,13 @@
 import { readdir } from 'fs/promises';
 import { extname, join, resolve } from 'path';
 import {
-  AIRecommendationEngine,
-  analyzeGraph,
-  applyContext,
-  assessProjectMaturity,
-  buildDependencyGraph,
-  inferContext,
-  MetricsDashboard,
+    AIRecommendationEngine,
+    analyzeGraph,
+    applyContext,
+    assessProjectMaturity,
+    buildDependencyGraph,
+    inferContext,
+    MetricsDashboard,
 } from '../src/quality/maturity/index.js';
 
 // ============================================================================

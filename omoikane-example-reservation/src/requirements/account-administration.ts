@@ -36,6 +36,7 @@ import {
 export const userAccountRegistration: ReservationUseCase = {
   id: 'user-account-registration',
   name: 'ユーザー登録',
+  type: 'usecase',
   description: 'システム管理者がユーザー情報と適切なロールを指定して新規ユーザーを登録する。最小権限の原則に従い、業務に必要な権限のみを付与し、登録操作と担当者IDを監査ログに記録することで、アクセス制御の透明性とセキュリティを確保する。',
   actors: { primary: typedActorRef('system-admin') },
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
@@ -131,6 +132,7 @@ export const userAccountRegistration: ReservationUseCase = {
 export const userAccountDeletion: ReservationUseCase = {
   id: 'user-account-deletion',
   name: 'ユーザー削除',
+  type: 'usecase',
   description: 'システム管理者が不要になったユーザーアカウントを削除し、システムへのアクセスを無効化する。削除前に影響範囲と承認状況を確認し、削除操作と担当者IDを監査ログに記録することで、セキュリティとコンプライアンスを維持する。',
   actors: { primary: typedActorRef('system-admin') },
   businessRequirementCoverage: reservationBusinessRequirementCoverage({

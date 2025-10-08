@@ -46,6 +46,7 @@ const visitorOfflineNotificationSteps = [
 export const reservationStaffChange: ReservationUseCase = {
   id: 'reservation-staff-change',
   name: '店舗スタッフによる予約変更',
+  type: 'usecase',
   description:
     '店舗スタッフが予約番号なしで特定した予約内容を編集し、来店者の希望に合わせて日時やサービス内容を調整する。変更理由と担当者IDを必須入力とし、旧枠の取消と新枠の確定を監査ログに記録することで、顧客対応の透明性と追跡可能性を確保する。',
   actors: {
