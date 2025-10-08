@@ -18,18 +18,18 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessRuleRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 
