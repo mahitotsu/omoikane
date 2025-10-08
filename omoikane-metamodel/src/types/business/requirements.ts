@@ -66,37 +66,25 @@ import type { Ref, TraceableDocument } from '../foundation/index.js';
 // ============================================================================
 
 /**
- * 業務要件項目（ゴール・スコープ・指標などの基本要素）
+ * 業務要件における個別項目の基本単位
  * 
  * **目的:**
- * ビジネスゴール、スコープ項目、ステークホルダー、成功指標などの
- * 基本的な要件項目を表現します。
+ * ビジネスゴール、スコープ項目、ステークホルダーなど、
+ * リスト形式で表現される業務要件の個別項目の共通構造を定義します。
  * 
  * **フィールド:**
  * - id: 項目ID（一意識別子）
- * - description: 項目の説明（内容、目的）
- * - notes: 補足メモ（追加情報、注意事項）
+ * - description: 項目の説明（内容、目的、詳細）
+ * - notes: 補足メモ（追加情報、注意事項、制約など）
+ * - type: 型識別子（オプション）
  * 
  * **使用例:**
  * ```typescript
- * // ビジネスゴール
  * const goal: BusinessRequirementItem = {
  *   id: 'goal-001',
- *   description: '年間売上を20%向上させる',
- *   notes: '現状1億円 → 目標1.2億円'
- * };
- * 
- * // スコープ項目
- * const scopeItem: BusinessRequirementItem = {
- *   id: 'scope-001',
- *   description: '商品検索機能の改善'
- * };
- * 
- * // ステークホルダー
- * const stakeholder: BusinessRequirementItem = {
- *   id: 'sh-001',
- *   description: 'マーケティング部門',
- *   notes: '主要な意思決定者'
+ *   description: '顧客満足度を20%向上させる',
+ *   notes: '現在のCSAT: 75% → 目標: 95%',
+ *   type: 'business-goal'
  * };
  * ```
  */
@@ -109,6 +97,9 @@ export interface BusinessRequirementItem {
   
   /** 補足メモ（追加情報、注意事項、制約など） */
   notes?: string;
+  
+  /** 型識別子（オプション） - 項目の種類を識別するためのフィールド */
+  type?: string;
 }
 
 /**
@@ -150,22 +141,130 @@ export interface BusinessRequirementScope {
 // ============================================================================
 
 /**
+ * ビジネスゴール
+ * 
+ * **目的:**
+ * 業務要件として達成すべき目標を定義します。
+ * BusinessRequirementItemを継承し、型識別子を追加します。
+ * 
+ * **使用例:**
+ * ```typescript
+ * const goal: BusinessGoal = {
+ *   id: 'goal-001',
+ *   description: '年間売上を20%向上させる',
+ *   notes: '現状1億円 → 目標1.2億円',
+ *   type: 'business-goal'
+ * };
+ * ```
+ */
+export interface BusinessGoal extends BusinessRequirementItem {
+  type?: 'business-goal';
+}
+
+/**
+ * ステークホルダー
+ * 
+ * **目的:**
+ * プロジェクトに関係する利害関係者を定義します。
+ * BusinessRequirementItemを継承し、型識別子を追加します。
+ * 
+ * **使用例:**
+ * ```typescript
+ * const stakeholder: Stakeholder = {
+ *   id: 'sh-001',
+ *   description: 'マーケティング部門',
+ *   notes: '意思決定者、予算承認',
+ *   type: 'stakeholder'
+ * };
+ * ```
+ */
+export interface Stakeholder extends BusinessRequirementItem {
+  type?: 'stakeholder';
+}
+
+/**
+ * 成功指標
+ * 
+ * **目的:**
+ * プロジェクトの成功を測定する指標を定義します。
+ * BusinessRequirementItemを継承し、型識別子を追加します。
+ * 
+ * **使用例:**
+ * ```typescript
+ * const metric: SuccessMetric = {
+ *   id: 'metric-001',
+ *   description: 'コンバージョン率を3%から5%に向上',
+ *   notes: '測定期間: リリース後3ヶ月',
+ *   type: 'success-metric'
+ * };
+ * ```
+ */
+export interface SuccessMetric extends BusinessRequirementItem {
+  type?: 'success-metric';
+}
+
+/**
+ * 前提条件
+ * 
+ * **目的:**
+ * プロジェクト実施の前提となる条件を定義します。
+ * BusinessRequirementItemを継承し、型識別子を追加します。
+ * 
+ * **使用例:**
+ * ```typescript
+ * const assumption: Assumption = {
+ *   id: 'assume-001',
+ *   description: '既存顧客データは移行可能',
+ *   notes: 'データ形式はCSVで提供される',
+ *   type: 'assumption'
+ * };
+ * ```
+ */
+export interface Assumption extends BusinessRequirementItem {
+  type?: 'assumption';
+}
+
+/**
+ * 制約条件
+ * 
+ * **目的:**
+ * プロジェクトに課される制約（予算、スケジュール、技術など）を定義します。
+ * BusinessRequirementItemを継承し、型識別子を追加します。
+ * 
+ * **使用例:**
+ * ```typescript
+ * const constraint: Constraint = {
+ *   id: 'const-001',
+ *   description: '予算は500万円以内',
+ *   notes: '追加予算の承認は困難',
+ *   type: 'constraint'
+ * };
+ * ```
+ */
+export interface Constraint extends BusinessRequirementItem {
+  type?: 'constraint';
+}
+
+/**
  * セキュリティポリシー
  * 
  * **目的:**
  * システムが遵守すべきセキュリティポリシーを定義します。
- * BusinessRequirementItemを継承し、同じ構造を持ちます。
+ * BusinessRequirementItemを継承し、型識別子を追加します。
  * 
  * **使用例:**
  * ```typescript
  * const policy: SecurityPolicy = {
  *   id: 'sec-001',
  *   description: 'パスワードは最低8文字、大文字・小文字・数字・記号を含む',
- *   notes: 'NIST SP 800-63Bに準拠'
+ *   notes: 'NIST SP 800-63Bに準拠',
+ *   type: 'security-policy'
  * };
  * ```
  */
-export interface SecurityPolicy extends BusinessRequirementItem {}
+export interface SecurityPolicy extends BusinessRequirementItem {
+  type?: 'security-policy';
+}
 
 /**
  * ビジネスルール
@@ -179,6 +278,7 @@ export interface SecurityPolicy extends BusinessRequirementItem {}
  * - description: ルールの説明
  * - notes: 補足メモ
  * - category: ルールのカテゴリー（計算、検証、承認など）
+ * - type: 型識別子（'business-rule'固定）
  * 
  * **使用例:**
  * ```typescript
@@ -186,13 +286,16 @@ export interface SecurityPolicy extends BusinessRequirementItem {}
  *   id: 'rule-001',
  *   description: '合計金額が10,000円以上の場合、送料無料',
  *   category: '計算ルール',
- *   notes: 'キャンペーン期間中は5,000円以上で送料無料'
+ *   notes: 'キャンペーン期間中は5,000円以上で送料無料',
+ *   type: 'business-rule'
  * };
  * ```
  */
 export interface BusinessRule extends BusinessRequirementItem {
   /** ルールのカテゴリー（計算、検証、承認、通知など） */
   category?: string;
+  
+  type?: 'business-rule';
 }
 
 // ============================================================================
@@ -292,6 +395,9 @@ export interface BusinessRule extends BusinessRequirementItem {
  * ```
  */
 export interface BusinessRequirementDefinition extends TraceableDocument {
+  /** 文書型識別子（固定値: 'business-requirement'） */
+  type?: 'business-requirement';
+  
   /** タイトル（プロジェクトや要件定義のタイトル） */
   title: string;
   
@@ -299,22 +405,22 @@ export interface BusinessRequirementDefinition extends TraceableDocument {
   summary: string;
   
   /** ビジネスゴール（達成すべき目標のリスト） */
-  businessGoals: BusinessRequirementItem[];
+  businessGoals: BusinessGoal[];
   
   /** スコープ（プロジェクトの範囲、inScope/outOfScope） */
   scope: BusinessRequirementScope;
   
   /** ステークホルダー（関係者、意思決定者） */
-  stakeholders: BusinessRequirementItem[];
+  stakeholders: Stakeholder[];
   
   /** 成功指標（目標達成を測定する指標） */
-  successMetrics?: BusinessRequirementItem[];
+  successMetrics?: SuccessMetric[];
   
   /** 前提条件（プロジェクト実施の前提となる条件） */
-  assumptions?: BusinessRequirementItem[];
+  assumptions?: Assumption[];
   
   /** 制約条件（予算、スケジュール、技術的制約など） */
-  constraints?: BusinessRequirementItem[];
+  constraints?: Constraint[];
   
   /** セキュリティポリシー（遵守すべきセキュリティ要件） */
   securityPolicies?: SecurityPolicy[];

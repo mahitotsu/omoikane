@@ -2,27 +2,30 @@
  * 型安全なアクター・ユースケース参照システム
  * IDE補完とコンパイル時型チェックを提供
  *
- * ⚠️ このファイルは新型対応のため手動更新されました
+ * ⚠️ このファイルは自動生成されます
+ * 手動編集は scripts/generate-typed-references.ts で行ってください
  *
- * 最終更新: 2025-10-05T00:00:00.000Z
+ * 最終更新: 2025-10-08T14:45:46.237Z
  */
 
-import {
-  createRef,
-  type Business,
-  type Foundation,
-  type Functional,
+import type {
+  Actor,
+  AssumptionRef,
+  BusinessGoalRef,
+  BusinessRequirementCoverage,
+  BusinessRequirementDefinitionRef,
+  BusinessScopeRef,
+  ConstraintRef,
+  BusinessRuleRef,
+  SecurityPolicyRef,
+  StakeholderRef,
+  SuccessMetricRef,
+  UseCase,
+  Screen,
+  ValidationRule,
+  ScreenFlow,
+  Ref,
 } from 'omoikane-metamodel';
-
-// 型エイリアス
-type Actor = Functional.Actor;
-type UseCase = Functional.UseCase;
-type BusinessRequirementCoverage = Business.BusinessRequirementCoverage;
-type BusinessRequirementDefinition = Business.BusinessRequirementDefinition;
-type BusinessRequirementItem = Business.BusinessRequirementItem;
-type SecurityPolicy = Business.SecurityPolicy;
-type BusinessRule = Business.BusinessRule;
-type Ref<T> = Foundation.Ref<T>;
 
 export type KnownBusinessRequirementId = 'reservation-business-requirements';
 
@@ -54,8 +57,8 @@ export type KnownSuccessMetricId = 'metric-admin-access-readiness'
   | 'metric-manual-adjustment-time'
   | 'metric-slot-utilization';
 
-export type KnownAssumptionId = 'assumption-manual-communications'
-  | 'assumption-holiday-manual-registration'
+export type KnownAssumptionId = 'assumption-holiday-manual-registration'
+  | 'assumption-manual-communications'
   | 'assumption-single-location'
   | 'assumption-slot-capacity-single'
   | 'assumption-slot-interval-1-hour'
@@ -102,104 +105,132 @@ export type KnownBusinessRuleId = 'business-rule-account-deletion-approval'
   | 'business-rule-visitor-cutoff'
   | 'business-rule-visitor-single-reservation';
 
-export type KnownActorId = 'system-admin'
-  | 'capacity-planner'
+export type KnownActorId = 'capacity-planner'
   | 'store-staff'
+  | 'system-admin'
   | 'visitor';
 
-export type KnownUseCaseId = 'reservation-history-review'
-  | 'reservation-staff-cancel'
-  | 'reservation-staff-change'
-  | 'reservation-staff-search'
-  | 'user-account-deletion'
-  | 'user-account-registration'
-  | 'reservation-check-in'
-  | 'capacity-management'
-  | 'reservation-booking'
-  | 'reservation-cancel'
-  | 'reservation-update';
+export type KnownUseCaseId = 'reservation-booking';
 
-// 新型ベースの参照ヘルパー関数
+export type KnownScreenId = never;
+
+export type KnownValidationRuleId = 'validation-booking-window'
+  | 'validation-business-hours'
+  | 'validation-cancellation-deadline'
+  | 'validation-email-format'
+  | 'validation-future-date'
+  | 'validation-name-min-length'
+  | 'validation-no-duplicate-reservation'
+  | 'validation-phone-format'
+  | 'validation-required-field'
+  | 'validation-reservation-number-format'
+  | 'validation-slot-availability';
+
+export type KnownScreenFlowId = never;
+
 export function businessRequirementRef<T extends KnownBusinessRequirementId>(
   id: T
-): Ref<BusinessRequirementDefinition> {
-  return createRef<BusinessRequirementDefinition>(id);
+): BusinessRequirementDefinitionRef<T> {
+  return { id, type: 'business-requirement-ref' };
 }
 
-export function businessGoalRef<T extends KnownBusinessGoalId>(id: T): Ref<BusinessRequirementItem> {
-  return createRef<BusinessRequirementItem>(id);
+export function businessGoalRef<T extends KnownBusinessGoalId>(id: T): BusinessGoalRef<T> {
+  return { id, type: 'business-goal-ref' };
 }
 
-export function businessScopeRef<T extends KnownScopeItemId>(id: T): Ref<BusinessRequirementItem> {
-  return createRef<BusinessRequirementItem>(id);
+export function businessScopeRef<T extends KnownScopeItemId>(id: T): BusinessScopeRef<T> {
+  return { id, type: 'business-scope-ref' };
 }
 
-export function stakeholderRef<T extends KnownStakeholderId>(id: T): Ref<BusinessRequirementItem> {
-  return createRef<BusinessRequirementItem>(id);
+export function stakeholderRef<T extends KnownStakeholderId>(id: T): StakeholderRef<T> {
+  return { id, type: 'stakeholder-ref' };
 }
 
-export function successMetricRef<T extends KnownSuccessMetricId>(id: T): Ref<BusinessRequirementItem> {
-  return createRef<BusinessRequirementItem>(id);
+export function successMetricRef<T extends KnownSuccessMetricId>(id: T): SuccessMetricRef<T> {
+  return { id, type: 'success-metric-ref' };
 }
 
-export function assumptionRef<T extends KnownAssumptionId>(id: T): Ref<BusinessRequirementItem> {
-  return createRef<BusinessRequirementItem>(id);
+export function assumptionRef<T extends KnownAssumptionId>(id: T): AssumptionRef<T> {
+  return { id, type: 'assumption-ref' };
 }
 
-export function constraintRef<T extends KnownConstraintId>(id: T): Ref<BusinessRequirementItem> {
-  return createRef<BusinessRequirementItem>(id);
+export function constraintRef<T extends KnownConstraintId>(id: T): ConstraintRef<T> {
+  return { id, type: 'constraint-ref' };
 }
 
 export function securityPolicyRef<T extends KnownSecurityPolicyId>(
   id: T
-): Ref<SecurityPolicy> {
-  return createRef<SecurityPolicy>(id);
+): SecurityPolicyRef<T> {
+  return { id, type: 'security-policy-ref' };
 }
 
-export function businessRuleRef<T extends KnownBusinessRuleId>(id: T): Ref<BusinessRule> {
-  return createRef<BusinessRule>(id);
+export function businessRuleRef<T extends KnownBusinessRuleId>(id: T): BusinessRuleRef<T> {
+  return { id, type: 'business-rule-ref' };
 }
 
-export function typedActorRef<T extends KnownActorId>(id: T): Ref<Actor> {
-  return createRef<Actor>(id);
+/**
+ * アクターへの型安全な参照
+ * Ref<Actor>と互換性あり
+ */
+export function typedActorRef<T extends KnownActorId>(id: T): Ref<Actor> & { id: T } {
+  return { id };
 }
 
-export function typedUseCaseRef<T extends KnownUseCaseId>(id: T): Ref<UseCase> {
-  return createRef<UseCase>(id);
+/**
+ * ユースケースへの型安全な参照
+ * Ref<UseCase>と互換性あり
+ */
+export function typedUseCaseRef<T extends KnownUseCaseId>(id: T): Ref<UseCase> & { id: T } {
+  return { id };
 }
 
-// カバレッジヘルパー
+export function typedScreenRef<T extends KnownScreenId>(id: T): Ref<Screen> {
+  return { id };
+}
+
+export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): Ref<ValidationRule> {
+  return { id };
+}
+
+export function typedScreenFlowRef<T extends KnownScreenFlowId>(id: T): Ref<ScreenFlow> {
+  return { id };
+}
+
 export function reservationBusinessRequirementCoverage(
-  coverage: BusinessRequirementCoverage
-): BusinessRequirementCoverage {
+  coverage: ReservationBusinessRequirementCoverage
+): ReservationBusinessRequirementCoverage {
   return coverage;
 }
 
-// 型エクスポート
 export type {
-  Actor, BusinessRequirementCoverage,
-  BusinessRequirementDefinition,
-  BusinessRequirementItem,
-  BusinessRule,
-  SecurityPolicy, UseCase
-};
+  Actor,
+  BusinessRequirementCoverage,
+  BusinessRuleRef,
+  SecurityPolicyRef,
+  UseCase,
+} from 'omoikane-metamodel';
 
-// プロジェクト固有の型エイリアス
-export type ReservationUseCase = UseCase;
 export type ReservationBusinessRequirementCoverage = BusinessRequirementCoverage;
+
+export type ReservationUseCase = UseCase & {
+  businessRequirementCoverage?: ReservationBusinessRequirementCoverage;
+};
 
 export const generatedStats = {
   actors: 4,
-  useCases: 11,
+  useCases: 1,
+  screens: 0,
+  validationRules: 11,
+  screenFlows: 0,
   businessRequirementIds: 1,
   businessGoals: 6,
-  scopeItems: 7,
+  scopeItems: 8,
   stakeholders: 5,
   successMetrics: 5,
-  assumptions: 6,
+  assumptions: 7,
   constraints: 7,
-  securityPolicies: 12,
-  businessRules: 27,
-  generatedAt: '2025-10-04T17:59:26.607Z',
-  sourceFiles: ['/home/akring/omoikane/omoikane-example-reservation/src/requirements/account-administration.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/capacity-management.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-booking.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-check-in.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-history-review.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-change.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-search.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-update.ts'],
+  securityPolicies: 11,
+  businessRules: 19,
+  generatedAt: '2025-10-08T14:45:46.238Z',
+  sourceFiles: ['/home/akring/omoikane/omoikane-example-reservation/src/actors.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-booking.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/validation-rules.ts'],
 } as const;

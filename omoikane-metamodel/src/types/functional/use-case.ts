@@ -87,6 +87,7 @@
 
 import type { BusinessRequirementCoverage, BusinessRule, SecurityPolicy } from '../business/index.js';
 import type { PriorityLevel, Ref, TraceableDocument } from '../foundation/index.js';
+import type { Screen } from '../ui/screen.js';
 import type { ActorReference } from './actor.js';
 
 // ============================================================================
@@ -221,6 +222,48 @@ export interface UseCaseStep {
   
   /** 補足メモ（UI仕様、注意事項など） */
   notes?: string;
+  
+  // UI関連（画面との関連付け）
+  
+  /**
+   * このステップで使用する画面
+   * 
+   * アクターとシステムの相互作用のインターフェースとして機能します。
+   * ユースケースステップと画面定義を関連付けることで、
+   * 「どのステップでどの画面を使うか」が明確になります。
+   * 
+   * **使用例:**
+   * ```typescript
+   * {
+   *   stepId: 'access-site',
+   *   actor: typedActorRef('visitor'),
+   *   action: '予約サイトにアクセスする',
+   *   expectedResult: '予約フォームが表示される',
+   *   screen: typedScreenRef('reservation-form-screen')
+   * }
+   * ```
+   */
+  screen?: Ref<Screen>;
+  
+  /**
+   * このステップで入力するフィールドID
+   * 
+   * 画面内の特定のフィールドを指定する場合に使用します。
+   * InputField.id を配列で指定します。
+   * 
+   * **使用例:**
+   * ```typescript
+   * {
+   *   stepId: 'input-info',
+   *   actor: typedActorRef('visitor'),
+   *   action: '予約情報を入力する',
+   *   expectedResult: '入力内容が確認画面に表示される',
+   *   screen: typedScreenRef('reservation-form-screen'),
+   *   inputFields: ['date', 'time', 'name', 'email', 'phone']
+   * }
+   * ```
+   */
+  inputFields?: string[];
   
   // 詳細化フィールド（オプション）
   
@@ -472,6 +515,9 @@ export interface UseCaseActors {
  * - metadata: メタデータ
  */
 export interface UseCase extends TraceableDocument {
+  /** 文書型識別子（固定値: 'usecase'） */
+  type?: 'usecase';
+  
   /** アクター（主・副アクター） */
   actors: UseCaseActors;
   

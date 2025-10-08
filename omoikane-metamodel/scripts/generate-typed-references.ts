@@ -18,6 +18,21 @@ interface UseCaseInfo {
   file: string;
 }
 
+interface ScreenInfo {
+  id: string;
+  file: string;
+}
+
+interface ValidationRuleInfo {
+  id: string;
+  file: string;
+}
+
+interface ScreenFlowInfo {
+  id: string;
+  file: string;
+}
+
 interface BusinessRequirementInfo {
   id: string;
   file: string;
@@ -66,16 +81,22 @@ function toUnionLiteral(values: string[]): string {
 async function extractElements(): Promise<{
   actors: ActorInfo[];
   useCases: UseCaseInfo[];
+  screens: ScreenInfo[];
+  validationRules: ValidationRuleInfo[];
+  screenFlows: ScreenFlowInfo[];
   businessRequirements: BusinessRequirementInfo[];
 }> {
   const actors: ActorInfo[] = [];
   const useCases: UseCaseInfo[] = [];
+  const screens: ScreenInfo[] = [];
+  const validationRules: ValidationRuleInfo[] = [];
+  const screenFlows: ScreenFlowInfo[] = [];
   const businessRequirements: BusinessRequirementInfo[] = [];
 
   const sourceDir = path.join(process.cwd(), 'src');
   if (!existsSync(sourceDir)) {
     console.warn(`⚠️  src ディレクトリが見つかりません: ${sourceDir}`);
-    return { actors, useCases, businessRequirements };
+    return { actors, useCases, screens, validationRules, screenFlows, businessRequirements };
   }
 
   const files = getAllTsFiles(sourceDir);
@@ -91,6 +112,7 @@ async function extractElements(): Promise<{
     }
   }
 
+  // BusinessRequirementDefinition の抽出（最初に実行）
   for (const [file, exported] of moduleCache) {
     for (const value of Object.values(exported)) {
       if (!value || typeof value !== 'object' || !('type' in value)) continue;
@@ -145,6 +167,7 @@ async function extractElements(): Promise<{
     }
   }
 
+  // Actor の抽出
   for (const [file, exported] of moduleCache) {
     for (const value of Object.values(exported)) {
       if (!value || typeof value !== 'object' || !('type' in value)) continue;
@@ -159,6 +182,7 @@ async function extractElements(): Promise<{
     }
   }
 
+  // UseCase の抽出
   for (const [file, exported] of moduleCache) {
     for (const value of Object.values(exported)) {
       if (!value || typeof value !== 'object' || !('type' in value)) continue;
@@ -173,7 +197,52 @@ async function extractElements(): Promise<{
     }
   }
 
-  return { actors, useCases, businessRequirements };
+  // Screen の抽出
+  for (const [file, exported] of moduleCache) {
+    for (const value of Object.values(exported)) {
+      if (!value || typeof value !== 'object' || !('type' in value)) continue;
+      const typedValue = value as { type?: string; id?: string };
+      if (typedValue.type !== 'screen' || !typedValue.id) {
+        continue;
+      }
+
+      if (!screens.find(screen => screen.id === typedValue.id)) {
+        screens.push({ id: typedValue.id, file });
+      }
+    }
+  }
+
+  // ValidationRule の抽出
+  for (const [file, exported] of moduleCache) {
+    for (const value of Object.values(exported)) {
+      if (!value || typeof value !== 'object' || !('type' in value)) continue;
+      const typedValue = value as { type?: string; id?: string };
+      if (typedValue.type !== 'validation-rule' || !typedValue.id) {
+        continue;
+      }
+
+      if (!validationRules.find(rule => rule.id === typedValue.id)) {
+        validationRules.push({ id: typedValue.id, file });
+      }
+    }
+  }
+
+  // ScreenFlow の抽出
+  for (const [file, exported] of moduleCache) {
+    for (const value of Object.values(exported)) {
+      if (!value || typeof value !== 'object' || !('type' in value)) continue;
+      const typedValue = value as { type?: string; id?: string };
+      if (typedValue.type !== 'screen-flow' || !typedValue.id) {
+        continue;
+      }
+
+      if (!screenFlows.find(flow => flow.id === typedValue.id)) {
+        screenFlows.push({ id: typedValue.id, file });
+      }
+    }
+  }
+
+  return { actors, useCases, screens, validationRules, screenFlows, businessRequirements };
 }
 
 function sanitizePackageSegment(segment: string): string {
@@ -192,7 +261,7 @@ function escapeForSingleQuote(input: string): string {
 async function generateTypedReferences() {
   console.log('🔄 型安全参照を自動生成中...');
 
-  const { actors, useCases, businessRequirements } = await extractElements();
+  const { actors, useCases, screens, validationRules, screenFlows, businessRequirements } = await extractElements();
 
   console.log(`📊 検出された業務要件定義: ${businessRequirements.length}個`);
   businessRequirements.forEach(r => console.log(`  - ${r.id} (${path.basename(r.file)})`));
@@ -202,6 +271,15 @@ async function generateTypedReferences() {
 
   console.log(`📊 検出されたユースケース: ${useCases.length}個`);
   useCases.forEach(u => console.log(`  - ${u.id} (${path.basename(u.file)})`));
+
+  console.log(`📊 検出された画面: ${screens.length}個`);
+  screens.forEach(s => console.log(`  - ${s.id} (${path.basename(s.file)})`));
+
+  console.log(`📊 検出されたバリデーションルール: ${validationRules.length}個`);
+  validationRules.forEach(v => console.log(`  - ${v.id} (${path.basename(v.file)})`));
+
+  console.log(`📊 検出された画面遷移フロー: ${screenFlows.length}個`);
+  screenFlows.forEach(f => console.log(`  - ${f.id} (${path.basename(f.file)})`));
 
   const knownBusinessRequirementIds = [...new Set(businessRequirements.map(r => r.id))].sort();
   const knownBusinessGoalIds = [
@@ -249,6 +327,9 @@ async function generateTypedReferences() {
     ...new Set([
       ...actors.map(a => a.file),
       ...useCases.map(u => u.file),
+      ...screens.map(s => s.file),
+      ...validationRules.map(v => v.file),
+      ...screenFlows.map(f => f.file),
       ...businessRequirements.map(r => r.file),
     ]),
   ].sort();
@@ -279,6 +360,10 @@ import type {
   StakeholderRef,
   SuccessMetricRef,
   UseCase,
+  Screen,
+  ValidationRule,
+  ScreenFlow,
+  Ref,
 } from 'omoikane-metamodel';
 
 export type KnownBusinessRequirementId = ${toUnionLiteral(knownBusinessRequirementIds)};
@@ -303,10 +388,16 @@ export type KnownActorId = ${toUnionLiteral(actors.map(a => a.id))};
 
 export type KnownUseCaseId = ${toUnionLiteral(useCases.map(u => u.id))};
 
+export type KnownScreenId = ${toUnionLiteral(screens.map(s => s.id))};
+
+export type KnownValidationRuleId = ${toUnionLiteral(validationRules.map(v => v.id))};
+
+export type KnownScreenFlowId = ${toUnionLiteral(screenFlows.map(f => f.id))};
+
 export function businessRequirementRef<T extends KnownBusinessRequirementId>(
-  requirementId: T
+  id: T
 ): BusinessRequirementDefinitionRef<T> {
-  return { requirementId, type: 'business-requirement-ref' };
+  return { id, type: 'business-requirement-ref' };
 }
 
 export function businessGoalRef<T extends KnownBusinessGoalId>(id: T): BusinessGoalRef<T> {
@@ -343,67 +434,38 @@ export function businessRuleRef<T extends KnownBusinessRuleId>(id: T): BusinessR
   return { id, type: 'business-rule-ref' };
 }
 
-export interface TypedActorRef<T extends KnownActorId = KnownActorId> {
-  readonly actorId: T;
-  readonly type: 'actor-ref';
+/**
+ * アクターへの型安全な参照
+ * Ref<Actor>と互換性あり
+ */
+export function typedActorRef<T extends KnownActorId>(id: T): Ref<Actor> & { id: T } {
+  return { id };
 }
 
-export interface TypedUseCaseRef<T extends KnownUseCaseId = KnownUseCaseId> {
-  readonly useCaseId: T;
-  readonly type: 'usecase-ref';
+/**
+ * ユースケースへの型安全な参照
+ * Ref<UseCase>と互換性あり
+ */
+export function typedUseCaseRef<T extends KnownUseCaseId>(id: T): Ref<UseCase> & { id: T } {
+  return { id };
 }
 
-export function typedActorRef<T extends KnownActorId>(actorId: T): TypedActorRef<T> {
-  return { actorId, type: 'actor-ref' };
+export function typedScreenRef<T extends KnownScreenId>(id: T): Ref<Screen> {
+  return { id };
 }
 
-export function typedUseCaseRef<T extends KnownUseCaseId>(useCaseId: T): TypedUseCaseRef<T> {
-  return { useCaseId, type: 'usecase-ref' };
+export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): Ref<ValidationRule> {
+  return { id };
+}
+
+export function typedScreenFlowRef<T extends KnownScreenFlowId>(id: T): Ref<ScreenFlow> {
+  return { id };
 }
 
 export function ${camelPrefix}BusinessRequirementCoverage(
   coverage: ${prefix}BusinessRequirementCoverage
 ): ${prefix}BusinessRequirementCoverage {
   return coverage;
-}
-
-export interface EnhancedActorRef<T extends KnownActorId = KnownActorId> extends TypedActorRef<T> {
-  resolve(): Actor | undefined;
-}
-
-export function createActorRef<T extends KnownActorId>(
-  actorId: T,
-  actorRegistry?: Map<string, Actor>
-): EnhancedActorRef<T> {
-  return {
-    actorId,
-    type: 'actor-ref',
-    resolve(): Actor | undefined {
-      return actorRegistry?.get(actorId);
-    },
-  };
-}
-
-export interface ActorDefinition<T extends KnownActorId> {
-  actor: Actor;
-  ref: TypedActorRef<T>;
-}
-
-export function defineActor<T extends KnownActorId>(
-  id: T,
-  definition: Omit<Actor, 'id'>
-): ActorDefinition<T> {
-  const actor: Actor = {
-    id,
-    ...definition,
-  };
-
-  const ref: TypedActorRef<T> = {
-    actorId: id,
-    type: 'actor-ref',
-  };
-
-  return { actor, ref };
 }
 
 export type {
@@ -414,35 +476,18 @@ export type {
   UseCase,
 } from 'omoikane-metamodel';
 
-export type ${prefix}BusinessRequirementCoverage = BusinessRequirementCoverage<
-  KnownBusinessRequirementId,
-  KnownBusinessGoalId,
-  KnownScopeItemId,
-  KnownStakeholderId,
-  KnownSuccessMetricId,
-  KnownAssumptionId,
-  KnownConstraintId,
-  KnownSecurityPolicyId,
-  KnownBusinessRuleId
->;
+export type ${prefix}BusinessRequirementCoverage = BusinessRequirementCoverage;
 
-export type ${prefix}UseCase = UseCase<
-  KnownBusinessRequirementId,
-  KnownBusinessGoalId,
-  KnownScopeItemId,
-  KnownStakeholderId,
-  KnownSuccessMetricId,
-  KnownAssumptionId,
-  KnownConstraintId,
-  KnownSecurityPolicyId,
-  KnownBusinessRuleId
-> & {
-  businessRequirementCoverage: ${prefix}BusinessRequirementCoverage;
+export type ${prefix}UseCase = UseCase & {
+  businessRequirementCoverage?: ${prefix}BusinessRequirementCoverage;
 };
 
 export const generatedStats = {
   actors: ${actors.length},
   useCases: ${useCases.length},
+  screens: ${screens.length},
+  validationRules: ${validationRules.length},
+  screenFlows: ${screenFlows.length},
   businessRequirementIds: ${knownBusinessRequirementIds.length},
   businessGoals: ${knownBusinessGoalIds.length},
   scopeItems: ${knownScopeItemIds.length},
@@ -462,7 +507,7 @@ export const generatedStats = {
 
   console.log(`✅ ${outputPath} を更新しました`);
   console.log(
-    `📈 業務要件: ${knownBusinessRequirementIds.length}個, アクター: ${actors.length}個, ユースケース: ${useCases.length}個`
+    `📈 業務要件: ${knownBusinessRequirementIds.length}個, アクター: ${actors.length}個, ユースケース: ${useCases.length}個, 画面: ${screens.length}個, バリデーションルール: ${validationRules.length}個, 画面遷移: ${screenFlows.length}個`
   );
 }
 

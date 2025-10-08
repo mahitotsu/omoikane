@@ -24,6 +24,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
   id: 'reservation-business-requirements',
   name: '来店予約管理システム 業務要件定義',
   title: '来店予約管理システム 業務要件定義',
+  type: 'business-requirement',
   summary:
     '来店者のセルフサービスによる予約と、店舗スタッフによる対面業務を両立させ、履歴管理と監査性を確保する',
   businessGoals: [

@@ -32,6 +32,7 @@ import {
 export const reservationBooking: ReservationUseCase = {
   id: 'reservation-booking',
   name: '予約登録',
+  type: 'usecase',
   description: '来店者が希望日時と利用サービスを選択して予約を新規登録する。営業時間外でもセルフサービスで予約を確定でき、予約番号と予約内容が画面に表示される。予約確定操作は履歴に記録され、店舗スタッフの業務リストに即座に反映される。',
   actors: {
     primary: typedActorRef('visitor'),

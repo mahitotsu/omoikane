@@ -106,6 +106,7 @@ export type ActorRole = 'primary' | 'secondary' | 'external';
  * const buyer: Actor = {
  *   id: 'actor-001',
  *   name: '購入者',
+ *   type: 'actor',
  *   description: 'ECサイトで商品を購入する一般ユーザー',
  *   role: 'primary',
  *   responsibilities: [
@@ -124,6 +125,9 @@ export type ActorRole = 'primary' | 'secondary' | 'external';
  * ```
  */
 export interface Actor extends DocumentBase {
+  /** 文書型識別子（固定値: 'actor'） */
+  type?: 'actor';
+  
   /** アクターの役割（primary, secondary, external） */
   role: ActorRole;
   

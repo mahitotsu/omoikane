@@ -158,6 +158,33 @@ export * as Business from './types/business/index.js';
 export * as Functional from './types/functional/index.js';
 
 /**
+ * UI Layer - ユーザーインターフェース層
+ * 
+ * 画面定義、画面遷移、バリデーションルールなどのUI要素の型を提供します。
+ * 
+ * **主要な型:**
+ * - `Screen`: 画面定義
+ * - `ValidationRule`: バリデーションルール
+ * - `ScreenFlow`: 画面遷移フロー
+ * - `InputField`: 入力フィールド
+ * - `DisplayField`: 表示フィールド
+ * - `ScreenAction`: 画面アクション
+ * 
+ * @example
+ * ```typescript
+ * import { UI } from 'omoikane-metamodel';
+ * 
+ * const screen: UI.Screen = {
+ *   id: 'form-screen',
+ *   name: 'フォーム画面',
+ *   screenType: 'form',
+ *   inputFields: [...]
+ * };
+ * ```
+ */
+export * as UI from './types/ui/index.js';
+
+/**
  * Cross-Cutting Layer - 横断層
  * 
  * トレーサビリティ、バージョニングなどの横断的関心事の型を提供します。
@@ -252,6 +279,102 @@ export {
     /** バージョン管理可能かチェック */
     isVersionable
 } from './types/foundation/index.js';
+
+// ============================================================================
+// Business層 - 主要型の再エクスポート（便利のため）
+// ============================================================================
+
+/**
+ * Business層から頻繁に使用される型を再エクスポートします。
+ */
+export type {
+    /** 業務要件カバレッジ */
+    BusinessRequirementCoverage,
+    /** 業務要件定義 */
+    BusinessRequirementDefinition,
+    /** 業務要件項目 */
+    BusinessRequirementItem,
+    /** 業務要件スコープ */
+    BusinessRequirementScope,
+    /** ビジネスルール */
+    BusinessRule,
+    /** セキュリティポリシー */
+    SecurityPolicy
+} from './types/business/index.js';
+
+/**
+ * Business層 - 参照型
+ * 
+ * インスタンスプロジェクトのtyped-references.tsで使用される参照型。
+ */
+export type {
+    /** 前提条件への参照 */
+    AssumptionRef,
+    /** ビジネスゴールへの参照 */
+    BusinessGoalRef,
+    /** 業務要件定義への参照 */
+    BusinessRequirementDefinitionRef,
+    /** ビジネスルールへの参照 */
+    BusinessRuleRef,
+    /** スコープ項目への参照 */
+    BusinessScopeRef,
+    /** 制約条件への参照 */
+    ConstraintRef,
+    /** セキュリティポリシーへの参照 */
+    SecurityPolicyRef,
+    /** ステークホルダーへの参照 */
+    StakeholderRef,
+    /** 成功指標への参照 */
+    SuccessMetricRef
+} from './types/business/index.js';
+
+// ============================================================================
+// Functional層 - 主要型の再エクスポート（便利のため）
+// ============================================================================
+
+/**
+ * Functional層から頻繁に使用される型を再エクスポートします。
+ */
+export type {
+    /** アクター */
+    Actor,
+    /** 代替フロー */
+    AlternativeFlow,
+    /** ユースケース */
+    UseCase,
+    /** ユースケースステップ */
+    UseCaseStep
+} from './types/functional/index.js';
+
+// ============================================================================
+// UI層 - 主要型の再エクスポート（便利のため）
+// ============================================================================
+
+/**
+ * UI層から頻繁に使用される型を再エクスポートします。
+ */
+export type {
+    /** 表示フィールド */
+    DisplayField,
+    /** 入力フィールド */
+    InputField,
+    /** 画面定義 */
+    Screen,
+    /** 画面アクション */
+    ScreenAction,
+    /** 画面遷移フロー */
+    ScreenFlow,
+    /** 画面遷移 */
+    ScreenTransition,
+    /** 画面タイプ */
+    ScreenType,
+    /** バリデーションルール */
+    ValidationRule,
+    /** バリデーションルールタイプ */
+    ValidationRuleType,
+    /** バリデーショントリガー */
+    ValidationTrigger
+} from './types/ui/index.js';
 
 // ============================================================================
 // Quality Layer - 品質評価ユーティリティ

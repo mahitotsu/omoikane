@@ -11,6 +11,9 @@
  * │         Cross-Cutting Layer             │  横断的関心事
  * │   (Traceability, Versioning)            │  トレーサビリティ、バージョニング
  * ├─────────────────────────────────────────┤
+ * │         UI Layer                        │  ユーザーインターフェース
+ * │   (Screen, ScreenFlow, ValidationRule)  │  画面定義、画面遷移、バリデーション
+ * ├─────────────────────────────────────────┤
  * │         Functional Layer                │  機能要件
  * │      (UseCase, Actor)                   │  ユースケース、アクター
  * ├─────────────────────────────────────────┤
@@ -256,6 +259,74 @@ export {
     normalizeActorRef,
     normalizeActorRefs
 } from './functional/index.js';
+
+// ============================================================================
+// UI Layer（UI層）
+// ============================================================================
+
+/**
+ * UI Layer - ユーザーインターフェース層
+ * 
+ * 画面定義、画面遷移、バリデーションルール等のUI要素を提供。
+ * 
+ * **主要な型:**
+ * - Screen: 画面定義
+ * - ScreenFlow: 画面遷移
+ * - ValidationRule: バリデーションルール
+ * - InputField: 入力フィールド
+ * - DisplayField: 表示フィールド
+ * - ScreenAction: 画面アクション
+ * 
+ * **使用例:**
+ * ```typescript
+ * import { UI } from './types/index.js';
+ * 
+ * const screen: UI.Screen = {
+ *   id: 'form-screen',
+ *   name: 'フォーム画面',
+ *   screenType: 'form',
+ *   inputFields: [
+ *     {
+ *       id: 'email',
+ *       name: 'email',
+ *       label: 'メールアドレス',
+ *       fieldType: 'email',
+ *       required: true,
+ *       validationRules: [{ id: 'validation-email-format' }]
+ *     }
+ *   ],
+ *   metadata: { ... }
+ * };
+ * ```
+ */
+export * as UI from './ui/index.js';
+
+/**
+ * UI Layer - 型定義（直接エクスポート）
+ * 
+ * **型:**
+ * - Screen: 画面定義
+ * - ScreenType: 画面タイプ
+ * - ScreenFlow: 画面遷移フロー
+ * - ScreenTransition: 画面遷移
+ * - ValidationRule: バリデーションルール
+ * - ValidationRuleType: バリデーションルールタイプ
+ * - InputField: 入力フィールド
+ * - FieldType: フィールドタイプ
+ * - SelectOption: 選択肢
+ * - DisplayField: 表示フィールド
+ * - DisplayFieldType: 表示フィールドタイプ
+ * - ScreenAction: 画面アクション
+ * - ScreenActionType: 画面アクションタイプ
+ */
+export type {
+    DisplayField,
+    DisplayFieldType, FieldType, InputField, Screen, ScreenAction,
+    ScreenActionType,
+    ScreenFlow,
+    ScreenTransition, ScreenType, SelectOption, ValidationRule,
+    ValidationRuleType
+} from './ui/index.js';
 
 // ============================================================================
 // Cross-Cutting Layer（横断層）

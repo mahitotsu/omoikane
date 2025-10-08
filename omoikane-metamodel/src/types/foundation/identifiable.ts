@@ -95,13 +95,14 @@ export interface Identifiable {
 }
 
 /**
- * 文書の基底インターフェース
+ * 文書基底インターフェース
  * 
  * **目的:**
  * メタデータを持つ全ての文書型が実装するインターフェースです。
  * 識別機能に加えて、説明とメタデータ管理機能を提供します。
  * 
  * **追加フィールド:**
+ * - type: 文書の型識別子（自動生成スクリプトで使用）
  * - description: 文書の説明（オプション）
  * - metadata: メタデータ（作成・更新履歴、バージョン、タグ）
  * 
@@ -110,6 +111,7 @@ export interface Identifiable {
  * const requirement: DocumentBase = {
  *   id: 'req-001',
  *   name: 'ユーザー登録要件',
+ *   type: 'requirement',
  *   description: 'ユーザーがシステムに登録できる機能を提供する',
  *   metadata: {
  *     createdAt: '2024-01-01T00:00:00Z',
@@ -121,6 +123,16 @@ export interface Identifiable {
  * ```
  */
 export interface DocumentBase extends Identifiable {
+  /**
+   * 文書の型識別子
+   * 
+   * 自動生成スクリプトがこのフィールドを使用して文書の型を判定します。
+   * 各文書型で適切な値を設定してください。
+   * 
+   * 例: 'actor', 'usecase', 'screen', 'validation-rule', 'screen-flow', 'business-requirement'
+   */
+  type?: string;
+  
   /** 文書の説明（概要、目的など） */
   description?: string;
   

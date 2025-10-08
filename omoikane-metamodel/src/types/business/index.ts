@@ -40,7 +40,27 @@
  */
 
 export type {
-    BusinessRequirementCoverage, BusinessRequirementDefinition, BusinessRequirementItem,
-    BusinessRequirementScope, BusinessRule, SecurityPolicy
+    Assumption,
+    BusinessGoal,
+    BusinessRequirementCoverage,
+    BusinessRequirementDefinition,
+    BusinessRequirementItem,
+    BusinessRequirementScope,
+    BusinessRule,
+    Constraint,
+    SecurityPolicy,
+    Stakeholder,
+    SuccessMetric
 } from './requirements.js';
 
+export type {
+    AssumptionRef,
+    BusinessGoalRef,
+    BusinessRequirementDefinitionRef,
+    BusinessRuleRef,
+    BusinessScopeRef,
+    ConstraintRef,
+    SecurityPolicyRef,
+    StakeholderRef,
+    SuccessMetricRef
+} from './references.js';

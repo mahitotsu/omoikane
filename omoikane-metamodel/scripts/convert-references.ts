@@ -17,8 +17,22 @@ const referenceConfigs: ReferenceConversionConfig[] = [
   },
   {
     factoryName: 'typedUseCaseRef',
-    singleProperties: ['useCase'],
+    singleProperties: ['useCase', 'relatedUseCase'],
     arrayProperties: ['relatedUseCases', 'dependentUseCases', 'includedUseCases'],
+  },
+  {
+    factoryName: 'typedScreenRef',
+    singleProperties: ['screen', 'targetScreen', 'startScreen', 'from', 'to'],
+    arrayProperties: ['screens', 'endScreens'],
+  },
+  {
+    factoryName: 'typedValidationRuleRef',
+    arrayProperties: ['validationRules'],
+  },
+  {
+    factoryName: 'typedScreenFlowRef',
+    singleProperties: ['screenFlow'],
+    arrayProperties: ['screenFlows'],
   },
   {
     factoryName: 'businessRequirementRef',
