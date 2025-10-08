@@ -1,24 +1,57 @@
 #!/usr/bin/env bun
 /**
- * 品質評価スクリプト v2.0
- * Quality Assessment Framework v2.0を使用した総合品質評価
+ * @fileoverview 品質評価CLIスクリプト
  * 
- * 機能:
- * - プロジェクト成熟度評価 (5レベル x 5次元)
- * - コンテキスト対応評価
- * - 依存関係グラフ分析
- * - AI推奨生成 (構造化された推奨事項)
- * - メトリクスダッシュボード (健全性スコア、トレンド分析)
+ * **目的:**
+ * プロジェクトの設計品質を総合的に評価し、改善推奨事項を提示します。
+ * Quality Assessment Framework v2.0を使用して、成熟度レベル1〜5の評価を行います。
  * 
- * 使用方法:
- *   bun run quality-assessment [プロジェクトディレクトリ] [オプション]
+ * **評価項目:**
+ * 1. プロジェクト成熟度評価（5レベル × 5次元）
+ * 2. コンテキスト対応評価（プロジェクトの特性に応じた評価）
+ * 3. 依存関係グラフ分析（要素間の関連性）
+ * 4. AI推奨生成（構造化された推奨事項）
+ * 5. メトリクスダッシュボード（健全性スコア、トレンド分析）
  * 
- * オプション:
- *   --export        レポートをファイルにエクスポート
- *   --json          JSON形式でエクスポート
- *   --html          HTML形式でエクスポート
- *   --markdown      Markdown形式でエクスポート (デフォルト)
- *   --help          ヘルプを表示
+ * **出力形式:**
+ * - コンソール出力（デフォルト）
+ * - Markdownファイル（--export --markdown）
+ * - JSONファイル（--export --json）
+ * - HTMLファイル（--export --html）
+ * 
+ * **実行方法:**
+ * ```bash
+ * # 基本実行（コンソール出力）
+ * bun run quality-assessment
+ * 
+ * # カレントディレクトリ以外のプロジェクト評価
+ * bun run quality-assessment /path/to/project
+ * 
+ * # Markdownレポートをエクスポート
+ * bun run quality-assessment --export --markdown
+ * 
+ * # JSON形式でエクスポート
+ * bun run quality-assessment --export --json
+ * 
+ * # HTML形式でエクスポート
+ * bun run quality-assessment --export --html
+ * 
+ * # ヘルプ表示
+ * bun run quality-assessment --help
+ * ```
+ * 
+ * **使用シーン:**
+ * - 設計レビュー前の品質確認
+ * - 継続的品質改善（CI/CD統合）
+ * - プロジェクト健全性モニタリング
+ * - リファクタリング優先度の判断
+ * 
+ * **設計原則:**
+ * - ファイルの自動検出（src/ディレクトリを再帰的に走査）
+ * - 型検出システムによる要素分類
+ * - エラー耐性（一部のファイルが読めなくても続行）
+ * 
+ * @module scripts/quality-assessment
  */
 
 import { readdir } from 'fs/promises';
@@ -33,6 +66,27 @@ import {
   MetricsDashboard,
 } from '../src/quality/maturity/index.js';
 
+// ============================================================================
+// プロジェクトファイル検索
+// ============================================================================
+
+/**
+ * プロジェクト内のTypeScriptファイルを再帰的に検索
+ * 
+ * **処理内容:**
+ * 1. ディレクトリを再帰的に走査
+ * 2. .ts拡張子のファイルを収集
+ * 3. node_modulesや隠しディレクトリをスキップ
+ * 4. index.tsは集約ファイルなのでスキップ（重複防止）
+ * 
+ * **スキップ対象:**
+ * - node_modules/
+ * - .git/, .vscode/ 等の隠しディレクトリ
+ * - index.ts（他ファイルの集約なので）
+ * 
+ * @param dir - 検索開始ディレクトリ
+ * @returns TypeScriptファイルパスの配列
+ */
 async function findProjectFiles(dir: string): Promise<string[]> {
   const files: string[] = [];
   const entries = await readdir(dir, { withFileTypes: true });
@@ -52,6 +106,32 @@ async function findProjectFiles(dir: string): Promise<string[]> {
   return files;
 }
 
+// ============================================================================
+// TypeScriptファイルの読み込み
+// ============================================================================
+
+/**
+ * TypeScriptファイルを動的インポートで読み込み
+ * 
+ * **処理フロー:**
+ * 1. 絶対パスに変換
+ * 2. file://プロトコルでURLに変換
+ * 3. 動的インポート実行
+ * 4. default/名前付きエクスポートを判別
+ * 5. エラー時はnullを返す（エラー耐性）
+ * 
+ * **エクスポート判別:**
+ * - defaultエクスポートがあればそれを返す
+ * - 名前付きエクスポートが1つならそれを返す
+ * - 名前付きエクスポートが複数なら配列で返す
+ * 
+ * **設計判断:**
+ * - Bunのトランスパイラを利用（高速）
+ * - インポートエラーは静かに無視（部分的な評価を可能に）
+ * 
+ * @param filePath - 読み込むTypeScriptファイルのパス
+ * @returns モジュールのエクスポート、またはnull
+ */
 async function loadTsFile(filePath: string): Promise<any> {
   try {
     // 1. Bunのトランスパイラーでファイルを読み込み準備
@@ -90,6 +170,32 @@ async function loadTsFile(filePath: string): Promise<any> {
   }
 }
 
+// ============================================================================
+// プロジェクトデータのロード
+// ============================================================================
+
+/**
+ * プロジェクトデータを読み込んで分類
+ * 
+ * **処理フロー:**
+ * 1. プロジェクト内の全.tsファイルを検索
+ * 2. 各ファイルを動的インポート
+ * 3. エクスポートされたオブジェクトを型検出
+ * 4. BusinessRequirement/Actor/UseCaseに分類
+ * 
+ * **型検出ロジック:**
+ * - BusinessRequirement: businessGoalsプロパティが配列
+ * - Actor: roleプロパティが存在
+ * - UseCase: actorsとmainFlowプロパティが存在
+ * 
+ * **設計判断:**
+ * - プロパティベースの型判定（typeフィールドに依存しない）
+ * - 配列と単一オブジェクトの両方に対応
+ * - 判定不能なオブジェクトはスキップ
+ * 
+ * @param projectDir - プロジェクトディレクトリ
+ * @returns 分類されたプロジェクトデータ
+ */
 async function loadProjectData(projectDir: string) {
   const files = await findProjectFiles(projectDir);
   
@@ -125,8 +231,22 @@ async function loadProjectData(projectDir: string) {
   return { businessRequirements, actors, useCases };
 }
 
+// ============================================================================
+// 表示ユーティリティ
+// ============================================================================
+
 /**
- * 文字列の表示幅を計算（全角=2, 半角=1）
+ * 文字列の表示幅を計算（全角対応）
+ * 
+ * **処理内容:**
+ * - 全角文字（CJK統合漢字、ひらがな、カタカナ等）: 幅2
+ * - 半角文字（ASCII、ラテン文字等）: 幅1
+ * 
+ * **用途:**
+ * 日本語を含むテキストの整形表示（表形式レポート等）
+ * 
+ * @param str - 測定する文字列
+ * @returns 表示幅
  */
 function getDisplayWidth(str: string): number {
   let width = 0;
@@ -148,6 +268,18 @@ function getDisplayWidth(str: string): number {
 
 /**
  * 表示幅を考慮したパディング
+ * 
+ * **処理内容:**
+ * 1. 現在の表示幅を計算
+ * 2. 目標幅との差分を算出
+ * 3. 差分分のスペースを右側に追加
+ * 
+ * **用途:**
+ * 表形式レポートのカラム揃え
+ * 
+ * @param str - パディング対象の文字列
+ * @param targetWidth - 目標表示幅
+ * @returns パディング済み文字列
  */
 function padEndByWidth(str: string, targetWidth: number): string {
   const currentWidth = getDisplayWidth(str);
@@ -155,6 +287,30 @@ function padEndByWidth(str: string, targetWidth: number): string {
   return str + ' '.repeat(padding);
 }
 
+// ============================================================================
+// レポート表示
+// ============================================================================
+
+/**
+ * 品質評価レポートv2.0をコンソールに表示
+ * 
+ * **表示セクション:**
+ * 1. 総合健全性スコア
+ * 2. 5次元成熟度評価
+ * 3. グラフ分析結果
+ * 4. AI推奨事項
+ * 
+ * **表示形式:**
+ * - 絵文字を活用した視覚的表示
+ * - 表形式での成熟度表示
+ * - グループ化された推奨事項
+ * - クイックウィンの強調表示
+ * 
+ * @param healthScore - 健全性スコア
+ * @param maturityResult - 成熟度評価結果
+ * @param graphAnalysis - グラフ分析結果
+ * @param recommendations - AI推奨事項
+ */
 function displayV2Report(
   healthScore: any,
   maturityResult: any,
@@ -326,6 +482,42 @@ function displayV2Report(
   console.log();
 }
 
+// ============================================================================
+// メイン実行処理
+// ============================================================================
+
+/**
+ * 品質評価のメイン処理
+ * 
+ * **実行フロー:**
+ * 1. プロジェクトデータの読み込み（BusinessRequirement/Actor/UseCase）
+ * 2. 成熟度評価（レベル1〜5）
+ * 3. コンテキスト分析（プロジェクト特性の推測）
+ * 4. 依存関係グラフ分析
+ * 5. AI推奨事項の生成
+ * 6. メトリクススナップショットの作成
+ * 7. 健全性スコアの計算
+ * 8. レポート表示
+ * 9. オプションでレポートエクスポート
+ * 10. 警告の表示
+ * 11. 終了コードの決定（品質閾値に基づく）
+ * 
+ * **終了コード:**
+ * - 0: 品質基準を満たす（スコア75以上）
+ * - 0: 改善余地あり（スコア40〜74）
+ * - 1: 品質不足（スコア40未満）
+ * - 1: エラー発生
+ * 
+ * **コマンドライン引数:**
+ * - argv[2]: プロジェクトディレクトリ（省略時はカレントディレクトリ）
+ * - --export: レポートをファイルにエクスポート
+ * - --json/--html/--markdown: エクスポート形式
+ * 
+ * **設計判断:**
+ * - 段階的な処理で進捗を表示
+ * - エラー時は詳細を出力して終了コード1
+ * - スコアに応じた適切な終了コード
+ */
 async function main() {
   const projectDir = process.argv[2] || process.cwd();
   console.log(`\n品質評価を実行中: ${projectDir}\n`);

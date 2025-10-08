@@ -1,51 +1,160 @@
 #!/usr/bin/env bun
 /**
- * 型安全参照の自動生成スクリプト
- * 定義済みのアクター・ユースケース・業務要件から型定義を生成
+ * @fileoverview 型安全参照の自動生成スクリプト
+ * 
+ * **目的:**
+ * インスタンスプロジェクトのソースコードから各種ドキュメント（Actor、UseCase、Screen等）を検出し、
+ * 型安全な参照関数を含む`typed-references.ts`ファイルを自動生成します。
+ * 
+ * **主要機能:**
+ * 1. 型検出システム: `type`フィールドによるドキュメント種別の自動識別
+ * 2. ID収集: 各ドキュメントのIDを収集してユニオン型を生成
+ * 3. 参照関数生成: IDE補完が効く型安全な参照関数を生成
+ * 4. 統計情報: 検出されたドキュメント数の集計
+ * 
+ * **検出対象:**
+ * - Actor (type: 'actor')
+ * - UseCase (type: 'usecase')
+ * - Screen (type: 'screen')
+ * - ValidationRule (type: 'validation-rule')
+ * - ScreenFlow (type: 'screen-flow')
+ * - BusinessRequirement (type: 'business-requirement')
+ *   - ネストされた業務要件項目（BusinessGoal、Stakeholder、SuccessMetric等）も抽出
+ * 
+ * **実行方法:**
+ * ```bash
+ * bun run generate-references
+ * ```
+ * 
+ * **生成ファイル:**
+ * - `src/typed-references.ts`: 型安全な参照システム
+ * 
+ * **設計原則:**
+ * - ゼロコンフィグ: 設定ファイル不要、`type`フィールドで自動検出
+ * - 型安全: 存在しないIDの参照はコンパイルエラーになる
+ * - IDE補完: KnownXXXId型により補完が効く
+ * - メンテナンス性: 手動編集不要、再実行で常に最新状態
+ * 
+ * @module scripts/generate-typed-references
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { pathToFileURL } from 'url';
 
+// ============================================================================
+// 型定義
+// ============================================================================
+
+/**
+ * アクター情報
+ * 
+ * 検出されたアクターのIDとファイルパスを保持します。
+ */
 interface ActorInfo {
+  /** アクターID */
   id: string;
+  /** 定義ファイルの絶対パス */
   file: string;
 }
 
+/**
+ * ユースケース情報
+ * 
+ * 検出されたユースケースのIDとファイルパスを保持します。
+ */
 interface UseCaseInfo {
+  /** ユースケースID */
   id: string;
+  /** 定義ファイルの絶対パス */
   file: string;
 }
 
+/**
+ * 画面情報
+ * 
+ * 検出された画面のIDとファイルパスを保持します。
+ */
 interface ScreenInfo {
+  /** 画面ID */
   id: string;
+  /** 定義ファイルの絶対パス */
   file: string;
 }
 
+/**
+ * バリデーションルール情報
+ * 
+ * 検出されたバリデーションルールのIDとファイルパスを保持します。
+ */
 interface ValidationRuleInfo {
+  /** バリデーションルールID */
   id: string;
+  /** 定義ファイルの絶対パス */
   file: string;
 }
 
+/**
+ * 画面遷移フロー情報
+ * 
+ * 検出された画面遷移フローのIDとファイルパスを保持します。
+ */
 interface ScreenFlowInfo {
+  /** 画面遷移フローID */
   id: string;
+  /** 定義ファイルの絶対パス */
   file: string;
 }
 
+/**
+ * 業務要件情報
+ * 
+ * 検出された業務要件定義のIDとファイルパス、
+ * さらにネストされた業務要件項目（BusinessGoal、Stakeholder等）のIDを保持します。
+ */
 interface BusinessRequirementInfo {
+  /** 業務要件定義ID */
   id: string;
+  /** 定義ファイルの絶対パス */
   file: string;
+  /** ビジネスゴールのIDリスト */
   businessGoalIds: string[];
+  /** スコープ項目のIDリスト */
   scopeItemIds: string[];
+  /** ステークホルダーのIDリスト */
   stakeholderIds: string[];
+  /** 成功指標のIDリスト */
   successMetricIds: string[];
+  /** 前提条件のIDリスト */
   assumptionIds: string[];
+  /** 制約条件のIDリスト */
   constraintIds: string[];
+  /** セキュリティポリシーのIDリスト */
   securityPolicyIds: string[];
+  /** ビジネスルールのIDリスト */
   businessRuleIds: string[];
 }
 
+// ============================================================================
+// ユーティリティ関数
+// ============================================================================
+
+/**
+ * ディレクトリ内の全TypeScriptファイルを再帰的に取得
+ * 
+ * **処理内容:**
+ * 1. 指定ディレクトリ内のエントリを取得
+ * 2. ディレクトリの場合は再帰的に探索
+ * 3. .tsファイルの場合は結果に追加
+ * 4. パスの長い順→アルファベット順でソート
+ * 
+ * **ソート理由:**
+ * より具体的なファイル（パスが長い）から処理することで、
+ * 詳細な定義を優先的に検出できます。
+ * 
+ * @param dir - 検索対象ディレクトリの絶対パス
+ * @returns TypeScriptファイルの絶対パスの配列
+ */
 function getAllTsFiles(dir: string): string[] {
   const results: string[] = [];
   const entries = readdirSync(dir, { withFileTypes: true });
@@ -54,12 +163,15 @@ function getAllTsFiles(dir: string): string[] {
     const fullPath = path.join(dir, entry.name);
 
     if (entry.isDirectory()) {
+      // ディレクトリの場合は再帰的に探索
       results.push(...getAllTsFiles(fullPath));
     } else if (entry.isFile() && fullPath.endsWith('.ts')) {
+      // .tsファイルの場合は結果に追加
       results.push(fullPath);
     }
   }
 
+  // パスの長い順→アルファベット順でソート
   return results.sort((a, b) => {
     const lengthDiff = b.length - a.length;
     if (lengthDiff !== 0) {
@@ -69,6 +181,23 @@ function getAllTsFiles(dir: string): string[] {
   });
 }
 
+/**
+ * 文字列配列からTypeScriptユニオン型リテラルを生成
+ * 
+ * **処理内容:**
+ * - 空配列の場合は`never`型を返す
+ * - 各文字列をシングルクォートで囲み、改行区切りで結合
+ * - エスケープ処理: バックスラッシュとシングルクォートを適切にエスケープ
+ * 
+ * **生成例:**
+ * ```typescript
+ * ['actor-1', 'actor-2'] → "'actor-1'\n  | 'actor-2'"
+ * [] → "never"
+ * ```
+ * 
+ * @param values - 文字列の配列
+ * @returns TypeScriptユニオン型リテラル文字列
+ */
 function toUnionLiteral(values: string[]): string {
   if (values.length === 0) {
     return 'never';
@@ -78,6 +207,38 @@ function toUnionLiteral(values: string[]): string {
     .join('\n  | ');
 }
 
+// ============================================================================
+// 要素抽出メイン関数
+// ============================================================================
+
+/**
+ * ソースコードから全てのドキュメント要素を抽出
+ * 
+ * **処理フロー:**
+ * 1. `src/`ディレクトリ内の全TypeScriptファイルを取得
+ * 2. 各ファイルを動的インポートしてモジュールキャッシュに格納
+ * 3. エクスポートされた値を走査し、`type`フィールドで種別を判定
+ * 4. 各種ドキュメント（Actor、UseCase等）を検出・収集
+ * 5. BusinessRequirementから入れ子の項目（BusinessGoal等）を抽出
+ * 
+ * **型検出システム:**
+ * 各ドキュメントの`type`フィールドを検査して種別を判定します：
+ * - type: 'actor' → Actor
+ * - type: 'usecase' → UseCase
+ * - type: 'screen' → Screen
+ * - type: 'validation-rule' → ValidationRule
+ * - type: 'screen-flow' → ScreenFlow
+ * - type: 'business-requirement' → BusinessRequirement
+ * 
+ * **重複回避:**
+ * 同じIDのドキュメントが複数回検出された場合は、最初の1つのみを保持します。
+ * 
+ * **エラーハンドリング:**
+ * - `src/`ディレクトリが存在しない場合: 警告を出力して空の結果を返す
+ * - モジュール解析に失敗した場合: 警告を出力して次のファイルに進む
+ * 
+ * @returns 検出された全ドキュメント情報
+ */
 async function extractElements(): Promise<{
   actors: ActorInfo[];
   useCases: UseCaseInfo[];
@@ -93,15 +254,18 @@ async function extractElements(): Promise<{
   const screenFlows: ScreenFlowInfo[] = [];
   const businessRequirements: BusinessRequirementInfo[] = [];
 
+  // srcディレクトリの存在確認
   const sourceDir = path.join(process.cwd(), 'src');
   if (!existsSync(sourceDir)) {
     console.warn(`⚠️  src ディレクトリが見つかりません: ${sourceDir}`);
     return { actors, useCases, screens, validationRules, screenFlows, businessRequirements };
   }
 
+  // 全TypeScriptファイルを取得
   const files = getAllTsFiles(sourceDir);
   const moduleCache = new Map<string, Record<string, unknown>>();
 
+  // 各ファイルを動的インポート
   for (const file of files) {
     try {
       const moduleUrl = pathToFileURL(path.resolve(file)).href;
@@ -112,19 +276,27 @@ async function extractElements(): Promise<{
     }
   }
 
+  // ================================================================
   // BusinessRequirementDefinition の抽出（最初に実行）
+  // ================================================================
+  // 
+  // BusinessRequirementには多数の入れ子項目（BusinessGoal、Stakeholder等）が
+  // 含まれるため、最初に処理して全てのIDを抽出します。
   for (const [file, exported] of moduleCache) {
     for (const value of Object.values(exported)) {
+      // type フィールドを確認
       if (!value || typeof value !== 'object' || !('type' in value)) continue;
       const typedValue = value as { type?: string; id?: string };
       if (typedValue.type !== 'business-requirement' || !typedValue.id) {
         continue;
       }
 
+      // 重複チェック
       if (businessRequirements.find(req => req.id === typedValue.id)) {
         continue;
       }
 
+      // BusinessRequirementDefinitionの構造を定義
       const definition = value as {
         businessGoals?: { id?: string }[];
         scope?: { inScope?: { id?: string }[] };
