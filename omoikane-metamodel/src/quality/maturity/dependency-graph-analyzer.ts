@@ -36,9 +36,9 @@
 import type {
     Actor,
     BusinessRequirementDefinition,
-    UseCase,
     Screen,
     ScreenFlow,
+    UseCase,
 } from '../../types/index.js';
 import type {
     ChangeImpactAnalysis,
