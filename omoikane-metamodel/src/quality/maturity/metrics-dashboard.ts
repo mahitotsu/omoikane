@@ -787,17 +787,29 @@ export class MetricsDashboard {
       });
     }
     
-    // 循環依存がある
-    if (snapshot.graphStats && snapshot.graphStats.circularDependencies > 0) {
-      alerts.push({
-        id: `alert-circular-${Date.now()}`,
-        severity: 'error',
-        message: `${snapshot.graphStats.circularDependencies}個の循環依存が検出されました`,
-        triggeredAt: new Date().toISOString(),
-        metric: 'circularDependencies',
-        actualValue: snapshot.graphStats.circularDependencies,
-        recommendedAction: '循環依存の解消を優先してください',
-      });
+    // 問題のある循環依存がある（critical/high/mediumのみ警告）
+    if (snapshot.graphStats && snapshot.graphStats.circularDependenciesBySeverity) {
+      const { critical = 0, high = 0, medium = 0 } = snapshot.graphStats.circularDependenciesBySeverity;
+      const problemCycles = critical + high + medium;
+      
+      if (problemCycles > 0) {
+        let severity: 'error' | 'warning' | 'info' = 'warning';
+        if (critical > 0) {
+          severity = 'error';
+        } else if (high > 0) {
+          severity = 'error';
+        }
+        
+        alerts.push({
+          id: `alert-circular-${Date.now()}`,
+          severity,
+          message: `${problemCycles}個の要対応の循環依存が検出されました（Critical: ${critical}, High: ${high}, Medium: ${medium}）`,
+          triggeredAt: new Date().toISOString(),
+          metric: 'circularDependencies',
+          actualValue: problemCycles,
+          recommendedAction: '循環依存の解消を優先してください',
+        });
+      }
     }
     
     return alerts;

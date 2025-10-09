@@ -483,15 +483,28 @@ export class AIRecommendationEngine {
   ): StructuredRecommendation[] {
     const recommendations: StructuredRecommendation[] = [];
     
-    // 循環依存の解消
+    // 循環依存の解消（infoレベルは除外 - 設計上許容される双方向参照）
     if (graph.circularDependencies && graph.circularDependencies.length > 0) {
-      for (const cycle of graph.circularDependencies) {
+      const problemCycles = graph.circularDependencies.filter((cycle: any) => cycle.severity !== 'info');
+      for (const cycle of problemCycles) {
+        // 優先度を重大度に応じて設定
+        let priority: RecommendationPriority;
+        if (cycle.severity === 'critical') {
+          priority = RecommendationPriority.CRITICAL;
+        } else if (cycle.severity === 'high') {
+          priority = RecommendationPriority.HIGH;
+        } else if (cycle.severity === 'medium') {
+          priority = RecommendationPriority.MEDIUM;
+        } else {
+          priority = RecommendationPriority.LOW;
+        }
+        
         recommendations.push({
           id: `dep-cycle-${cycle.cycle[0]}`,
           title: `循環依存の解消: ${cycle.cycle.join(' → ')}`,
-          priority: cycle.severity === 'high' ? RecommendationPriority.CRITICAL : RecommendationPriority.HIGH,
+          priority,
           category: RecommendationCategory.ARCHITECTURE,
-          problem: `${cycle.length}個の要素間で循環依存が検出されました`,
+          problem: `${cycle.length}個の要素間で循環依存が検出されました（重大度: ${cycle.severity}）`,
           impact: {
             scope: 'module',
             affectedElements: cycle.cycle,
