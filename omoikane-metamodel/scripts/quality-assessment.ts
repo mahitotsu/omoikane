@@ -181,12 +181,14 @@ async function loadTsFile(filePath: string): Promise<any> {
  * 1. プロジェクト内の全.tsファイルを検索
  * 2. 各ファイルを動的インポート
  * 3. エクスポートされたオブジェクトを型検出
- * 4. BusinessRequirement/Actor/UseCaseに分類
+ * 4. BusinessRequirement/Actor/UseCase/Screen/ScreenFlowに分類
  * 
  * **型検出ロジック:**
  * - BusinessRequirement: businessGoalsプロパティが配列
  * - Actor: roleプロパティが存在
  * - UseCase: actorsとmainFlowプロパティが存在
+ * - Screen: screenTypeプロパティが存在
+ * - ScreenFlow: screensプロパティが配列でtransitionsが存在
  * 
  * **設計判断:**
  * - プロパティベースの型判定（typeフィールドに依存しない）
@@ -202,6 +204,8 @@ async function loadProjectData(projectDir: string) {
   const businessRequirements: any[] = [];
   const actors: any[] = [];
   const useCases: any[] = [];
+  const screens: any[] = [];
+  const screenFlows: any[] = [];
 
   for (const file of files) {
     const data = await loadTsFile(file);
@@ -217,6 +221,14 @@ async function loadProjectData(projectDir: string) {
       if (item.businessGoals && Array.isArray(item.businessGoals)) {
         businessRequirements.push(item);
       }
+      // ScreenFlowの判定（screensとtransitionsが存在、UseCaseと区別するため先に判定）
+      else if (item.screens && Array.isArray(item.screens) && item.transitions && Array.isArray(item.transitions)) {
+        screenFlows.push(item);
+      }
+      // Screenの判定（screenTypeプロパティが存在）
+      else if (item.screenType !== undefined) {
+        screens.push(item);
+      }
       // アクターの判定（roleプロパティが存在）
       else if (item.role !== undefined) {
         actors.push(item);
@@ -228,7 +240,7 @@ async function loadProjectData(projectDir: string) {
     }
   }
   
-  return { businessRequirements, actors, useCases };
+  return { businessRequirements, actors, useCases, screens, screenFlows };
 }
 
 // ============================================================================
@@ -367,8 +379,8 @@ function displayV2Report(
   console.log(`  循環依存: ${graphAnalysis.circularDependencies.length}件`);
   if (graphAnalysis.circularDependencies.length > 0) {
     console.log('  循環依存の詳細:');
-    for (const cycle of graphAnalysis.circularDependencies.slice(0, 3)) {
-      console.log(`    • ${cycle.join(' → ')}`);
+    for (const cycleDep of graphAnalysis.circularDependencies.slice(0, 3)) {
+      console.log(`    • ${cycleDep.cycle.join(' → ')} (長さ: ${cycleDep.length}, 重大度: ${cycleDep.severity})`);
     }
     if (graphAnalysis.circularDependencies.length > 3) {
       console.log(`    ... 他${graphAnalysis.circularDependencies.length - 3}件`);
@@ -524,10 +536,12 @@ async function main() {
 
   try {
     console.log('📁 プロジェクトデータを読み込んでいます...');
-    const { businessRequirements, actors, useCases } = await loadProjectData(projectDir);
+    const { businessRequirements, actors, useCases, screens, screenFlows } = await loadProjectData(projectDir);
     console.log(`  要件定義: ${businessRequirements.length}件`);
     console.log(`  アクター: ${actors.length}件`);
-    console.log(`  ユースケース: ${useCases.length}件\n`);
+    console.log(`  ユースケース: ${useCases.length}件`);
+    console.log(`  画面: ${screens.length}件`);
+    console.log(`  画面遷移フロー: ${screenFlows.length}件\n`);
 
     console.log('📊 成熟度を評価しています...');
     const maturityResult = assessProjectMaturity(businessRequirements, actors, useCases);
@@ -548,7 +562,7 @@ async function main() {
     console.log(`  完了: ${context.domain} / ${context.stage}\n`);
 
     console.log('🔗 依存関係を分析しています...');
-    const graph = buildDependencyGraph(businessRequirements, actors, useCases);
+    const graph = buildDependencyGraph(businessRequirements, actors, useCases, screens, screenFlows);
     const graphAnalysis = analyzeGraph(graph);
     console.log(`  完了: ${graphAnalysis.statistics.nodeCount}ノード\n`);
 

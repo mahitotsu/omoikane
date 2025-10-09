@@ -37,6 +37,8 @@ import type {
     Actor,
     BusinessRequirementDefinition,
     UseCase,
+    Screen,
+    ScreenFlow,
 } from '../../types/index.js';
 import type {
     ChangeImpactAnalysis,
@@ -74,22 +76,27 @@ import {
  * - SECURITY_POLICY: セキュリティポリシー
  * - ACTOR: アクター
  * - USECASE: ユースケース
+ * - SCREEN: 画面定義
+ * - SCREEN_FLOW: 画面遷移フロー
  * 
  * **エッジタイプ:**
- * - USES: アクターがユースケースを使用
- * - CONTAINS: 要素が別の要素を包含
+ * - USES: アクターがユースケースを使用、ユースケースが画面を使用
+ * - CONTAINS: 要素が別の要素を包含、フローが画面を包含
  * - REFERENCES: ユースケースが要素を参照
  * - EXTENDS: ユースケースが別のユースケースを拡張
  * - INCLUDES: ユースケースが別のユースケースをインクルード
+ * - TRIGGERS: 画面遷移のトリガー
  * 
  * @param requirements - ビジネス要求定義リスト
  * @param actors - アクターリスト
  * @param useCases - ユースケースリスト
+ * @param screens - 画面定義リスト
+ * @param screenFlows - 画面遷移フローリスト
  * @returns 構築された依存関係グラフ
  * 
  * **使用例:**
  * ```typescript
- * const graph = buildDependencyGraph(requirements, actors, useCases);
+ * const graph = buildDependencyGraph(requirements, actors, useCases, screens, screenFlows);
  * console.log(`ノード数: ${graph.nodes.size}, エッジ数: ${graph.edges.length}`);
  * ```
  * 
@@ -99,7 +106,9 @@ import {
 export function buildDependencyGraph(
   requirements: BusinessRequirementDefinition[],
   actors: Actor[],
-  useCases: UseCase[]
+  useCases: UseCase[],
+  screens: Screen[] = [],
+  screenFlows: ScreenFlow[] = []
 ): DependencyGraph {
   const nodes = new Map<string, GraphNode>();
   const edges: GraphEdge[] = [];
@@ -185,8 +194,47 @@ export function buildDependencyGraph(
       addEdge(edges, adjacencyList, reverseAdjacencyList, uc.id, policy.id, EdgeType.DEPENDS_ON);
     });
     
+    // ユースケースステップの画面参照
+    uc.mainFlow?.forEach((step, idx) => {
+      if (step.screen) {
+        const screenId = typeof step.screen === 'string' ? step.screen : step.screen.id;
+        addEdge(edges, adjacencyList, reverseAdjacencyList, uc.id, screenId, EdgeType.USES);
+      }
+    });
+    
     // 拡張・包含関係（UseCaseにこれらのプロパティがない場合はスキップ）
     // TODO: 必要に応じて実装
+  });
+  
+  // 画面をノードとして追加
+  screens.forEach(screen => {
+    addNode(nodes, screen.id, screen.name, NodeType.SCREEN, {
+      screenType: screen.screenType,
+    });
+  });
+  
+  // 画面遷移フローをノードとして追加
+  screenFlows.forEach(flow => {
+    addNode(nodes, flow.id, flow.name, NodeType.SCREEN_FLOW);
+    
+    // フローが含む画面との関係
+    flow.screens?.forEach(screen => {
+      const screenId = typeof screen === 'string' ? screen : screen.id;
+      addEdge(edges, adjacencyList, reverseAdjacencyList, flow.id, screenId, EdgeType.CONTAINS);
+    });
+    
+    // 画面遷移（トリガー）
+    flow.transitions?.forEach(transition => {
+      const fromId = typeof transition.from === 'string' ? transition.from : transition.from.id;
+      const toId = typeof transition.to === 'string' ? transition.to : transition.to.id;
+      addEdge(edges, adjacencyList, reverseAdjacencyList, fromId, toId, EdgeType.TRIGGERS);
+    });
+    
+    // フローが関連するユースケース
+    if (flow.relatedUseCase) {
+      const useCaseId = typeof flow.relatedUseCase === 'string' ? flow.relatedUseCase : flow.relatedUseCase.id;
+      addEdge(edges, adjacencyList, reverseAdjacencyList, useCaseId, flow.id, EdgeType.USES);
+    }
   });
   
   return {

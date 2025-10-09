@@ -43,7 +43,7 @@
  * ノードタイプ
  * 
  * **用途:**
- * 依存関係グラフのノード（要素）のタイプを8種類で定義します。
+ * 依存関係グラフのノード（要素）のタイプを10種類で定義します。
  * 
  * **ノードタイプの定義:**
  * - BUSINESS_REQUIREMENT: ビジネス要件定義
@@ -54,6 +54,8 @@
  * - USECASE: ユースケース
  * - USECASE_STEP: ユースケースステップ
  * - DATA_REQUIREMENT: データ要件
+ * - SCREEN: 画面定義
+ * - SCREEN_FLOW: 画面遷移フロー
  * 
  * **使用例:**
  * グラフ分析時に要素タイプ別の統計を取得したり、
@@ -72,6 +74,8 @@ export enum NodeType {
   USECASE = 'usecase',
   USECASE_STEP = 'usecase-step',
   DATA_REQUIREMENT = 'data-requirement',
+  SCREEN = 'screen',
+  SCREEN_FLOW = 'screen-flow',
 }
 
 /**
