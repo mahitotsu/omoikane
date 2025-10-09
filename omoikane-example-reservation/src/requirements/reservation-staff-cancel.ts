@@ -26,6 +26,7 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 const concurrentEditWarningSteps = [
   {
@@ -100,12 +101,14 @@ export const reservationStaffCancel: ReservationUseCase = {
       actor: typedActorRef('store-staff'),
       action: '予約詳細画面で現行ステータスと来店者情報、特記事項を確認する',
       expectedResult: '取消による影響範囲とフォロー内容が把握できる',
+      screen: typedScreenRef('staff-reservation-list-screen'),
     },
     {
       stepId: 'initiate-cancel',
       actor: typedActorRef('store-staff'),
       action: '取消操作を選択し理由区分と詳細メモ、フォロー方法を入力する',
       expectedResult: '入力内容が形式チェックされ確認ダイアログに進む',
+      screen: typedScreenRef('staff-cancel-confirm-screen'),
     },
     {
       stepId: 'confirm-cancel',
@@ -113,6 +116,7 @@ export const reservationStaffCancel: ReservationUseCase = {
       action: 'キャンセル内容を最終確認し取消を確定する',
       expectedResult:
         '予約ステータスがキャンセル済みに更新され枠解放（予約取消）の履歴が未確認として追加される',
+      screen: typedScreenRef('staff-cancel-confirm-screen'),
     },
   ],
   alternativeFlows: [

@@ -26,6 +26,7 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 
 export const reservationHistoryReview: ReservationUseCase = {
@@ -74,24 +75,28 @@ export const reservationHistoryReview: ReservationUseCase = {
       actor: typedActorRef('store-staff'),
       action: '予約照会画面で確定・取消履歴タブを開き未確認の記録を一覧表示する',
       expectedResult: '未確認の履歴が作成日時順に表示される',
+      screen: typedScreenRef('history-list-screen'),
     },
     {
       stepId: 'inspect-entry',
       actor: typedActorRef('store-staff'),
       action: '各履歴の詳細を確認し関連する予約内容や担当者への共有が必要か判断する',
       expectedResult: '履歴から予約の変更点や取り消しの影響が把握できる',
+      screen: typedScreenRef('history-detail-screen'),
     },
     {
       stepId: 'mark-reviewed',
       actor: typedActorRef('store-staff'),
       action: '内容を確認した履歴に既読状態を設定し、必要に応じてメモを追加する',
       expectedResult: '履歴の確認状態が更新され、対応メモが残る',
+      screen: typedScreenRef('history-detail-screen'),
     },
     {
       stepId: 'verify-remaining-items',
       actor: typedActorRef('store-staff'),
       action: '既読済み履歴を除外して残件を確認する',
       expectedResult: '未確認の履歴がなくなり、対応が完了したことが把握できる',
+      screen: typedScreenRef('history-list-screen'),
     },
   ],
   alternativeFlows: [

@@ -26,6 +26,7 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 
 
@@ -93,6 +94,7 @@ export const reservationBooking: ReservationUseCase = {
       actor: typedActorRef('visitor'),
       action: '予約カレンダーから希望日と時間帯を選択する',
       expectedResult: '空き枠と所要時間の候補が表示される',
+      screen: typedScreenRef('reservation-form-screen'),
       validationRules: [
         '選択日が現在日時以降であること',
         '選択時刻が営業時間内であること',
@@ -107,6 +109,7 @@ export const reservationBooking: ReservationUseCase = {
       actor: typedActorRef('visitor'),
       action: '希望するサービスメニューと利用目的を入力する',
       expectedResult: 'サービス内容がリアルタイムでバリデーションされる',
+      screen: typedScreenRef('reservation-form-screen'),
       inputData: ['サービスメニューID', '利用目的（任意）', '連絡先情報'],
       validationRules: [
         'サービスメニューが有効なものであること',
@@ -123,6 +126,7 @@ export const reservationBooking: ReservationUseCase = {
       action: '入力内容を送信し選択した枠の確定操作を完了する',
       expectedResult:
         'システムが対象枠を予約確定として登録し履歴に未確認の確定記録を追加、予約番号を画面に表示する',
+      screen: typedScreenRef('reservation-confirm-screen'),
       validationRules: [
         '選択した枠が依然として利用可能であること',
         '同一連絡先での重複予約がないこと',
@@ -137,6 +141,7 @@ export const reservationBooking: ReservationUseCase = {
       actor: typedActorRef('visitor'),
       action: '表示された予約番号と照会手順を確認し控える',
       expectedResult: '予約照会・変更ページへの到達手順が明示される',
+      screen: typedScreenRef('reservation-complete-screen'),
     },
   ],
   alternativeFlows: [

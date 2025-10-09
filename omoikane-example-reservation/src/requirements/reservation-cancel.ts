@@ -26,12 +26,14 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 const reservationLookupStep = {
   stepId: 'open-lookup',
   actor: typedActorRef('visitor'),
   action: '予約照会ページで予約番号と連絡先を入力し対象予約を表示する',
   expectedResult: '本人と一致する予約のみが照会される',
+  screen: typedScreenRef('reservation-lookup-screen'),
   inputData: ['予約番号', '連絡先情報'],
   validationRules: [
     '予約番号が有効な形式であること',
@@ -129,6 +131,7 @@ export const reservationCancel: ReservationUseCase = {
       actor: typedActorRef('visitor'),
       action: 'キャンセルポリシーと取消による影響（キャンセル料など）を確認する',
       expectedResult: '取消条件と費用が明示される',
+      screen: typedScreenRef('reservation-detail-screen'),
     },
     {
       stepId: 'confirm-cancel',
@@ -136,6 +139,7 @@ export const reservationCancel: ReservationUseCase = {
   action: '必要に応じて取消理由を入力しキャンセルを確定する',
       expectedResult:
         'システムが予約ステータスをキャンセル済みに更新し、枠解放（予約取消）を未確認記録として履歴に追加した上で確認画面を表示する',
+      screen: typedScreenRef('reservation-cancel-confirm-screen'),
     },
   ],
   alternativeFlows: [

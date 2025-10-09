@@ -30,6 +30,7 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 
 
@@ -70,18 +71,21 @@ export const userAccountRegistration: ReservationUseCase = {
       actor: typedActorRef('system-admin'),
       action: '管理コンソールのアカウント管理画面を開く',
       expectedResult: 'ユーザー一覧と新規登録操作メニューが表示される',
+      screen: typedScreenRef('account-list-screen'),
     },
     {
       stepId: 'enter-user-info',
       actor: typedActorRef('system-admin'),
       action: 'ユーザー情報と付与するロールを入力する',
       expectedResult: '入力内容の形式チェックが完了する',
+      screen: typedScreenRef('account-registration-form-screen'),
     },
     {
       stepId: 'create-user',
       actor: typedActorRef('system-admin'),
       action: '登録を実行しユーザーを作成する',
       expectedResult: '新規ユーザーが作成され指定ロールが付与される',
+      screen: typedScreenRef('account-operation-complete-screen'),
     },
   ],
   alternativeFlows: [
@@ -166,18 +170,21 @@ export const userAccountDeletion: ReservationUseCase = {
       actor: typedActorRef('system-admin'),
       action: '管理コンソールのアカウント管理画面を開く',
       expectedResult: 'ユーザー一覧と削除操作メニューが表示される',
+      screen: typedScreenRef('account-list-screen'),
     },
     {
       stepId: 'select-user',
       actor: typedActorRef('system-admin'),
       action: '削除対象のユーザーを検索し選択する',
       expectedResult: '対象ユーザーの詳細と影響範囲が表示される',
+      screen: typedScreenRef('account-deletion-confirm-screen'),
     },
     {
       stepId: 'confirm-deletion',
       actor: typedActorRef('system-admin'),
       action: '削除理由を入力し確認のうえ削除を実行する',
       expectedResult: 'ユーザーが削除され関連アクセスが無効化される',
+      screen: typedScreenRef('account-operation-complete-screen'),
     },
   ],
   alternativeFlows: [

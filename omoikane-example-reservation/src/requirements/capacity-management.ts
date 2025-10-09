@@ -24,6 +24,7 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 
 
@@ -70,18 +71,21 @@ export const capacityManagement: ReservationUseCase = {
       actor: typedActorRef('capacity-planner'),
       action: '予約カレンダーの管理画面で対象日を選択する',
       expectedResult: '該当日の既存枠と空き状況が表示される',
+      screen: typedScreenRef('capacity-calendar-screen'),
     },
     {
       stepId: 'register-slot',
       actor: typedActorRef('capacity-planner'),
       action: '開始時刻・終了時刻・最大組数を入力して枠を追加する',
       expectedResult: '入力内容が保存前チェックに進む',
+      screen: typedScreenRef('capacity-slot-form-screen'),
     },
     {
       stepId: 'confirm-slot-publication',
       actor: typedActorRef('capacity-planner'),
       action: '検証結果を確認し問題がなければ保存を確定する',
       expectedResult: 'システムが枠を公開し、空き枠一覧が更新される',
+      screen: typedScreenRef('capacity-slot-confirm-screen'),
     },
   ],
   alternativeFlows: [

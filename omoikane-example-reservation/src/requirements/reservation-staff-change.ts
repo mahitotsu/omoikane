@@ -26,6 +26,7 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 const concurrentEditWarningSteps = [
   {
@@ -94,24 +95,28 @@ export const reservationStaffChange: ReservationUseCase = {
       actor: typedActorRef('store-staff'),
       action: '予約詳細画面で現行の日時、サービス内容、担当者割り当てを確認する',
       expectedResult: '変更対象となる項目と制約条件が把握できる',
+      screen: typedScreenRef('staff-reservation-list-screen'),
     },
     {
       stepId: 'edit-fields',
       actor: typedActorRef('store-staff'),
       action: '変更フォームで日時、サービス、担当者、メモなど必要な項目を編集する',
       expectedResult: '入力した内容が即時に形式チェックされる',
+      screen: typedScreenRef('reservation-update-form-screen'),
     },
     {
       stepId: 'validate-updates',
       actor: typedActorRef('store-staff'),
       action: '変更内容を確認し検証ボタンを押下する',
       expectedResult: '枠重複や担当者アサイン制約などが検証され、問題がなければ確認画面に進む',
+      screen: typedScreenRef('reservation-update-form-screen'),
     },
     {
       stepId: 'confirm-change',
       actor: typedActorRef('store-staff'),
       action: '変更理由とフォロー計画を入力し更新を確定する',
       expectedResult: '予約内容が更新され履歴に変更記録と枠の予約取消・予約確定情報が追加される',
+      screen: typedScreenRef('staff-change-confirm-screen'),
     },
   ],
   alternativeFlows: [

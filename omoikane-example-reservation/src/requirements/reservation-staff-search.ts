@@ -26,6 +26,7 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 
 export const reservationStaffSearch: ReservationUseCase = {
@@ -71,6 +72,7 @@ export const reservationStaffSearch: ReservationUseCase = {
       actor: typedActorRef('store-staff'),
       action: '予約管理コンソールで「予約検索」ビューを開く',
       expectedResult: '検索条件入力欄と空の検索結果リストが表示される',
+      screen: typedScreenRef('staff-search-screen'),
     },
     {
       stepId: 'input-filters',
@@ -78,12 +80,14 @@ export const reservationStaffSearch: ReservationUseCase = {
       action: '来店予定日、来店者名、連絡先など必要な条件を入力し検索を実行する',
       expectedResult:
         '条件に合致する予約のみが検索結果リストに表示される（該当なしの場合は空リストのまま）',
+      screen: typedScreenRef('staff-reservation-list-screen'),
     },
     {
       stepId: 'select-reservation',
       actor: typedActorRef('store-staff'),
       action: '検索結果から対象予約を選択し詳細画面を開く',
       expectedResult: '選択した予約の詳細情報と操作メニューが確認できる',
+      screen: typedScreenRef('staff-reservation-list-screen'),
     },
   ],
   alternativeFlows: [

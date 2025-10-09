@@ -205,6 +205,25 @@ export const slotAvailabilityValidation: ValidationRule = {
 };
 
 /**
+ * 利用人数範囲検証
+ * 
+ * 予約の利用人数が許容範囲内（1名〜10名）であることを検証。
+ */
+export const partySizeRangeValidation: ValidationRule = {
+  id: 'validation-party-size-range',
+  name: '利用人数範囲検証',
+  type: 'validation-rule',
+  description: '予約の利用人数が許容範囲内（1名以上10名以下）であることを検証します。',
+  ruleType: 'custom',
+  parameters: {
+    min: 1,
+    max: 10,
+  },
+  errorMessage: 'ご利用人数は1名から10名の範囲で指定してください。10名を超える場合は店舗にお問い合わせください。',
+  validateOn: ['blur', 'submit'],
+};
+
+/**
  * キャンセル期限検証
  * 
  * 予約のキャンセルは指定時間前までという制約。
@@ -266,6 +285,7 @@ export const allValidationRules: ValidationRule[] = [
   // 予約固有検証
   noDuplicateReservationValidation,
   slotAvailabilityValidation,
+  partySizeRangeValidation,
   cancellationDeadlineValidation,
   reservationNumberFormatValidation,
 ];

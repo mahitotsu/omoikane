@@ -26,12 +26,14 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 const reservationLookupStep = {
   stepId: 'open-lookup',
   actor: typedActorRef('visitor'),
   action: '予約照会ページで予約番号と連絡先を入力し対象予約を表示する',
   expectedResult: '本人と一致する予約のみが照会される',
+  screen: typedScreenRef('reservation-lookup-screen'),
   inputData: ['予約番号', '連絡先情報'],
   validationRules: [
     '予約番号が有効な形式であること',
@@ -112,6 +114,7 @@ export const reservationUpdate: ReservationUseCase = {
       actor: typedActorRef('visitor'),
       action: '表示された現行内容を確認し変更したい項目を選択する',
       expectedResult: '変更対象の項目が編集モードで表示される',
+      screen: typedScreenRef('reservation-detail-screen'),
     },
     {
       stepId: 'apply-updates',
@@ -119,6 +122,7 @@ export const reservationUpdate: ReservationUseCase = {
       action: '新しい日時やサービス内容、要望事項を入力して変更を送信する',
       expectedResult:
         'システムが空き枠の重複チェックと制約条件の検証を実行し、旧枠取消・新枠確定の準備を行う',
+      screen: typedScreenRef('reservation-update-form-screen'),
     },
     {
       stepId: 'confirm-updates',
@@ -126,6 +130,7 @@ export const reservationUpdate: ReservationUseCase = {
       action: '検証結果と更新後の内容を確認して変更を確定する',
       expectedResult:
         '予約番号は維持されたまま内容が更新され、旧枠の予約取消と新枠の予約確定が履歴に未確認記録として追加される',
+      screen: typedScreenRef('reservation-update-confirm-screen'),
     },
   ],
   alternativeFlows: [

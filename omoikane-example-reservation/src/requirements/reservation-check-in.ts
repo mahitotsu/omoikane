@@ -24,6 +24,7 @@ import {
     stakeholderRef,
     successMetricRef,
     typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 
 export const reservationCheckIn: ReservationUseCase = {
@@ -72,6 +73,7 @@ export const reservationCheckIn: ReservationUseCase = {
       actor: typedActorRef('store-staff'),
       action: '来店者から予約名または予約番号をヒアリングする',
       expectedResult: '必要な検索条件が揃いチェックイン準備が整う',
+      screen: typedScreenRef('check-in-console-screen'),
       inputData: ['予約名または予約番号'],
       validationRules: ['入力された情報が有効な形式であること'],
       errorHandling: ['不正な形式の場合は再入力を促す'],
@@ -81,6 +83,7 @@ export const reservationCheckIn: ReservationUseCase = {
       actor: typedActorRef('store-staff'),
       action: 'チェックインコンソールで予約を検索し対象レコードを開く',
       expectedResult: '対象予約が表示され来店ステータス変更が可能になる',
+      screen: typedScreenRef('check-in-console-screen'),
       validationRules: [
         '予約が存在すること',
         '予約が「確定済み」状態であること',
@@ -95,6 +98,7 @@ export const reservationCheckIn: ReservationUseCase = {
       actor: typedActorRef('store-staff'),
       action: 'チェックインコンソールで来店済みに更新し必要なメモを記録する',
       expectedResult: '予約カレンダー上のステータスが「来店済み」に変更される',
+      screen: typedScreenRef('check-in-complete-screen'),
       validationRules: [
         'チェックイン時刻が予約枠の範囲内またはgrace period内であること',
       ],
