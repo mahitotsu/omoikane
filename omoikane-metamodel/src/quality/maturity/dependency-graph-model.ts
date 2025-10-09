@@ -212,6 +212,22 @@ export interface GraphEdge {
   
   /** 説明 */
   label?: string;
+  
+  /**
+   * 双方向参照を許可するか
+   * 
+   * **用途:**
+   * 画面遷移（戻るボタン等）のような設計上必要な双方向参照を許可します。
+   * これにより、循環依存検出時にこれらのエッジを除外できます。
+   * 
+   * **例:**
+   * - 画面A → 画面B（進む）: bidirectionalAllowed: true
+   * - 画面B → 画面A（戻る）: bidirectionalAllowed: true
+   * - ユースケースA → ユースケースB（循環）: bidirectionalAllowed: false
+   * 
+   * **デフォルト:** false
+   */
+  bidirectionalAllowed?: boolean;
 }
 
 // ============================================================================
@@ -268,6 +284,16 @@ export interface Path {
 
 /**
  * 循環依存
+ * 
+ * **用途:**
+ * グラフ内で検出された循環依存を表現します。
+ * 
+ * **重大度レベル:**
+ * - `critical`: ビジネスロジックやアーキテクチャ上重大な循環
+ * - `high`: 通常の循環依存（是正推奨）
+ * - `medium`: やや問題のある循環
+ * - `low`: 軽微な循環
+ * - `info`: 設計上許容される双方向参照（画面遷移等）
  */
 export interface CircularDependency {
   /** 循環を構成するノードID */
@@ -279,8 +305,8 @@ export interface CircularDependency {
   /** 循環に含まれるエッジタイプ */
   edgeTypes: EdgeType[];
   
-  /** 重大度（長い循環ほど問題が少ない可能性） */
-  severity: 'high' | 'medium' | 'low';
+  /** 重大度 */
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
 }
 
 /**

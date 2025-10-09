@@ -110,6 +110,14 @@ export interface MetricsSnapshot {
     edgeCount: number;
     circularDependencies: number;
     isolatedNodes: number;
+    /** 重大度別の循環依存数 */
+    circularDependenciesBySeverity?: {
+      critical: number;
+      high: number;
+      medium: number;
+      low: number;
+      info: number;
+    };
   };
   
   /** プロジェクトコンテキスト */

@@ -229,7 +229,7 @@ export interface StructuredRecommendation {
   impact: {
     scope: 'element' | 'module' | 'project';
     affectedElements: string[];
-    severity: 'high' | 'medium' | 'low';
+    severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
   };
   
   /** 解決策 */

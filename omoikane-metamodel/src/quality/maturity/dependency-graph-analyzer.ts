@@ -223,11 +223,11 @@ export function buildDependencyGraph(
       addEdge(edges, adjacencyList, reverseAdjacencyList, flow.id, screenId, EdgeType.CONTAINS);
     });
     
-    // 画面遷移（トリガー）
+    // 画面遷移（トリガー） - 双方向許可
     flow.transitions?.forEach(transition => {
       const fromId = typeof transition.from === 'string' ? transition.from : transition.from.id;
       const toId = typeof transition.to === 'string' ? transition.to : transition.to.id;
-      addEdge(edges, adjacencyList, reverseAdjacencyList, fromId, toId, EdgeType.TRIGGERS);
+      addEdge(edges, adjacencyList, reverseAdjacencyList, fromId, toId, EdgeType.TRIGGERS, true);
     });
     
     // フローが関連するユースケース
@@ -566,9 +566,10 @@ function addEdge(
   reverseAdjacencyList: Map<string, string[]>,
   from: string,
   to: string,
-  type: EdgeType
+  type: EdgeType,
+  bidirectionalAllowed: boolean = false
 ): void {
-  edges.push({ from, to, type });
+  edges.push({ from, to, type, bidirectionalAllowed });
   
   if (!adjacencyList.has(from)) {
     adjacencyList.set(from, []);
@@ -625,6 +626,21 @@ function calculateStatistics(graph: DependencyGraph): GraphStatistics {
   };
 }
 
+/**
+ * 循環依存を検出（双方向許可エッジを考慮）
+ * 
+ * **処理内容:**
+ * 1. DFSで循環を検出
+ * 2. 双方向許可エッジのみの循環は`info`レベルに分類
+ * 3. ノードタイプに基づいて重大度を判定
+ * 
+ * **重大度判定:**
+ * - `info`: 双方向許可エッジのみの循環（画面遷移等）
+ * - `critical`: ビジネス要件やアクターを含む循環
+ * - `high`: 長さ3以下の循環（強い依存）
+ * - `medium`: 長さ4-5の循環
+ * - `low`: 長さ6以上の循環（弱い依存）
+ */
 function detectCycles(graph: DependencyGraph): CircularDependency[] {
   const cycles: CircularDependency[] = [];
   const visited = new Set<string>();
@@ -646,11 +662,31 @@ function detectCycles(graph: DependencyGraph): CircularDependency[] {
         const cycleStart = path.indexOf(neighborId);
         const cycle = path.slice(cycleStart);
         
+        // 循環に含まれるエッジタイプと双方向許可を確認
+        const edgeTypes: EdgeType[] = [];
+        let allBidirectionalAllowed = true;
+        
+        for (let i = 0; i < cycle.length; i++) {
+          const from = cycle[i];
+          const to = cycle[(i + 1) % cycle.length];
+          const edge = graph.edges.find(e => e.from === from && e.to === to);
+          
+          if (edge) {
+            edgeTypes.push(edge.type);
+            if (!edge.bidirectionalAllowed) {
+              allBidirectionalAllowed = false;
+            }
+          }
+        }
+        
+        // 重大度を計算
+        const severity = calculateCycleSeverity(cycle, edgeTypes, allBidirectionalAllowed, graph);
+        
         cycles.push({
           cycle,
           length: cycle.length,
-          edgeTypes: [], // 簡略化のため省略
-          severity: cycle.length <= 3 ? 'high' : cycle.length <= 5 ? 'medium' : 'low',
+          edgeTypes,
+          severity,
         });
       }
     }
@@ -666,6 +702,47 @@ function detectCycles(graph: DependencyGraph): CircularDependency[] {
   });
   
   return cycles;
+}
+
+/**
+ * 循環依存の重大度を計算
+ * 
+ * **判定基準:**
+ * 1. 双方向許可エッジのみ → `info`（設計上許容）
+ * 2. ビジネス要件やアクター含む → `critical`
+ * 3. 長さ3以下 → `high`
+ * 4. 長さ4-5 → `medium`
+ * 5. 長さ6以上 → `low`
+ */
+function calculateCycleSeverity(
+  cycle: string[],
+  edgeTypes: EdgeType[],
+  allBidirectionalAllowed: boolean,
+  graph: DependencyGraph
+): 'critical' | 'high' | 'medium' | 'low' | 'info' {
+  // 双方向許可エッジのみの循環は情報レベル
+  if (allBidirectionalAllowed) {
+    return 'info';
+  }
+  
+  // ノードタイプを確認
+  const nodeTypes = cycle.map(id => graph.nodes.get(id)?.type).filter(Boolean);
+  
+  // ビジネス要件やアクターを含む循環は重大
+  if (nodeTypes.includes(NodeType.BUSINESS_REQUIREMENT) || 
+      nodeTypes.includes(NodeType.BUSINESS_GOAL) ||
+      nodeTypes.includes(NodeType.ACTOR)) {
+    return 'critical';
+  }
+  
+  // 長さに基づく判定
+  if (cycle.length <= 3) {
+    return 'high';
+  } else if (cycle.length <= 5) {
+    return 'medium';
+  } else {
+    return 'low';
+  }
 }
 
 function calculateNodeImportance(graph: DependencyGraph): NodeImportance[] {

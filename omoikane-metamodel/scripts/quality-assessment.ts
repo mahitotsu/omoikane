@@ -378,12 +378,32 @@ function displayV2Report(
   console.log(`  エッジ数: ${graphAnalysis.statistics.edgeCount}`);
   console.log(`  循環依存: ${graphAnalysis.circularDependencies.length}件`);
   if (graphAnalysis.circularDependencies.length > 0) {
-    console.log('  循環依存の詳細:');
-    for (const cycleDep of graphAnalysis.circularDependencies.slice(0, 3)) {
-      console.log(`    • ${cycleDep.cycle.join(' → ')} (長さ: ${cycleDep.length}, 重大度: ${cycleDep.severity})`);
-    }
-    if (graphAnalysis.circularDependencies.length > 3) {
-      console.log(`    ... 他${graphAnalysis.circularDependencies.length - 3}件`);
+    // 重大度別にグループ化
+    const bySeverity = {
+      critical: graphAnalysis.circularDependencies.filter((c: any) => c.severity === 'critical'),
+      high: graphAnalysis.circularDependencies.filter((c: any) => c.severity === 'high'),
+      medium: graphAnalysis.circularDependencies.filter((c: any) => c.severity === 'medium'),
+      low: graphAnalysis.circularDependencies.filter((c: any) => c.severity === 'low'),
+      info: graphAnalysis.circularDependencies.filter((c: any) => c.severity === 'info'),
+    };
+    
+    console.log('  循環依存（重大度別）:');
+    console.log(`    🔴 Critical: ${bySeverity.critical.length}件`);
+    console.log(`    🟠 High: ${bySeverity.high.length}件`);
+    console.log(`    🟡 Medium: ${bySeverity.medium.length}件`);
+    console.log(`    🟢 Low: ${bySeverity.low.length}件`);
+    console.log(`    ℹ️  Info: ${bySeverity.info.length}件 (設計上許容される双方向参照)`);
+    
+    // Critical/Highがあれば詳細表示
+    const problemCycles = [...bySeverity.critical, ...bySeverity.high];
+    if (problemCycles.length > 0) {
+      console.log('\n  ⚠️ 要対応の循環依存:');
+      for (const cycleDep of problemCycles.slice(0, 3)) {
+        console.log(`    • ${cycleDep.cycle.join(' → ')} (長さ: ${cycleDep.length}, 重大度: ${cycleDep.severity})`);
+      }
+      if (problemCycles.length > 3) {
+        console.log(`    ... 他${problemCycles.length - 3}件`);
+      }
     }
   }
   console.log(`  孤立ノード: ${graphAnalysis.isolatedNodes.length}件`);

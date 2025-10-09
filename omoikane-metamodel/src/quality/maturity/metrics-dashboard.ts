@@ -238,6 +238,13 @@ export class MetricsDashboard {
         edgeCount: data.graph.statistics.edgeCount,
         circularDependencies: data.graph.circularDependencies?.length || 0,
         isolatedNodes: data.graph.isolatedNodes?.length || 0,
+        circularDependenciesBySeverity: {
+          critical: data.graph.circularDependencies?.filter(c => c.severity === 'critical').length || 0,
+          high: data.graph.circularDependencies?.filter(c => c.severity === 'high').length || 0,
+          medium: data.graph.circularDependencies?.filter(c => c.severity === 'medium').length || 0,
+          low: data.graph.circularDependencies?.filter(c => c.severity === 'low').length || 0,
+          info: data.graph.circularDependencies?.filter(c => c.severity === 'info').length || 0,
+        },
       } : undefined,
       context: data.context,
     };
@@ -321,10 +328,19 @@ export class MetricsDashboard {
     // トレーサビリティスコア
     const traceabilityScore = (snapshot.dimensionScores.get('traceability' as MaturityDimension) || 0) * 100;
     
-    // アーキテクチャスコア（循環依存・孤立ノードがないほど高い）
+    // アーキテクチャスコア（重大な循環依存・孤立ノードがないほど高い）
+    // info レベルの循環（画面遷移の双方向性等）は減点対象外
     let architectureScore = 100;
     if (snapshot.graphStats) {
-      architectureScore -= snapshot.graphStats.circularDependencies * 10;
+      // info レベルを除いた重大な循環のみカウント
+      const criticalCycles = (snapshot.graphStats.circularDependenciesBySeverity?.critical || 0) +
+                             (snapshot.graphStats.circularDependenciesBySeverity?.high || 0);
+      const mediumCycles = snapshot.graphStats.circularDependenciesBySeverity?.medium || 0;
+      const lowCycles = snapshot.graphStats.circularDependenciesBySeverity?.low || 0;
+      
+      architectureScore -= criticalCycles * 15;  // 重大な循環は大きく減点
+      architectureScore -= mediumCycles * 8;     // 中程度の循環は中減点
+      architectureScore -= lowCycles * 3;        // 軽微な循環は小減点
       architectureScore -= snapshot.graphStats.isolatedNodes * 5;
       architectureScore = Math.max(0, architectureScore);
     }
