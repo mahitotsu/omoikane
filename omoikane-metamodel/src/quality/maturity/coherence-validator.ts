@@ -188,6 +188,18 @@ function validateTransitions(
 
 /**
  * 開始・終了画面の一致性を検証
+ * 
+ * **設計思想:**
+ * - startScreen: UseCaseの最初のステップとScreenFlowの開始画面は一致すべき
+ * - endScreens: UseCaseの最後のステップの画面がScreenFlowの終了画面リストに含まれるべき
+ * 
+ * **endScreensの解釈:**
+ * ScreenFlow.endScreensは「このフローで到達可能な終了点（出口）」を表現します。
+ * 複数の終了画面がある場合（正常完了画面、キャンセル後の一覧画面など）、
+ * すべての出口をendScreensに含めることで、UI実装者に有益な情報を提供します。
+ * 
+ * UseCaseの最後のステップの画面は、少なくとも1つのendScreenとして含まれるべきです。
+ * これにより、ビジネスユースケースの終了点とScreenFlowの終了点の整合性が保たれます。
  */
 function validateBoundaryScreens(
   useCase: UseCase,
