@@ -84,6 +84,7 @@ bun run quality-assessment
 ```
 
 **評価内容:**
+
 - 成熟度レベル1-5の評価（INITIAL → REPEATABLE → DEFINED → MANAGED → OPTIMIZED）
 - 5次元評価（構造、詳細度、トレーサビリティ、テスト可能性、保守性）
 - AI推奨事項（クイックウィン、最優先改善項目）

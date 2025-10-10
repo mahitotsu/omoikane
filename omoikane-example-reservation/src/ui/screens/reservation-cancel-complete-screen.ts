@@ -1,14 +1,14 @@
 /**
  * 予約取消完了画面
- * 
+ *
  * 予約が正常に取り消されたことを通知する画面。
- * 
+ *
  * 設計上の特徴:
  * - 取消完了メッセージの表示
  * - 取り消された予約内容のサマリー
  * - 確認メール送信の案内
  * - 次回予約への導線
- * 
+ *
  * 関連ユースケース:
  * - reservation-cancel: 予約取消の最終ステップ
  */
@@ -21,7 +21,7 @@ export const reservationCancelCompleteScreen: Screen = {
   type: 'screen',
   description: '予約取消が正常に完了したことを通知する画面。取り消された予約内容を表示します。',
   screenType: 'detail',
-  
+
   displayFields: [
     {
       id: 'success-message',

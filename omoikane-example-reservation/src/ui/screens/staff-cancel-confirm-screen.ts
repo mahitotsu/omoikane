@@ -1,22 +1,22 @@
 /**
  * スタッフ予約取消確認画面
- * 
+ *
  * スタッフによる予約取消を確認し、最終実行する画面。
  * 来店者向けの取消確認画面とほぼ同じだが、スタッフ権限で操作します。
- * 
+ *
  * 設計上の特徴:
  * - 取消対象の予約内容表示
  * - 取消理由の記録（必須）
  * - 操作スタッフIDの記録
  * - 監査ログへの記録
  * - 顧客への通知オプション
- * 
+ *
  * セキュリティ考慮:
  * - スタッフ権限の確認
  * - 取消理由の必須入力
  * - 操作履歴の記録
  * - 不可逆操作の警告
- * 
+ *
  * 関連ユースケース:
  * - reservation-staff-cancel: スタッフによる予約取消
  */
@@ -30,7 +30,7 @@ export const staffCancelConfirmScreen: Screen = {
   type: 'screen',
   description: 'スタッフによる予約取消を確認し、最終実行する画面。取消理由を記録します。',
   screenType: 'confirmation',
-  
+
   displayFields: [
     {
       id: 'cancel-reservation-number',
@@ -92,9 +92,7 @@ export const staffCancelConfirmScreen: Screen = {
       required: true,
       placeholder: '顧客からの電話依頼、店舗都合、無断キャンセルなど',
       helpText: '取消の理由を明確に記載してください（監査ログに記録されます）',
-      validationRules: [
-        typedValidationRuleRef('validation-required-field'),
-      ],
+      validationRules: [typedValidationRuleRef('validation-required-field')],
     },
     {
       id: 'notify-customer',

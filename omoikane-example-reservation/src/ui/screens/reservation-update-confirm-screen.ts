@@ -1,14 +1,14 @@
 /**
  * 予約変更確認画面
- * 
+ *
  * 変更内容を確認し、最終的に変更を確定する画面。
  * 変更前と変更後の内容を並べて表示します。
- * 
+ *
  * 設計上の特徴:
  * - 変更前・変更後の比較表示
  * - 戻るボタンで再編集可能
  * - 確定ボタンで変更実行
- * 
+ *
  * 関連ユースケース:
  * - reservation-update: 予約変更の確認ステップ
  */
@@ -21,7 +21,7 @@ export const reservationUpdateConfirmScreen: Screen = {
   type: 'screen',
   description: '予約の変更内容を確認し、最終確定を行う画面。変更前と変更後の内容を比較表示します。',
   screenType: 'confirmation',
-  
+
   displayFields: [
     {
       id: 'confirm-reservation-number',

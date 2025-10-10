@@ -1,13 +1,13 @@
 /**
  * 来店予約管理システム - 予約変更ユースケース
- * 
+ *
  * 来店者による予約内容の変更フローを定義します。
- * 
+ *
  * 設計上の特徴:
  * - 予約番号と連絡先による本人確認
  * - 旧枠の取消と新枠の確定を同時実行
  * - 変更理由の記録による監査性確保
- * 
+ *
  * 関連ユースケース:
  * - reservation-booking: 予約の新規登録
  * - reservation-staff-change: スタッフによる予約変更
@@ -35,10 +35,7 @@ const reservationLookupStep = {
   expectedResult: '本人と一致する予約のみが照会される',
   screen: typedScreenRef('reservation-lookup-screen'),
   inputData: ['予約番号', '連絡先情報'],
-  validationRules: [
-    '予約番号が有効な形式であること',
-    '連絡先情報が登録時と一致すること',
-  ],
+  validationRules: ['予約番号が有効な形式であること', '連絡先情報が登録時と一致すること'],
   errorHandling: [
     '予約番号が存在しない場合はエラーメッセージを表示',
     '連絡先が一致しない場合は本人確認手順を案内',
@@ -62,7 +59,8 @@ export const reservationUpdate: ReservationUseCase = {
   id: 'reservation-update',
   name: '予約変更',
   type: 'usecase',
-  description: '来店者が確定済みの予約内容を更新する。予約番号と連絡先による本人確認を行い、日時やサービス内容の変更を営業時間外でもセルフサービスで実行できる。旧枠の取消と新枠の確定を一連の操作として記録し、履歴の追跡可能性を維持する。',
+  description:
+    '来店者が確定済みの予約内容を更新する。予約番号と連絡先による本人確認を行い、日時やサービス内容の変更を営業時間外でもセルフサービスで実行できる。旧枠の取消と新枠の確定を一連の操作として記録し、履歴の追跡可能性を維持する。',
   actors: {
     primary: typedActorRef('visitor'),
     secondary: [typedActorRef('store-staff')],
@@ -100,7 +98,7 @@ export const reservationUpdate: ReservationUseCase = {
   }),
   preconditions: [
     '有効な予約番号と登録済みの連絡先情報を来店者が保持している',
-  '予約変更受付期限（利用予定日時の前営業日の営業時間終了まで）を過ぎていない',
+    '予約変更受付期限（利用予定日時の前営業日の営業時間終了まで）を過ぎていない',
   ],
   postconditions: [
     '予約内容が最新の情報に更新されている',
@@ -128,8 +126,7 @@ export const reservationUpdate: ReservationUseCase = {
       stepId: 'confirm-updates',
       actor: typedActorRef('visitor'),
       action: '検証結果と更新後の内容を確認して変更を確定する',
-      expectedResult:
-        '予約内容が更新される',
+      expectedResult: '予約内容が更新される',
       screen: typedScreenRef('reservation-update-confirm-screen'),
     },
     {
@@ -145,7 +142,7 @@ export const reservationUpdate: ReservationUseCase = {
     {
       id: 'change-cutoff-exceeded',
       name: '変更可能時間を超過',
-  condition: '利用予定日時の前営業日の営業時間終了後である場合',
+      condition: '利用予定日時の前営業日の営業時間終了後である場合',
       steps: [
         {
           actor: typedActorRef('visitor'),

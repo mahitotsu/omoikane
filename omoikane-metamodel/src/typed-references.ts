@@ -85,9 +85,7 @@ export function constraintRef<T extends KnownConstraintId>(id: T): ConstraintRef
   return { id, type: 'constraint-ref' };
 }
 
-export function securityPolicyRef<T extends KnownSecurityPolicyId>(
-  id: T
-): SecurityPolicyRef<T> {
+export function securityPolicyRef<T extends KnownSecurityPolicyId>(id: T): SecurityPolicyRef<T> {
   return { id, type: 'security-policy-ref' };
 }
 
@@ -125,7 +123,9 @@ export function typedScreenRef<T extends KnownScreenId>(id: T): Ref<Screen> {
   return { id };
 }
 
-export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): Ref<ValidationRule> {
+export function typedValidationRuleRef<T extends KnownValidationRuleId>(
+  id: T
+): Ref<ValidationRule> {
   return { id };
 }
 

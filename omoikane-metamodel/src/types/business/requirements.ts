@@ -1,10 +1,10 @@
 /**
  * @fileoverview 業務要件定義型（Business Requirements）
- * 
+ *
  * **目的:**
  * システムが提供すべき業務価値と成果を整理するための型を定義します。
  * ビジネスゴール、スコープ、ステークホルダー、成功指標、制約条件などを構造化して記述します。
- * 
+ *
  * **型定義:**
  * 1. BusinessRequirementItem: 業務要件項目（基本要素）
  * 2. BusinessRequirementScope: スコープ定義（inScope/outOfScope）
@@ -12,12 +12,12 @@
  * 4. BusinessRule: ビジネスルール
  * 5. BusinessRequirementDefinition: 業務要件定義文書
  * 6. BusinessRequirementCoverage: 業務要件カバレッジ情報
- * 
+ *
  * **設計原則:**
  * - 構造化: 業務要件を明確な構造で整理
  * - トレーサビリティ: 機能仕様との対応関係を追跡
  * - 柔軟性: 様々なプロジェクトに適用可能
- * 
+ *
  * **使用例:**
  * ```typescript
  * // 業務要件定義
@@ -45,7 +45,7 @@
  *     { id: 'sh-001', description: 'マーケティング部門' }
  *   ]
  * };
- * 
+ *
  * // 業務要件カバレッジ（ユースケースとの対応）
  * const coverage: BusinessRequirementCoverage = {
  *   requirement: { id: 'br-001', displayName: 'ECサイトリニューアル' },
@@ -55,7 +55,7 @@
  *   notes: 'このユースケースは売上向上ゴールに貢献する'
  * };
  * ```
- * 
+ *
  * @module types/business/requirements
  */
 
@@ -67,17 +67,17 @@ import type { Ref, TraceableDocument } from '../foundation/index.js';
 
 /**
  * 業務要件における個別項目の基本単位
- * 
+ *
  * **目的:**
  * ビジネスゴール、スコープ項目、ステークホルダーなど、
  * リスト形式で表現される業務要件の個別項目の共通構造を定義します。
- * 
+ *
  * **フィールド:**
  * - id: 項目ID（一意識別子）
  * - description: 項目の説明（内容、目的、詳細）
  * - notes: 補足メモ（追加情報、注意事項、制約など）
  * - type: 型識別子（オプション）
- * 
+ *
  * **使用例:**
  * ```typescript
  * const goal: BusinessRequirementItem = {
@@ -91,28 +91,28 @@ import type { Ref, TraceableDocument } from '../foundation/index.js';
 export interface BusinessRequirementItem {
   /** 項目ID（一意識別子） */
   id: string;
-  
+
   /** 項目の説明（内容、目的、詳細） */
   description: string;
-  
+
   /** 補足メモ（追加情報、注意事項、制約など） */
   notes?: string;
-  
+
   /** 型識別子（オプション） - 項目の種類を識別するためのフィールド */
   type?: string;
 }
 
 /**
  * 業務要件におけるスコープ定義
- * 
+ *
  * **目的:**
  * プロジェクトのスコープ（範囲）を明確に定義します。
  * スコープ内項目とスコープ外項目を明示的に区別します。
- * 
+ *
  * **フィールド:**
  * - inScope: スコープ内項目（プロジェクトで実施する項目）
  * - outOfScope: スコープ外項目（プロジェクトで実施しない項目、明示的に除外）
- * 
+ *
  * **使用例:**
  * ```typescript
  * const scope: BusinessRequirementScope = {
@@ -131,7 +131,7 @@ export interface BusinessRequirementItem {
 export interface BusinessRequirementScope {
   /** スコープ内項目（プロジェクトで実施する項目） */
   inScope: BusinessRequirementItem[];
-  
+
   /** スコープ外項目（明示的に除外する項目） */
   outOfScope?: BusinessRequirementItem[];
 }
@@ -142,11 +142,11 @@ export interface BusinessRequirementScope {
 
 /**
  * ビジネスゴール
- * 
+ *
  * **目的:**
  * 業務要件として達成すべき目標を定義します。
  * BusinessRequirementItemを継承し、型識別子を追加します。
- * 
+ *
  * **使用例:**
  * ```typescript
  * const goal: BusinessGoal = {
@@ -163,11 +163,11 @@ export interface BusinessGoal extends BusinessRequirementItem {
 
 /**
  * ステークホルダー
- * 
+ *
  * **目的:**
  * プロジェクトに関係する利害関係者を定義します。
  * BusinessRequirementItemを継承し、型識別子を追加します。
- * 
+ *
  * **使用例:**
  * ```typescript
  * const stakeholder: Stakeholder = {
@@ -184,11 +184,11 @@ export interface Stakeholder extends BusinessRequirementItem {
 
 /**
  * 成功指標
- * 
+ *
  * **目的:**
  * プロジェクトの成功を測定する指標を定義します。
  * BusinessRequirementItemを継承し、型識別子を追加します。
- * 
+ *
  * **使用例:**
  * ```typescript
  * const metric: SuccessMetric = {
@@ -205,11 +205,11 @@ export interface SuccessMetric extends BusinessRequirementItem {
 
 /**
  * 前提条件
- * 
+ *
  * **目的:**
  * プロジェクト実施の前提となる条件を定義します。
  * BusinessRequirementItemを継承し、型識別子を追加します。
- * 
+ *
  * **使用例:**
  * ```typescript
  * const assumption: Assumption = {
@@ -226,11 +226,11 @@ export interface Assumption extends BusinessRequirementItem {
 
 /**
  * 制約条件
- * 
+ *
  * **目的:**
  * プロジェクトに課される制約（予算、スケジュール、技術など）を定義します。
  * BusinessRequirementItemを継承し、型識別子を追加します。
- * 
+ *
  * **使用例:**
  * ```typescript
  * const constraint: Constraint = {
@@ -247,11 +247,11 @@ export interface Constraint extends BusinessRequirementItem {
 
 /**
  * セキュリティポリシー
- * 
+ *
  * **目的:**
  * システムが遵守すべきセキュリティポリシーを定義します。
  * BusinessRequirementItemを継承し、型識別子を追加します。
- * 
+ *
  * **使用例:**
  * ```typescript
  * const policy: SecurityPolicy = {
@@ -268,18 +268,18 @@ export interface SecurityPolicy extends BusinessRequirementItem {
 
 /**
  * ビジネスルール
- * 
+ *
  * **目的:**
  * ビジネスロジックやビジネス上の制約を定義します。
  * BusinessRequirementItemを継承し、カテゴリー分類機能を追加します。
- * 
+ *
  * **フィールド:**
  * - id: ルールID
  * - description: ルールの説明
  * - notes: 補足メモ
  * - category: ルールのカテゴリー（計算、検証、承認など）
  * - type: 型識別子（'business-rule'固定）
- * 
+ *
  * **使用例:**
  * ```typescript
  * const rule: BusinessRule = {
@@ -294,7 +294,7 @@ export interface SecurityPolicy extends BusinessRequirementItem {
 export interface BusinessRule extends BusinessRequirementItem {
   /** ルールのカテゴリー（計算、検証、承認、通知など） */
   category?: string;
-  
+
   type?: 'business-rule';
 }
 
@@ -304,11 +304,11 @@ export interface BusinessRule extends BusinessRequirementItem {
 
 /**
  * 業務要件定義文書
- * 
+ *
  * **目的:**
  * システムが提供すべき業務価値と成果を整理した文書です。
  * プロジェクトの目的、スコープ、ステークホルダー、成功指標などを構造化して記述します。
- * 
+ *
  * **必須フィールド:**
  * - id: 文書ID
  * - name: 文書名
@@ -317,20 +317,20 @@ export interface BusinessRule extends BusinessRequirementItem {
  * - businessGoals: ビジネスゴール
  * - scope: スコープ
  * - stakeholders: ステークホルダー
- * 
+ *
  * **オプションフィールド:**
  * - successMetrics: 成功指標
  * - assumptions: 前提条件
  * - constraints: 制約条件
  * - securityPolicies: セキュリティポリシー
  * - businessRules: ビジネスルール
- * 
+ *
  * **TraceableDocumentからの継承:**
  * - relatedDocuments: 関連文書
  * - traceabilityNote: トレーサビリティのメモ
  * - description: 文書の説明
  * - metadata: メタデータ
- * 
+ *
  * **使用例:**
  * ```typescript
  * const requirement: BusinessRequirementDefinition = {
@@ -397,34 +397,34 @@ export interface BusinessRule extends BusinessRequirementItem {
 export interface BusinessRequirementDefinition extends TraceableDocument {
   /** 文書型識別子（固定値: 'business-requirement'） */
   type?: 'business-requirement';
-  
+
   /** タイトル（プロジェクトや要件定義のタイトル） */
   title: string;
-  
+
   /** サマリー（要件定義の概要、目的） */
   summary: string;
-  
+
   /** ビジネスゴール（達成すべき目標のリスト） */
   businessGoals: BusinessGoal[];
-  
+
   /** スコープ（プロジェクトの範囲、inScope/outOfScope） */
   scope: BusinessRequirementScope;
-  
+
   /** ステークホルダー（関係者、意思決定者） */
   stakeholders: Stakeholder[];
-  
+
   /** 成功指標（目標達成を測定する指標） */
   successMetrics?: SuccessMetric[];
-  
+
   /** 前提条件（プロジェクト実施の前提となる条件） */
   assumptions?: Assumption[];
-  
+
   /** 制約条件（予算、スケジュール、技術的制約など） */
   constraints?: Constraint[];
-  
+
   /** セキュリティポリシー（遵守すべきセキュリティ要件） */
   securityPolicies?: SecurityPolicy[];
-  
+
   /** ビジネスルール（ビジネスロジック、業務ルール） */
   businessRules?: BusinessRule[];
 }
@@ -435,11 +435,11 @@ export interface BusinessRequirementDefinition extends TraceableDocument {
 
 /**
  * 業務要件カバレッジ情報
- * 
+ *
  * **目的:**
  * ユースケースなどの機能仕様が、どの業務要件をカバーしているかを追跡します。
  * トレーサビリティマトリクスを構築し、要件の実装状況を管理します。
- * 
+ *
  * **ジェネリクス型パラメータ:**
  * @template TRequirement - 業務要件定義の型（デフォルト: BusinessRequirementDefinition）
  * @template TGoal - ビジネスゴールの型（デフォルト: BusinessRequirementItem）
@@ -450,7 +450,7 @@ export interface BusinessRequirementDefinition extends TraceableDocument {
  * @template TConstraint - 制約条件の型（デフォルト: BusinessRequirementItem）
  * @template TSecurityPolicy - セキュリティポリシーの型（デフォルト: SecurityPolicy）
  * @template TBusinessRule - ビジネスルールの型（デフォルト: BusinessRule）
- * 
+ *
  * **フィールド:**
  * - requirement: 業務要件定義への参照（必須）
  * - businessGoals: カバーするビジネスゴール（必須）
@@ -462,14 +462,14 @@ export interface BusinessRequirementDefinition extends TraceableDocument {
  * - securityPolicies: 関連するセキュリティポリシー（オプション）
  * - businessRules: 関連するビジネスルール（オプション）
  * - notes: カバレッジに関する補足（オプション）
- * 
+ *
  * **使用例:**
  * ```typescript
  * // ユースケース「ログイン」の業務要件カバレッジ
  * const coverage: BusinessRequirementCoverage = {
- *   requirement: { 
- *     id: 'br-001', 
- *     displayName: 'ECサイトリニューアル' 
+ *   requirement: {
+ *     id: 'br-001',
+ *     displayName: 'ECサイトリニューアル'
  *   },
  *   businessGoals: [
  *     { id: 'goal-001', displayName: '売上向上' },
@@ -486,7 +486,7 @@ export interface BusinessRequirementDefinition extends TraceableDocument {
  *   ],
  *   notes: 'このユースケースはセキュアなログイン機能を提供し、売上向上とUX向上に貢献する'
  * };
- * 
+ *
  * // トレーサビリティマトリクス構築
  * const useCase: UseCase = {
  *   id: 'uc-001',
@@ -509,31 +509,31 @@ export interface BusinessRequirementCoverage<
 > {
   /** 業務要件定義への参照（どの業務要件をカバーしているか） */
   requirement: Ref<TRequirement>;
-  
+
   /** カバーするビジネスゴール（どの目標に貢献するか） */
   businessGoals: Ref<TGoal>[];
-  
+
   /** カバーするスコープ項目（どのスコープ項目を実装するか） */
   scopeItems?: Ref<TScope>[];
-  
+
   /** 関連するステークホルダー（どの関係者が関与するか） */
   stakeholders?: Ref<TStakeholder>[];
-  
+
   /** 関連する成功指標（どの指標に影響するか） */
   successMetrics?: Ref<TMetric>[];
-  
+
   /** 関連する前提条件（どの前提に依存するか） */
   assumptions?: Ref<TAssumption>[];
-  
+
   /** 関連する制約条件（どの制約を考慮するか） */
   constraints?: Ref<TConstraint>[];
-  
+
   /** 関連するセキュリティポリシー（どのポリシーを適用するか） */
   securityPolicies?: Ref<TSecurityPolicy>[];
-  
+
   /** 関連するビジネスルール（どのルールを実装するか） */
   businessRules?: Ref<TBusinessRule>[];
-  
+
   /** カバレッジに関する補足（実装方針、注意事項など） */
   notes?: string;
 }

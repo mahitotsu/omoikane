@@ -1,40 +1,41 @@
 /**
  * 来店予約管理システム - 店舗スタッフ予約検索ユースケース
- * 
+ *
  * 店舗スタッフによる予約検索機能を定義します。
- * 
+ *
  * 設計上の特徴:
  * - 予約番号なしでの柔軟な検索（日付・連絡先・サービス内容等）
  * - 検索条件と結果閲覧の監査ログ記録
  * - プライバシー保護と現場オペレーション効率化の両立
- * 
+ *
  * セキュリティ考慮事項:
  * - 必要最小限の個人情報のみ表示
  * - 権限に基づくアクセス制御
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessRuleRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    securityPolicyRef,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
-    typedScreenRef,
-    typedUseCaseRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessRuleRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  securityPolicyRef,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
+  typedScreenRef,
+  typedUseCaseRef,
 } from '../typed-references.js';
 
 export const reservationStaffSearch: ReservationUseCase = {
   id: 'reservation-staff-search',
   name: '店舗スタッフによる予約検索',
   type: 'usecase',
-  description: '店舗スタッフが予約番号なしで、日付・連絡先・サービス内容などの条件を指定して対象予約の一覧を取得する。検索条件と結果閲覧を監査ログに記録することで、プライバシー保護と現場オペレーションの効率化を両立する。',
+  description:
+    '店舗スタッフが予約番号なしで、日付・連絡先・サービス内容などの条件を指定して対象予約の一覧を取得する。検索条件と結果閲覧を監査ログに記録することで、プライバシー保護と現場オペレーションの効率化を両立する。',
   actors: {
     primary: typedActorRef('store-staff'),
   },

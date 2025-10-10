@@ -1,18 +1,18 @@
 /**
  * 来店予約管理システム - アカウント管理ユースケース
- * 
+ *
  * システム管理者が店舗スタッフアカウントの登録・削除を行う機能を定義します。
- * 
+ *
  * 設計上の特徴:
  * - 2つのユースケース（登録・削除）を1ファイルで定義
  * - 店舗スタッフIDとパスワードの管理
  * - アカウント削除は論理削除（システムからの完全削除ではない）
- * 
+ *
  * セキュリティ考慮事項:
  * - パスワードの初期設定とハッシュ化
  * - アカウント操作の監査ログ記録
  * - 削除されたアカウントによる操作の防止
- * 
+ *
  * 関連ユースケース:
  * - 店舗スタッフによる全ての予約操作（認証の前提）
  */
@@ -34,13 +34,13 @@ import {
   typedUseCaseRef,
 } from '../typed-references.js';
 
-
 export const userAccountRegistration: ReservationUseCase = {
   id: 'user-account-registration',
   name: 'ユーザー登録',
   type: 'usecase',
   prerequisiteUseCases: [typedUseCaseRef('staff-authentication')],
-  description: 'システム管理者がユーザー情報と適切なロールを指定して新規ユーザーを登録する。最小権限の原則に従い、業務に必要な権限のみを付与し、登録操作と担当者IDを監査ログに記録することで、アクセス制御の透明性とセキュリティを確保する。',
+  description:
+    'システム管理者がユーザー情報と適切なロールを指定して新規ユーザーを登録する。最小権限の原則に従い、業務に必要な権限のみを付与し、登録操作と担当者IDを監査ログに記録することで、アクセス制御の透明性とセキュリティを確保する。',
   actors: { primary: typedActorRef('system-admin') },
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
     requirement: businessRequirementRef('reservation-business-requirements'),
@@ -132,7 +132,8 @@ export const userAccountRegistration: ReservationUseCase = {
     'ロールの権限が適切に適用されること',
     '登録操作が監査ログに記録されること',
   ],
-  businessValue: 'ユーザー管理の効率化とアクセス制御の適切な運用により、セキュリティとコンプライアンスを維持',
+  businessValue:
+    'ユーザー管理の効率化とアクセス制御の適切な運用により、セキュリティとコンプライアンスを維持',
 };
 
 export const userAccountDeletion: ReservationUseCase = {
@@ -140,7 +141,8 @@ export const userAccountDeletion: ReservationUseCase = {
   name: 'ユーザー削除',
   type: 'usecase',
   prerequisiteUseCases: [typedUseCaseRef('staff-authentication')],
-  description: 'システム管理者が不要になったユーザーアカウントを削除し、システムへのアクセスを無効化する。削除前に影響範囲と承認状況を確認し、削除操作と担当者IDを監査ログに記録することで、セキュリティとコンプライアンスを維持する。',
+  description:
+    'システム管理者が不要になったユーザーアカウントを削除し、システムへのアクセスを無効化する。削除前に影響範囲と承認状況を確認し、削除操作と担当者IDを監査ログに記録することで、セキュリティとコンプライアンスを維持する。',
   actors: { primary: typedActorRef('system-admin') },
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
     requirement: businessRequirementRef('reservation-business-requirements'),
@@ -232,5 +234,6 @@ export const userAccountDeletion: ReservationUseCase = {
     '削除後、即座にシステムアクセスが無効化されること',
     '削除操作が監査ログに記録されること',
   ],
-  businessValue: 'ユーザーライフサイクル管理の適切な運用により、セキュリティリスクを最小化し、監査性を確保',
+  businessValue:
+    'ユーザーライフサイクル管理の適切な運用により、セキュリティリスクを最小化し、監査性を確保',
 };

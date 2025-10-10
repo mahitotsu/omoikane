@@ -5,32 +5,32 @@
  * **目的:**
  * プロジェクトのビルドプロセスを自動化し、型安全性を保証します。
  * ファイル監視モードでは、変更を検知して自動的にビルドを実行します。
- * 
+ *
  * **実行フロー:**
  * 1. 型安全参照の生成（typed-references.ts）
  * 2. 文字列参照から型安全参照への変換
  * 3. TypeScript構文チェック
  * 4. 変更差分の表示
- * 
+ *
  * **実行方法:**
  * ```bash
  * # 単発実行
  * bun run auto-build
- * 
+ *
  * # ファイル監視モード（開発時推奨）
  * bun run auto-build --watch
  * ```
- * 
+ *
  * **使用シーン:**
  * - 開発中の継続的なビルド（--watchモード）
  * - CI/CDパイプラインでの自動ビルド
  * - プロジェクトのセットアップ時
- * 
+ *
  * **設計原則:**
  * - 各ステップの成功/失敗を追跡
  * - エラーが発生しても続行可能
  * - 詳細なビルド結果サマリーを表示
- * 
+ *
  * @module scripts/auto-build
  */
 
@@ -42,7 +42,7 @@ import { execSync } from 'child_process';
 
 /**
  * ビルドステップの結果
- * 
+ *
  * 各ビルドステップの実行結果を保持します。
  */
 interface BuildResult {
@@ -62,17 +62,17 @@ interface BuildResult {
 
 /**
  * コマンドを実行して結果を返す
- * 
+ *
  * **処理内容:**
  * 1. コマンド実行開始をログ出力
  * 2. execSyncでコマンド実行
  * 3. 成功/失敗に応じて結果を返す
- * 
+ *
  * **設計判断:**
  * - execSync使用（シンプルで同期的な実行）
  * - エラーをキャッチして構造化データで返す
  * - カレントディレクトリでの実行を保証
- * 
+ *
  * @param command - 実行するシェルコマンド
  * @param description - ステップの説明（ログ用）
  * @returns ビルド結果
@@ -99,19 +99,19 @@ function runCommand(command: string, description: string): BuildResult {
 
 /**
  * 完全自動ビルドを実行
- * 
+ *
  * **処理フロー:**
  * 1. プロジェクト名を表示
  * 2. 型安全参照生成スクリプト実行
  * 3. 参照変換スクリプト実行（文字列 → 型安全）
  * 4. TypeScript構文チェック
  * 5. ビルド結果のサマリー表示
- * 
+ *
  * **エラーハンドリング:**
  * - 各ステップの成功/失敗を記録
  * - 1つのステップが失敗しても次のステップに進む
  * - 最終的に失敗があればプロセスを終了コード1で終了
- * 
+ *
  * **出力例:**
  * ```
  * 🚀 Omoikane フル自動ビルド開始 (omoikane-example-reservation)
@@ -126,7 +126,7 @@ function runCommand(command: string, description: string): BuildResult {
  * ✅ 成功: 3/3 ステップ
  * 🎉 フル自動ビルドが正常に完了しました！
  * ```
- * 
+ *
  * @returns ビルド結果の配列
  */
 async function fullAutoBuild() {
@@ -202,10 +202,10 @@ async function fullAutoBuild() {
 
 /**
  * コマンドライン引数の処理
- * 
+ *
  * **サポートするオプション:**
  * - --watch: ファイル監視モード（将来実装予定）
- * 
+ *
  * **実行例:**
  * ```bash
  * bun run auto-build          # 通常実行
@@ -223,4 +223,3 @@ if (args.includes('--watch')) {
 if (import.meta.main) {
   fullAutoBuild().catch(console.error);
 }
-

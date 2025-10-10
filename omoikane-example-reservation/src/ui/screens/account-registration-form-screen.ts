@@ -36,9 +36,7 @@ export const accountRegistrationFormScreen: Screen = {
       label: 'メールアドレス',
       fieldType: 'email',
       required: true,
-      validationRules: [
-        typedValidationRuleRef('validation-email-format'),
-      ],
+      validationRules: [typedValidationRuleRef('validation-email-format')],
       helpText: '通知やパスワードリセットに使用',
     },
     {

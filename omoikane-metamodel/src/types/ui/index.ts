@@ -1,9 +1,9 @@
 /**
  * @fileoverview UI Layer - ユーザーインターフェース層
- * 
+ *
  * **目的:**
  * 画面定義、画面遷移、バリデーションルールなどのUI要素を提供します。
- * 
+ *
  * **主要な型:**
  * - ValidationRule: バリデーションルール（複数画面で再利用可能）
  * - Screen: 画面定義（入力フィールド、表示項目、アクション含む）
@@ -11,7 +11,7 @@
  * - InputField: 入力フィールド
  * - DisplayField: 表示フィールド
  * - ScreenAction: 画面アクション
- * 
+ *
  * **レイヤー構成における位置:**
  * ```
  * ┌─────────────────────────────────────────┐
@@ -26,16 +26,16 @@
  * │         Foundation Layer                │
  * └─────────────────────────────────────────┘
  * ```
- * 
+ *
  * **依存関係:**
  * - Foundation Layer: Ref<T>, DocumentBase
  * - Business Layer: BusinessRule
  * - Functional Layer: UseCase（ScreenFlowで参照）
- * 
+ *
  * **使用例:**
  * ```typescript
  * import { Screen, ValidationRule, ScreenFlow } from './types/ui/index.js';
- * 
+ *
  * // バリデーションルール定義
  * const emailValidation: ValidationRule = {
  *   id: 'validation-email-format',
@@ -43,7 +43,7 @@
  *   ruleType: 'email',
  *   errorMessage: '有効なメールアドレスを入力してください',
  * };
- * 
+ *
  * // 画面定義
  * const formScreen: Screen = {
  *   id: 'form-screen',
@@ -61,7 +61,7 @@
  *   ]
  * };
  * ```
- * 
+ *
  * @module types/ui
  */
 
@@ -76,9 +76,15 @@ export type { ValidationRule, ValidationRuleType, ValidationTrigger } from './va
 // ============================================================================
 
 export type {
-    DisplayField,
-    DisplayFieldType, FieldType, InputField, Screen, ScreenAction,
-    ScreenActionType, ScreenType, SelectOption
+  DisplayField,
+  DisplayFieldType,
+  FieldType,
+  InputField,
+  Screen,
+  ScreenAction,
+  ScreenActionType,
+  ScreenType,
+  SelectOption,
 } from './screen.js';
 
 // ============================================================================

@@ -1,14 +1,14 @@
 /**
  * チェックイン完了画面
- * 
+ *
  * チェックイン処理が正常に完了したことを通知する画面。
- * 
+ *
  * 設計上の特徴:
  * - チェックイン完了メッセージ
  * - チェックイン時刻の表示
  * - 実際の来店人数の記録
  * - 次の予約への導線
- * 
+ *
  * 関連ユースケース:
  * - reservation-check-in: チェックインの最終ステップ
  */
@@ -19,9 +19,10 @@ export const checkInCompleteScreen: Screen = {
   id: 'check-in-complete-screen',
   name: 'チェックイン完了画面',
   type: 'screen',
-  description: 'チェックイン処理が正常に完了したことを通知する画面。チェックイン時刻と実際の人数を表示します。',
+  description:
+    'チェックイン処理が正常に完了したことを通知する画面。チェックイン時刻と実際の人数を表示します。',
   screenType: 'detail',
-  
+
   displayFields: [
     {
       id: 'success-message',

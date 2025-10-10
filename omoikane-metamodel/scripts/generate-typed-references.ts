@@ -1,17 +1,17 @@
 #!/usr/bin/env bun
 /**
  * @fileoverview 型安全参照の自動生成スクリプト
- * 
+ *
  * **目的:**
  * インスタンスプロジェクトのソースコードから各種ドキュメント（Actor、UseCase、Screen等）を検出し、
  * 型安全な参照関数を含む`typed-references.ts`ファイルを自動生成します。
- * 
+ *
  * **主要機能:**
  * 1. 型検出システム: `type`フィールドによるドキュメント種別の自動識別
  * 2. ID収集: 各ドキュメントのIDを収集してユニオン型を生成
  * 3. 参照関数生成: IDE補完が効く型安全な参照関数を生成
  * 4. 統計情報: 検出されたドキュメント数の集計
- * 
+ *
  * **検出対象:**
  * - Actor (type: 'actor')
  * - UseCase (type: 'usecase')
@@ -20,21 +20,21 @@
  * - ScreenFlow (type: 'screen-flow')
  * - BusinessRequirement (type: 'business-requirement')
  *   - ネストされた業務要件項目（BusinessGoal、Stakeholder、SuccessMetric等）も抽出
- * 
+ *
  * **実行方法:**
  * ```bash
  * bun run generate-references
  * ```
- * 
+ *
  * **生成ファイル:**
  * - `src/typed-references.ts`: 型安全な参照システム
- * 
+ *
  * **設計原則:**
  * - ゼロコンフィグ: 設定ファイル不要、`type`フィールドで自動検出
  * - 型安全: 存在しないIDの参照はコンパイルエラーになる
  * - IDE補完: KnownXXXId型により補完が効く
  * - メンテナンス性: 手動編集不要、再実行で常に最新状態
- * 
+ *
  * @module scripts/generate-typed-references
  */
 
@@ -48,7 +48,7 @@ import { pathToFileURL } from 'url';
 
 /**
  * アクター情報
- * 
+ *
  * 検出されたアクターのIDとファイルパスを保持します。
  */
 interface ActorInfo {
@@ -60,7 +60,7 @@ interface ActorInfo {
 
 /**
  * ユースケース情報
- * 
+ *
  * 検出されたユースケースのIDとファイルパスを保持します。
  */
 interface UseCaseInfo {
@@ -72,7 +72,7 @@ interface UseCaseInfo {
 
 /**
  * 画面情報
- * 
+ *
  * 検出された画面のIDとファイルパスを保持します。
  */
 interface ScreenInfo {
@@ -84,7 +84,7 @@ interface ScreenInfo {
 
 /**
  * バリデーションルール情報
- * 
+ *
  * 検出されたバリデーションルールのIDとファイルパスを保持します。
  */
 interface ValidationRuleInfo {
@@ -96,7 +96,7 @@ interface ValidationRuleInfo {
 
 /**
  * 画面遷移フロー情報
- * 
+ *
  * 検出された画面遷移フローのIDとファイルパスを保持します。
  */
 interface ScreenFlowInfo {
@@ -108,7 +108,7 @@ interface ScreenFlowInfo {
 
 /**
  * 業務要件情報
- * 
+ *
  * 検出された業務要件定義のIDとファイルパス、
  * さらにネストされた業務要件項目（BusinessGoal、Stakeholder等）のIDを保持します。
  */
@@ -141,17 +141,17 @@ interface BusinessRequirementInfo {
 
 /**
  * ディレクトリ内の全TypeScriptファイルを再帰的に取得
- * 
+ *
  * **処理内容:**
  * 1. 指定ディレクトリ内のエントリを取得
  * 2. ディレクトリの場合は再帰的に探索
  * 3. .tsファイルの場合は結果に追加
  * 4. パスの長い順→アルファベット順でソート
- * 
+ *
  * **ソート理由:**
  * より具体的なファイル（パスが長い）から処理することで、
  * 詳細な定義を優先的に検出できます。
- * 
+ *
  * @param dir - 検索対象ディレクトリの絶対パス
  * @returns TypeScriptファイルの絶対パスの配列
  */
@@ -183,18 +183,18 @@ function getAllTsFiles(dir: string): string[] {
 
 /**
  * 文字列配列からTypeScriptユニオン型リテラルを生成
- * 
+ *
  * **処理内容:**
  * - 空配列の場合は`never`型を返す
  * - 各文字列をシングルクォートで囲み、改行区切りで結合
  * - エスケープ処理: バックスラッシュとシングルクォートを適切にエスケープ
- * 
+ *
  * **生成例:**
  * ```typescript
  * ['actor-1', 'actor-2'] → "'actor-1'\n  | 'actor-2'"
  * [] → "never"
  * ```
- * 
+ *
  * @param values - 文字列の配列
  * @returns TypeScriptユニオン型リテラル文字列
  */
@@ -213,14 +213,14 @@ function toUnionLiteral(values: string[]): string {
 
 /**
  * ソースコードから全てのドキュメント要素を抽出
- * 
+ *
  * **処理フロー:**
  * 1. `src/`ディレクトリ内の全TypeScriptファイルを取得
  * 2. 各ファイルを動的インポートしてモジュールキャッシュに格納
  * 3. エクスポートされた値を走査し、`type`フィールドで種別を判定
  * 4. 各種ドキュメント（Actor、UseCase等）を検出・収集
  * 5. BusinessRequirementから入れ子の項目（BusinessGoal等）を抽出
- * 
+ *
  * **型検出システム:**
  * 各ドキュメントの`type`フィールドを検査して種別を判定します：
  * - type: 'actor' → Actor
@@ -229,14 +229,14 @@ function toUnionLiteral(values: string[]): string {
  * - type: 'validation-rule' → ValidationRule
  * - type: 'screen-flow' → ScreenFlow
  * - type: 'business-requirement' → BusinessRequirement
- * 
+ *
  * **重複回避:**
  * 同じIDのドキュメントが複数回検出された場合は、最初の1つのみを保持します。
- * 
+ *
  * **エラーハンドリング:**
  * - `src/`ディレクトリが存在しない場合: 警告を出力して空の結果を返す
  * - モジュール解析に失敗した場合: 警告を出力して次のファイルに進む
- * 
+ *
  * @returns 検出された全ドキュメント情報
  */
 async function extractElements(): Promise<{
@@ -279,7 +279,7 @@ async function extractElements(): Promise<{
   // ================================================================
   // BusinessRequirementDefinition の抽出（最初に実行）
   // ================================================================
-  // 
+  //
   // BusinessRequirementには多数の入れ子項目（BusinessGoal、Stakeholder等）が
   // 含まれるため、最初に処理して全てのIDを抽出します。
   for (const [file, exported] of moduleCache) {
@@ -433,7 +433,8 @@ function escapeForSingleQuote(input: string): string {
 async function generateTypedReferences() {
   console.log('🔄 型安全参照を自動生成中...');
 
-  const { actors, useCases, screens, validationRules, screenFlows, businessRequirements } = await extractElements();
+  const { actors, useCases, screens, validationRules, screenFlows, businessRequirements } =
+    await extractElements();
 
   console.log(`📊 検出された業務要件定義: ${businessRequirements.length}個`);
   businessRequirements.forEach(r => console.log(`  - ${r.id} (${path.basename(r.file)})`));

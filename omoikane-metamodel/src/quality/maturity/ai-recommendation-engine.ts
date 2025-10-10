@@ -1,67 +1,58 @@
 /**
  * @fileoverview AI Agent推奨エンジン v2.0 - 実装（AI Recommendation Engine）
- * 
+ *
  * **目的:**
  * 成熟度評価、コンテキスト分析、依存関係分析を統合し、AIエージェントが実行可能な
  * 具体的な改善推奨を生成します。
- * 
+ *
  * **4つの推奨生成戦略:**
  * 1. 成熟度ベース（Maturity-based）: 次のレベルに到達するための具体的アクション
  * 2. コンテキストベース（Context-based）: プロジェクトステージ・チーム規模に応じた推奨
  * 3. 依存関係ベース（Dependency-based）: 循環依存・孤立要素の解決
  * 4. テンプレートベース（Template-based）: ベストプラクティスの適用
- * 
+ *
  * **推奨の構造:**
  * - 優先度: critical > high > medium > low
  * - カテゴリ: quality, maintainability, testability, documentation, architecture
  * - 影響範囲: project, module, element
  * - 工数見積もり: 時間数、複雑度
  * - ROI計算: 効果/工数
- * 
+ *
  * **推奨のグルーピング:**
  * - Top Priority: 最優先5件
  * - Quick Wins: 低工数・高効果
  * - Long-term Strategy: 戦略的改善
  * - Bundles: 関連する推奨のまとまり
- * 
+ *
  * **出力:**
  * - AIAgentRecommendations: 全推奨リスト + サマリー
  * - StructuredRecommendation: 実行可能な具体的アクション
  * - 工数見積もり、成熟度向上予測
- * 
+ *
  * **拡張ポイント:**
  * - 新しい推奨戦略を追加する場合: generate〇〇Recommendations関数を追加
  * - 新しいテンプレートを追加する場合: initializeBuiltInTemplatesに追加
  * - 優先順位付けロジックを変更する場合: prioritizeRecommendations関数を修正
  * - ROI計算を調整する場合: calculateROI関数を変更
- * 
+ *
  * @module quality/maturity/ai-recommendation-engine
  */
 
-import type {
-    Actor,
-    BusinessRequirementDefinition,
-    UseCase,
-} from '../../types/index.js';
+import type { Actor, BusinessRequirementDefinition, UseCase } from '../../types/index.js';
 import type {
     AIAgentRecommendations,
     AIRecommendationTemplate,
     RecommendationBundle,
     RecommendationOptions,
-    StructuredRecommendation
+    StructuredRecommendation,
 } from './ai-recommendation-model.js';
 import { RecommendationCategory, RecommendationPriority } from './ai-recommendation-model.js';
-import type {
-    ContextApplicationResult,
-    ProjectContext
-} from './context-model.js';
-import type {
-    GraphAnalysisResult
-} from './dependency-graph-model.js';
+import type { ContextApplicationResult, ProjectContext } from './context-model.js';
+import type { GraphAnalysisResult } from './dependency-graph-model.js';
 import type {
     MaturityDimension,
     MaturityLevel,
-    ProjectMaturityAssessment
+    ProjectMaturityAssessment,
 } from './maturity-model.js';
 
 // ============================================================================
@@ -70,13 +61,13 @@ import type {
 
 /**
  * AI推奨エンジン（AI Recommendation Engine）
- * 
+ *
  * **責務:**
  * - 複数の分析結果を統合して改善推奨を生成
  * - 優先順位付けとフィルタリング
  * - Quick Wins（低工数・高効果）の特定
  * - 推奨のバンドリング（関連する推奨のグループ化）
- * 
+ *
  * **使用例:**
  * ```typescript
  * const engine = new AIRecommendationEngine();
@@ -86,27 +77,27 @@ import type {
  *   graph: graphAnalysis
  * }, { maxRecommendations: 20, generateBundles: true });
  * ```
- * 
+ *
  * **内部状態:**
  * - templates: ビルトインテンプレートのリスト
- * 
+ *
  * **拡張ポイント:**
  * - カスタムテンプレートを追加する場合: コンストラクタでthis.templates.push()
  */
 export class AIRecommendationEngine {
   private templates: AIRecommendationTemplate[] = [];
-  
+
   constructor() {
     this.initializeBuiltInTemplates();
   }
-  
+
   // ============================================================================
   // 公開API: 総合推奨生成
   // ============================================================================
-  
+
   /**
    * 総合推奨を生成します。
-   * 
+   *
    * **処理フロー:**
    * 1. 4つの戦略で推奨を生成（成熟度、コンテキスト、依存関係、テンプレート）
    * 2. フィルタリング（オプション適用）
@@ -114,16 +105,16 @@ export class AIRecommendationEngine {
    * 4. Top 5、Quick Wins、Long-term Strategyを特定
    * 5. バンドル生成（関連推奨のグループ化）
    * 6. サマリー作成（総数、工数、成熟度向上予測）
-   * 
+   *
    * **優先順位付けアルゴリズム:**
    * - ROI = (成熟度向上 × 影響範囲) / (工数 × 複雑度)
    * - critical問題は最優先
    * - 依存関係のある推奨は順序を考慮
-   * 
+   *
    * @param data - 分析結果データ（maturity, context, graph, requirements, actors, useCasesなど）
    * @param options - 推奨生成オプション（maxRecommendations, generateBundles, priorityThresholdなど）
    * @returns 総合推奨結果（AIAgentRecommendations）
-   * 
+   *
    * **使用例:**
    * ```typescript
    * const recommendations = engine.generateRecommendations({
@@ -137,60 +128,59 @@ export class AIRecommendationEngine {
    * });
    * console.log(`トップ推奨: ${recommendations.topPriority[0].title}`);
    * ```
-   * 
+   *
    * **注意:**
    * - データが不足している場合、該当する戦略の推奨はスキップされます
    * - options.maxRecommendationsを指定しない場合、全推奨を返します
-   * 
+   *
    * **拡張ポイント:**
    * - 新しい推奨戦略を追加する場合: generate〇〇Recommendations呼び出しを追加
    */
-  generateRecommendations(data: {
-    maturity?: ProjectMaturityAssessment;
-    context?: ProjectContext;
-    contextResult?: ContextApplicationResult;
-    graph?: GraphAnalysisResult;
-    requirements?: BusinessRequirementDefinition[];
-    actors?: Actor[];
-    useCases?: UseCase[];
-  }, options: RecommendationOptions = {}): AIAgentRecommendations {
+  generateRecommendations(
+    data: {
+      maturity?: ProjectMaturityAssessment;
+      context?: ProjectContext;
+      contextResult?: ContextApplicationResult;
+      graph?: GraphAnalysisResult;
+      requirements?: BusinessRequirementDefinition[];
+      actors?: Actor[];
+      useCases?: UseCase[];
+    },
+    options: RecommendationOptions = {}
+  ): AIAgentRecommendations {
     const recommendations: StructuredRecommendation[] = [];
-    
+
     // 1. 成熟度ベースの推奨
     if (data.maturity) {
       recommendations.push(...this.generateMaturityRecommendations(data.maturity));
     }
-    
+
     // 2. コンテキストベースの推奨
     if (data.context && data.contextResult) {
-      recommendations.push(...this.generateContextRecommendations(
-        data.context,
-        data.contextResult,
-        data.maturity
-      ));
+      recommendations.push(
+        ...this.generateContextRecommendations(data.context, data.contextResult, data.maturity)
+      );
     }
-    
+
     // 3. 依存関係ベースの推奨
     if (data.graph) {
       recommendations.push(...this.generateDependencyRecommendations(data.graph));
     }
-    
+
     // 4. テンプレートベースの推奨
     recommendations.push(...this.generateTemplateRecommendations(data));
-    
+
     // フィルタリングと優先順位付け
     const filtered = this.filterRecommendations(recommendations, options);
     const prioritized = this.prioritizeRecommendations(filtered, data);
-    
+
     // Top Nとバンドル生成
     const topPriority = prioritized.slice(0, 5);
     const quickWins = this.identifyQuickWins(prioritized);
     const longTerm = this.identifyLongTermStrategy(prioritized);
-    
-    const bundles = options.generateBundles
-      ? this.generateBundles(prioritized, data.maturity)
-      : [];
-    
+
+    const bundles = options.generateBundles ? this.generateBundles(prioritized, data.maturity) : [];
+
     return {
       timestamp: new Date().toISOString(),
       context: data.context,
@@ -204,39 +194,35 @@ export class AIRecommendationEngine {
         criticalCount: prioritized.filter(r => r.priority === 'critical').length,
         highPriorityCount: prioritized.filter(r => r.priority === 'high').length,
         estimatedTotalHours: prioritized.reduce((sum, r) => sum + r.effort.hours, 0),
-        expectedMaturityIncrease: this.estimateMaturityIncrease(
-          prioritized,
-          data.maturity
-        ),
+        expectedMaturityIncrease: this.estimateMaturityIncrease(prioritized, data.maturity),
       },
     };
   }
-  
-  
+
   // ============================================================================
   // 推奨生成戦略1: 成熟度ベース
   // ============================================================================
-  
+
   /**
    * 成熟度評価結果から推奨を生成します。
-   * 
+   *
    * **生成ロジック:**
    * 1. 各要素のnextStepsを取得
    * 2. StructuredRecommendation形式に変換
    * 3. 優先度、工数、成熟度向上効果を計算
    * 4. プロジェクト全体の改善推奨を追加（レベル5未満の場合）
-   * 
+   *
    * **推奨の種類:**
    * - 要素レベル: 各UseCase/Actor/BusinessRequirementの改善
    * - プロジェクトレベル: 全体的な成熟度向上
-   * 
+   *
    * @param maturity - プロジェクト成熟度評価結果
    * @returns 成熟度ベースの推奨リスト
-   * 
+   *
    * **注意:**
    * - nextStepsが定義されていない要素はスキップされます
    * - レベル2以下の要素は高優先度として扱われます
-   * 
+   *
    * **拡張ポイント:**
    * - 新しい要素タイプを追加する場合: maturity.elementsの構造を確認
    */
@@ -245,15 +231,15 @@ export class AIRecommendationEngine {
   ): StructuredRecommendation[] {
     const recommendations: StructuredRecommendation[] = [];
     let recId = 1;
-    
+
     // 各要素の次ステップを構造化推奨に変換
-    for (const [type, elementOrArray] of Object.entries(maturity.elements)) {
+    for (const elementOrArray of Object.values(maturity.elements)) {
       // 単一要素か配列かを判定
       const elements = Array.isArray(elementOrArray) ? elementOrArray : [elementOrArray];
-      
+
       for (const element of elements) {
         if (!element || !element.nextSteps) continue;
-        
+
         for (const nextStep of element.nextSteps) {
           const targetLevel = (element.overallLevel + 1) as MaturityLevel;
           recommendations.push({
@@ -271,10 +257,7 @@ export class AIRecommendationEngine {
               description: nextStep.action,
               steps: this.generateStepsForNextStep(nextStep),
             },
-            benefits: [
-              nextStep.rationale,
-              `成熟度レベル${targetLevel}に到達`,
-            ],
+            benefits: [nextStep.rationale, `成熟度レベル${targetLevel}に到達`],
             effort: {
               hours: this.mapPriorityToHours(nextStep.priority),
               complexity: this.mapPriorityToComplexity(nextStep.priority),
@@ -286,41 +269,38 @@ export class AIRecommendationEngine {
         }
       }
     }
-    
+
     // プロジェクト全体の改善推奨
     if (maturity.projectLevel < 5) {
-      recommendations.push(
-        this.generateProjectLevelRecommendation(maturity)
-      );
+      recommendations.push(this.generateProjectLevelRecommendation(maturity));
     }
-    
+
     return recommendations;
   }
-  
-  
+
   // ============================================================================
   // 推奨生成戦略2: コンテキストベース
   // ============================================================================
-  
+
   /**
    * プロジェクトコンテキストに応じた推奨を生成します。
-   * 
+   *
    * **生成ロジック:**
    * 1. ステージ別推奨（PoC/MVP: 軽量化、Production: 詳細化）
    * 2. チーム規模別推奨（小規模: シンプル、大規模: 構造化）
    * 3. 文書化レベル別推奨（低: 基本追加、高: 最適化）
    * 4. コンテキスト適用結果の反映（適用されたルールの効果測定）
-   * 
+   *
    * **コンテキスト考慮:**
    * - stage: poc, mvp, production, maintenance
    * - teamSize: small (1-5), medium (6-15), large (16+)
    * - documentationLevel: minimal, moderate, comprehensive
-   * 
+   *
    * @param context - プロジェクトコンテキスト
    * @param contextResult - コンテキスト適用結果
    * @param maturity - 成熟度評価結果（オプション、優先度判定に使用）
    * @returns コンテキストベースの推奨リスト
-   * 
+   *
    * **拡張ポイント:**
    * - 新しいステージを追加する場合: stage判定条件を追加
    * - 新しいチーム規模を追加する場合: teamSize判定条件を追加
@@ -331,7 +311,7 @@ export class AIRecommendationEngine {
     maturity?: ProjectMaturityAssessment
   ): StructuredRecommendation[] {
     const recommendations: StructuredRecommendation[] = [];
-    
+
     // ステージ別推奨
     if (context.stage === 'poc' || context.stage === 'mvp') {
       recommendations.push({
@@ -353,10 +333,7 @@ export class AIRecommendationEngine {
             '詳細な例外フローは実装後に追加',
           ],
         },
-        benefits: [
-          '開発速度の維持',
-          '検証サイクルの高速化',
-        ],
+        benefits: ['開発速度の維持', '検証サイクルの高速化'],
         effort: {
           hours: 4,
           complexity: 'simple',
@@ -366,10 +343,9 @@ export class AIRecommendationEngine {
         },
       });
     }
-    
+
     // クリティカリティ別推奨
-    if (context.criticality === 'mission_critical' || 
-        context.criticality === 'high') {
+    if (context.criticality === 'mission_critical' || context.criticality === 'high') {
       recommendations.push({
         id: 'ctx-crit-1',
         title: 'ミッションクリティカルプロジェクトのためのトレーサビリティ強化',
@@ -389,11 +365,7 @@ export class AIRecommendationEngine {
             '変更履歴の記録を開始',
           ],
         },
-        benefits: [
-          '監査対応の向上',
-          '変更影響分析の精度向上',
-          'コンプライアンス要件の充足',
-        ],
+        benefits: ['監査対応の向上', '変更影響分析の精度向上', 'コンプライアンス要件の充足'],
         effort: {
           hours: 16,
           complexity: 'moderate',
@@ -403,13 +375,15 @@ export class AIRecommendationEngine {
         },
       });
     }
-    
+
     // 適用ルールに基づく推奨
     for (const rule of contextResult.appliedRules) {
       if (rule.id === 'finance-traceability' && maturity) {
-        const traceabilityScore = maturity.overallDimensions
-          .find(d => d.dimension === 'TRACEABILITY' as MaturityDimension)?.completionRate || 0;
-        
+        const traceabilityScore =
+          maturity.overallDimensions.find(
+            d => d.dimension === ('TRACEABILITY' as MaturityDimension)
+          )?.completionRate || 0;
+
         if (traceabilityScore < 0.8) {
           recommendations.push({
             id: 'ctx-rule-finance',
@@ -430,10 +404,7 @@ export class AIRecommendationEngine {
                 'コンプライアンス参照の追加',
               ],
             },
-            benefits: [
-              '規制監査への対応',
-              'リスク管理の向上',
-            ],
+            benefits: ['規制監査への対応', 'リスク管理の向上'],
             effort: {
               hours: 20,
               complexity: 'complex',
@@ -446,35 +417,35 @@ export class AIRecommendationEngine {
         }
       }
     }
-    
+
     return recommendations;
   }
-  
+
   // ============================================================================
   // 推奨生成戦略3: 依存関係ベース
   // ============================================================================
-  
+
   /**
    * 依存関係分析結果から推奨を生成します。
-   * 
+   *
    * **生成ロジック:**
    * 1. 循環依存（Circular Dependencies）の解決推奨
    * 2. 孤立要素（Orphaned Elements）の統合推奨
    * 3. 過度に依存されている要素（Hub Elements）の分割推奨
    * 4. 依存関係の簡素化推奨
-   * 
+   *
    * **問題検出:**
    * - 循環依存: システムの理解を困難にする（高優先度）
    * - 孤立要素: 未使用のリソース（中優先度）
    * - ハブ要素: 単一障害点のリスク（中優先度）
-   * 
+   *
    * @param graph - 依存関係グラフ分析結果
    * @returns 依存関係ベースの推奨リスト
-   * 
+   *
    * **注意:**
    * - 循環依存の解決は複雑度が高いため、詳細な手順を提供します
    * - 孤立要素は削除または統合の判断が必要です
-   * 
+   *
    * **拡張ポイント:**
    * - 新しいグラフメトリクスを追加する場合: graph.metricsの構造を確認
    */
@@ -482,10 +453,12 @@ export class AIRecommendationEngine {
     graph: GraphAnalysisResult
   ): StructuredRecommendation[] {
     const recommendations: StructuredRecommendation[] = [];
-    
+
     // 循環依存の解消（infoレベルは除外 - 設計上許容される双方向参照）
     if (graph.circularDependencies && graph.circularDependencies.length > 0) {
-      const problemCycles = graph.circularDependencies.filter((cycle: any) => cycle.severity !== 'info');
+      const problemCycles = graph.circularDependencies.filter(
+        (cycle: any) => cycle.severity !== 'info'
+      );
       for (const cycle of problemCycles) {
         // 優先度を重大度に応じて設定
         let priority: RecommendationPriority;
@@ -498,7 +471,7 @@ export class AIRecommendationEngine {
         } else {
           priority = RecommendationPriority.LOW;
         }
-        
+
         recommendations.push({
           id: `dep-cycle-${cycle.cycle[0]}`,
           title: `循環依存の解消: ${cycle.cycle.join(' → ')}`,
@@ -518,19 +491,12 @@ export class AIRecommendationEngine {
               '循環を断ち切るリファクタリング',
             ],
           },
-          benefits: [
-            'アーキテクチャの明確化',
-            '保守性の向上',
-            'テスト容易性の改善',
-          ],
+          benefits: ['アーキテクチャの明確化', '保守性の向上', 'テスト容易性の改善'],
           effort: {
             hours: cycle.length * 3,
             complexity: 'complex',
           },
-          risks: [
-            '既存の参照関係の変更が必要',
-            '影響範囲の慎重な分析が必要',
-          ],
+          risks: ['既存の参照関係の変更が必要', '影響範囲の慎重な分析が必要'],
           rationale: {
             dependencyIssue: '循環依存はアーキテクチャの脆弱性',
             bestPractice: '階層化アーキテクチャ原則',
@@ -538,7 +504,7 @@ export class AIRecommendationEngine {
         });
       }
     }
-    
+
     // 孤立ノードの統合
     if (graph.isolatedNodes && graph.isolatedNodes.length > 0) {
       recommendations.push({
@@ -560,10 +526,7 @@ export class AIRecommendationEngine {
             '不要な場合は削除を検討',
           ],
         },
-        benefits: [
-          'トレーサビリティの向上',
-          'プロジェクト全体の一貫性',
-        ],
+        benefits: ['トレーサビリティの向上', 'プロジェクト全体の一貫性'],
         effort: {
           hours: graph.isolatedNodes.length * 0.5,
           complexity: 'simple',
@@ -573,11 +536,11 @@ export class AIRecommendationEngine {
         },
       });
     }
-    
+
     // UseCaseとScreenFlowの整合性エラー
     if (graph.coherenceValidation && graph.coherenceValidation.totalIssues > 0) {
       const cv = graph.coherenceValidation;
-      
+
       // High重大度の整合性エラー
       const highIssues = cv.issues.filter((i: any) => i.severity === 'high');
       for (const issue of highIssues) {
@@ -601,25 +564,19 @@ export class AIRecommendationEngine {
               '一方を修正して整合性を確保',
             ],
           },
-          benefits: [
-            '実装時の混乱を防止',
-            'トレーサビリティの向上',
-            '設計書の品質向上',
-          ],
+          benefits: ['実装時の混乱を防止', 'トレーサビリティの向上', '設計書の品質向上'],
           effort: {
             hours: 2,
             complexity: 'simple',
           },
-          risks: [
-            'UseCaseまたはScreenFlowの変更が必要',
-          ],
+          risks: ['UseCaseまたはScreenFlowの変更が必要'],
           rationale: {
             dependencyIssue: 'UseCaseとScreenFlowの不整合は実装精度に影響',
             bestPractice: 'ユースケース駆動開発では画面遷移の整合性が重要',
           },
         });
       }
-      
+
       // Medium重大度の整合性エラー（開始/終了画面の不一致）
       const mediumIssues = cv.issues.filter((i: any) => i.severity === 'medium');
       if (mediumIssues.length > 0) {
@@ -641,9 +598,7 @@ export class AIRecommendationEngine {
               'ScreenFlowのstartScreenとendScreensを更新',
             ],
           },
-          benefits: [
-            'フローのエントリーポイントと終了条件が明確化',
-          ],
+          benefits: ['フローのエントリーポイントと終了条件が明確化'],
           effort: {
             hours: 1,
             complexity: 'simple',
@@ -654,13 +609,13 @@ export class AIRecommendationEngine {
         });
       }
     }
-    
+
     // 重要ノードの品質強化
     if (graph.nodeImportance) {
       const topNodes = graph.nodeImportance
         .filter(n => n.importance === 'high' || n.importance === 'critical')
         .slice(0, 3);
-      
+
       for (const node of topNodes) {
         recommendations.push({
           id: `dep-critical-${node.nodeId}`,
@@ -675,16 +630,9 @@ export class AIRecommendationEngine {
           },
           solution: {
             description: '重要要素の詳細化とテストカバレッジ向上',
-            steps: [
-              '詳細な仕様記述の追加',
-              'エッジケースのシナリオ追加',
-              'テストケースの拡充',
-            ],
+            steps: ['詳細な仕様記述の追加', 'エッジケースのシナリオ追加', 'テストケースの拡充'],
           },
-          benefits: [
-            'システム全体の安定性向上',
-            '変更リスクの低減',
-          ],
+          benefits: ['システム全体の安定性向上', '変更リスクの低減'],
           effort: {
             hours: 8,
             complexity: 'moderate',
@@ -696,33 +644,33 @@ export class AIRecommendationEngine {
         });
       }
     }
-    
+
     return recommendations;
   }
-  
+
   // ============================================================================
   // 推奨生成戦略4: テンプレートベース
   // ============================================================================
-  
+
   /**
    * テンプレートベースの推奨を生成します。
-   * 
+   *
    * **生成ロジック:**
    * 1. ビルトインテンプレートをスキャン
    * 2. 適用条件（condition）をチェック
    * 3. 条件を満たすテンプレートからStructuredRecommendationを生成
-   * 
+   *
    * **テンプレートの種類:**
    * - ベストプラクティス: 業界標準の適用
    * - パターン: 設計パターンの導入
    * - チェックリスト: 品質チェック項目
-   * 
+   *
    * @param data - 全分析結果データ
    * @returns テンプレートベースの推奨リスト
-   * 
+   *
    * **注意:**
    * - テンプレートのcondition関数がtrueを返した場合のみ推奨を生成
-   * 
+   *
    * **拡張ポイント:**
    * - 新しいテンプレートを追加する場合: initializeBuiltInTemplatesに追加
    */
@@ -735,34 +683,34 @@ export class AIRecommendationEngine {
     useCases?: UseCase[];
   }): StructuredRecommendation[] {
     const recommendations: StructuredRecommendation[] = [];
-    
+
     for (const template of this.templates) {
       if (template.condition(data)) {
         recommendations.push(...template.generate(data));
       }
     }
-    
+
     return recommendations;
   }
-  
+
   // ============================================================================
   // フィルタリングと優先順位付け
   // ============================================================================
-  
+
   /**
    * 推奨をフィルタリングします。
-   * 
+   *
    * **フィルタリング条件:**
    * 1. 最低優先度（minPriority）: これ以上の優先度のみ
    * 2. カテゴリ（categories）: 指定カテゴリのみ
    * 3. 実行可能性（executableOnly）: executables定義があるもののみ
    * 4. 最大工数（maxEffortHours）: 指定時間以下のもののみ
    * 5. 最大推奨数（maxRecommendations）: 上位N件のみ
-   * 
+   *
    * @param recommendations - フィルタリング前の推奨リスト
    * @param options - フィルタリングオプション
    * @returns フィルタリング後の推奨リスト
-   * 
+   *
    * **使用例:**
    * ```typescript
    * const filtered = filterRecommendations(recs, {
@@ -771,7 +719,7 @@ export class AIRecommendationEngine {
    *   executableOnly: true
    * });
    * ```
-   * 
+   *
    * **拡張ポイント:**
    * - 新しいフィルタ条件を追加する場合: optionsに追加し、ここで判定
    */
@@ -780,73 +728,65 @@ export class AIRecommendationEngine {
     options: RecommendationOptions
   ): StructuredRecommendation[] {
     let filtered = recommendations;
-    
+
     if (options.minPriority) {
       const priorityOrder = [
         RecommendationPriority.CRITICAL,
         RecommendationPriority.HIGH,
         RecommendationPriority.MEDIUM,
-        RecommendationPriority.LOW
+        RecommendationPriority.LOW,
       ];
       const minIndex = priorityOrder.indexOf(options.minPriority);
-      filtered = filtered.filter(r => 
-        priorityOrder.indexOf(r.priority) <= minIndex
-      );
+      filtered = filtered.filter(r => priorityOrder.indexOf(r.priority) <= minIndex);
     }
-    
+
     if (options.categories && options.categories.length > 0) {
-      filtered = filtered.filter(r => 
-        options.categories!.includes(r.category)
-      );
+      filtered = filtered.filter(r => options.categories!.includes(r.category));
     }
-    
+
     if (options.executableOnly) {
-      filtered = filtered.filter(r => 
-        r.solution.executables && r.solution.executables.length > 0
-      );
+      filtered = filtered.filter(r => r.solution.executables && r.solution.executables.length > 0);
     }
-    
+
     if (options.maxEffortHours) {
-      filtered = filtered.filter(r => 
-        r.effort.hours <= options.maxEffortHours!
-      );
+      filtered = filtered.filter(r => r.effort.hours <= options.maxEffortHours!);
     }
-    
+
     if (options.maxRecommendations) {
       filtered = filtered.slice(0, options.maxRecommendations);
     }
-    
+
     return filtered;
   }
-  
+
   /**
    * 推奨を優先順位付けします。
-   * 
+   *
    * **優先順位付けアルゴリズム:**
    * 1. ROI（投資対効果）を計算: (効果 / 工数)
    * 2. critical推奨を最優先
    * 3. ROIが高い順にソート
    * 4. 同率の場合は優先度（priority）で判定
-   * 
+   *
    * **ROI計算:**
    * - 効果 = (成熟度向上 × 5) + (影響範囲の広さ × 3)
    * - 工数 = 時間数 × 複雑度係数
    * - 影響範囲: project(3) > module(2) > element(1)
    * - 複雑度係数: simple(1) < moderate(1.5) < complex(2)
-   * 
+   *
    * @param recommendations - 優先順位付け前の推奨リスト
    * @param data - 分析結果データ（成熟度情報など）
    * @returns 優先順位付け後の推奨リスト
-   * 
+   *
    * **注意:**
    * - critical推奨は常に最優先（ROIに関わらず）
-   * 
+   *
    * **拡張ポイント:**
    * - ROI計算式を変更する場合: calculateROI関数を修正
    */
   private prioritizeRecommendations(
     recommendations: StructuredRecommendation[],
-    data: {
+    _data: {
       maturity?: ProjectMaturityAssessment;
       context?: ProjectContext;
       graph?: GraphAnalysisResult;
@@ -858,47 +798,47 @@ export class AIRecommendationEngine {
         RecommendationPriority.CRITICAL,
         RecommendationPriority.HIGH,
         RecommendationPriority.MEDIUM,
-        RecommendationPriority.LOW
+        RecommendationPriority.LOW,
       ];
       const priorityDiff = priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
       if (priorityDiff !== 0) return priorityDiff;
-      
+
       // 2. 影響範囲の重大度
       const severityOrder = ['high', 'medium', 'low'];
-      const severityDiff = severityOrder.indexOf(a.impact.severity) - 
-                          severityOrder.indexOf(b.impact.severity);
+      const severityDiff =
+        severityOrder.indexOf(a.impact.severity) - severityOrder.indexOf(b.impact.severity);
       if (severityDiff !== 0) return severityDiff;
-      
+
       // 3. ROI（効果/工数）
       const roiA = this.calculateROI(a);
       const roiB = this.calculateROI(b);
       if (roiA !== roiB) return roiB - roiA;
-      
+
       // 4. 影響要素数
       const impactDiff = b.impact.affectedElements.length - a.impact.affectedElements.length;
       return impactDiff;
     });
   }
-  
+
   /**
    * Quick Wins（速攻で成果を上げる推奨）を特定します。
-   * 
+   *
    * **Quick Winsの条件:**
    * - 工数: 4時間以内
    * - 複雑度: simple
    * - 優先度: high または medium
-   * 
+   *
    * **目的:**
    * - 短期間で実装可能
    * - 即座に効果を実感できる
    * - チームの士気向上
-   * 
+   *
    * @param recommendations - 全推奨リスト
    * @returns Quick Winsのリスト（ROI順、最大5件）
-   * 
+   *
    * **使用例:**
    * 初期段階で成果を見せる必要がある場合、これらを優先実装します。
-   * 
+   *
    * **拡張ポイント:**
    * - 条件を変更する場合: filter条件を調整
    */
@@ -906,32 +846,33 @@ export class AIRecommendationEngine {
     recommendations: StructuredRecommendation[]
   ): StructuredRecommendation[] {
     return recommendations
-      .filter(r => 
-        r.effort.hours <= 4 && 
-        r.effort.complexity === 'simple' &&
-        (r.priority === 'high' || r.priority === 'medium')
+      .filter(
+        r =>
+          r.effort.hours <= 4 &&
+          r.effort.complexity === 'simple' &&
+          (r.priority === 'high' || r.priority === 'medium')
       )
       .slice(0, 5);
   }
-  
+
   /**
    * Long-term Strategy（長期的な戦略推奨）を特定します。
-   * 
+   *
    * **Long-term Strategyの条件:**
    * - 工数: 16時間以上
    * - 影響範囲: project全体
-   * 
+   *
    * **目的:**
    * - システム全体のアーキテクチャ改善
    * - 長期的な品質向上
    * - 技術的負債の解消
-   * 
+   *
    * @param recommendations - 全推奨リスト
    * @returns Long-term Strategyのリスト（ROI順、最大5件）
-   * 
+   *
    * **使用例:**
    * 中長期的なロードマップを作成する際に参照します。
-   * 
+   *
    * **拡張ポイント:**
    * - 条件を変更する場合: filter条件を調整
    */
@@ -939,30 +880,28 @@ export class AIRecommendationEngine {
     recommendations: StructuredRecommendation[]
   ): StructuredRecommendation[] {
     return recommendations
-      .filter(r => 
-        r.effort.hours >= 16 &&
-        r.category === 'architecture' ||
-        r.impact.scope === 'project'
+      .filter(
+        r => (r.effort.hours >= 16 && r.category === 'architecture') || r.impact.scope === 'project'
       )
       .slice(0, 3);
   }
-  
+
   /**
    * 推奨バンドル（関連する推奨のグループ）を生成します。
-   * 
+   *
    * **バンドル生成ロジック:**
    * 1. カテゴリー別バンドル: 同じカテゴリの推奨を3件以上まとめる
    * 2. 成熟度レベル別バンドル: 同じ目標レベルの推奨をまとめる
-   * 
+   *
    * **バンドルの利点:**
    * - 関連する改善を一括実施
    * - 相乗効果の最大化
    * - プロジェクト管理の簡素化
-   * 
+   *
    * @param recommendations - 全推奨リスト
    * @param maturity - 成熟度評価結果（オプション）
    * @returns 推奨バンドルのリスト
-   * 
+   *
    * **使用例:**
    * ```typescript
    * const bundles = generateBundles(recs, maturity);
@@ -970,7 +909,7 @@ export class AIRecommendationEngine {
    *   console.log(`${bundle.name}: ${bundle.recommendations.length}件`);
    * }
    * ```
-   * 
+   *
    * **拡張ポイント:**
    * - 新しいバンドル基準を追加する場合: ここにロジックを追加
    */
@@ -979,7 +918,7 @@ export class AIRecommendationEngine {
     maturity?: ProjectMaturityAssessment
   ): RecommendationBundle[] {
     const bundles: RecommendationBundle[] = [];
-    
+
     // カテゴリー別バンドル
     const byCategory = this.groupByCategory(recommendations);
     for (const [category, recs] of byCategory.entries()) {
@@ -998,10 +937,10 @@ export class AIRecommendationEngine {
         });
       }
     }
-    
+
     return bundles;
   }
-  
+
   /**
    * 成熟度向上の見積もり
    */
@@ -1010,51 +949,51 @@ export class AIRecommendationEngine {
     maturity?: ProjectMaturityAssessment
   ): number {
     if (!maturity) return 0;
-    
+
     const criticalCount = recommendations.filter(r => r.priority === 'critical').length;
     const highCount = recommendations.filter(r => r.priority === 'high').length;
-    
+
     // 簡易的な見積もり: critical 1個で0.1レベル、high 1個で0.05レベル
     return Math.min(criticalCount * 0.1 + highCount * 0.05, 1.0);
   }
-  
+
   // ============================================================================
   // ユーティリティ関数: ROI計算とグルーピング
   // ============================================================================
-  
+
   /**
    * ROI（投資対効果）を計算します。
-   * 
+   *
    * **計算式:**
    * - 効果スコア = 便益数 × 2 + 優先度係数
    * - 優先度係数: critical(10), high(5), medium/low(2)
    * - ROI = 効果スコア / 工数（時間）
-   * 
+   *
    * **用途:**
    * - 推奨の優先順位付け
    * - Quick Winsの特定
-   * 
+   *
    * @param rec - 推奨
    * @returns ROIスコア（高いほど効果的）
-   * 
+   *
    * **拡張ポイント:**
    * - 計算式を調整する場合: benefitScoreやeffortScoreの算出ロジックを変更
    */
   private calculateROI(rec: StructuredRecommendation): number {
-    const benefitScore = rec.benefits.length * 2 + 
-                        (rec.priority === 'critical' ? 10 : 
-                         rec.priority === 'high' ? 5 : 2);
+    const benefitScore =
+      rec.benefits.length * 2 +
+      (rec.priority === 'critical' ? 10 : rec.priority === 'high' ? 5 : 2);
     const effortScore = rec.effort.hours;
     return benefitScore / Math.max(effortScore, 1);
   }
-  
+
   /**
    * カテゴリー別にグルーピングします。
-   * 
+   *
    * **用途:**
    * - バンドル生成
    * - レポート作成
-   * 
+   *
    * @param recommendations - 推奨リスト
    * @returns カテゴリーごとの推奨マップ
    */
@@ -1070,81 +1009,95 @@ export class AIRecommendationEngine {
     }
     return map;
   }
-  
+
   /**
    * ヘルパー: 優先度を時間にマップ
    */
   private mapPriorityToHours(priority: 'high' | 'medium' | 'low'): number {
     switch (priority) {
-      case 'high': return 2;
-      case 'medium': return 8;
-      case 'low': return 24;
-      default: return 8;
+      case 'high':
+        return 2;
+      case 'medium':
+        return 8;
+      case 'low':
+        return 24;
+      default:
+        return 8;
     }
   }
-  
+
   /**
    * ヘルパー: 優先度を複雑度にマップ
    */
-  private mapPriorityToComplexity(priority: 'high' | 'medium' | 'low'): 'simple' | 'moderate' | 'complex' {
+  private mapPriorityToComplexity(
+    priority: 'high' | 'medium' | 'low'
+  ): 'simple' | 'moderate' | 'complex' {
     switch (priority) {
-      case 'high': return 'simple';
-      case 'medium': return 'moderate';
-      case 'low': return 'complex';
-      default: return 'moderate';
+      case 'high':
+        return 'simple';
+      case 'medium':
+        return 'moderate';
+      case 'low':
+        return 'complex';
+      default:
+        return 'moderate';
     }
   }
-  
+
   /**
    * ヘルパー: 工数を優先度にマップ
    */
   private mapEffortToPriority(effort: string): RecommendationPriority {
     switch (effort) {
-      case 'small': return 'high' as RecommendationPriority;
-      case 'medium': return 'medium' as RecommendationPriority;
-      case 'large': return 'low' as RecommendationPriority;
-      default: return 'medium' as RecommendationPriority;
+      case 'small':
+        return 'high' as RecommendationPriority;
+      case 'medium':
+        return 'medium' as RecommendationPriority;
+      case 'large':
+        return 'low' as RecommendationPriority;
+      default:
+        return 'medium' as RecommendationPriority;
     }
   }
-  
+
   /**
    * ヘルパー: 次元をカテゴリーにマップ
    */
   private mapDimensionToCategory(dimension: string): RecommendationCategory {
     const mapping: Record<string, RecommendationCategory> = {
-      'STRUCTURE': 'structure' as RecommendationCategory,
-      'DETAIL': 'detail' as RecommendationCategory,
-      'TRACEABILITY': 'traceability' as RecommendationCategory,
-      'TESTABILITY': 'testability' as RecommendationCategory,
-      'MAINTAINABILITY': 'maintainability' as RecommendationCategory,
+      STRUCTURE: 'structure' as RecommendationCategory,
+      DETAIL: 'detail' as RecommendationCategory,
+      TRACEABILITY: 'traceability' as RecommendationCategory,
+      TESTABILITY: 'testability' as RecommendationCategory,
+      MAINTAINABILITY: 'maintainability' as RecommendationCategory,
     };
     return mapping[dimension] || ('quality' as RecommendationCategory);
   }
-  
+
   /**
    * ヘルパー: 工数を時間にマップ
    */
   private mapEffortToHours(effort: string): number {
     switch (effort) {
-      case 'small': return 2;
-      case 'medium': return 8;
-      case 'large': return 24;
-      default: return 8;
+      case 'small':
+        return 2;
+      case 'medium':
+        return 8;
+      case 'large':
+        return 24;
+      default:
+        return 8;
     }
   }
-  
+
   /**
    * ヘルパー: 次ステップから実行ステップを生成
    */
   private generateStepsForNextStep(nextStep: any): string[] {
     // 簡易的な実装 - 実際にはより詳細なロジックが必要
-    return [
-      nextStep.action,
-      '実装を確認',
-      'テストを実施',
-    ];
+    return [nextStep.action, '実装を確認', 'テストを実施'];
   }
-  
+
   /**
    * プロジェクトレベル改善推奨
    */
@@ -1153,7 +1106,7 @@ export class AIRecommendationEngine {
   ): StructuredRecommendation {
     const currentLevel = maturity.projectLevel;
     const targetLevel = (currentLevel + 1) as MaturityLevel;
-    
+
     return {
       id: 'mat-project-level',
       title: `プロジェクト成熟度レベル${targetLevel}への到達`,
@@ -1167,11 +1120,7 @@ export class AIRecommendationEngine {
       },
       solution: {
         description: `レベル${targetLevel}基準を満たすための包括的改善`,
-        steps: [
-          '最も低い次元を特定',
-          'その次元の改善に集中',
-          'プロセスの標準化を推進',
-        ],
+        steps: ['最も低い次元を特定', 'その次元の改善に集中', 'プロセスの標準化を推進'],
       },
       benefits: [
         `成熟度レベル${targetLevel}達成`,
@@ -1188,7 +1137,7 @@ export class AIRecommendationEngine {
       },
     };
   }
-  
+
   /**
    * 組み込みテンプレートの初期化
    */
@@ -1196,86 +1145,81 @@ export class AIRecommendationEngine {
     // テンプレート1: テストカバレッジ不足
     this.templates.push({
       id: 'test-coverage',
-      condition: (data) => {
+      condition: data => {
         if (!data.maturity) return false;
-        const testability = data.maturity.overallDimensions
-          .find(d => d.dimension === 'TESTABILITY' as MaturityDimension);
+        const testability = data.maturity.overallDimensions.find(
+          d => d.dimension === ('TESTABILITY' as MaturityDimension)
+        );
         return testability ? testability.completionRate < 0.6 : false;
       },
-      generate: (data) => [{
-        id: 'tmpl-test-1',
-        title: 'テストシナリオの体系的追加',
-        priority: RecommendationPriority.HIGH,
-        category: RecommendationCategory.TESTABILITY,
-        problem: 'テストカバレッジが不足しています（60%未満）',
-        impact: {
-          scope: 'project',
-          affectedElements: [],
-          severity: 'high',
+      generate: _data => [
+        {
+          id: 'tmpl-test-1',
+          title: 'テストシナリオの体系的追加',
+          priority: RecommendationPriority.HIGH,
+          category: RecommendationCategory.TESTABILITY,
+          problem: 'テストカバレッジが不足しています（60%未満）',
+          impact: {
+            scope: 'project',
+            affectedElements: [],
+            severity: 'high',
+          },
+          solution: {
+            description: 'すべてのユースケースにテストシナリオを追加',
+            steps: [
+              '正常系シナリオの追加',
+              '主要な異常系シナリオの追加',
+              'エッジケースの特定と追加',
+            ],
+          },
+          benefits: ['バグ検出率の向上', '品質保証の強化'],
+          effort: {
+            hours: 12,
+            complexity: 'moderate',
+          },
+          rationale: {
+            bestPractice: 'テストカバレッジ目標80%以上',
+          },
         },
-        solution: {
-          description: 'すべてのユースケースにテストシナリオを追加',
-          steps: [
-            '正常系シナリオの追加',
-            '主要な異常系シナリオの追加',
-            'エッジケースの特定と追加',
-          ],
-        },
-        benefits: [
-          'バグ検出率の向上',
-          '品質保証の強化',
-        ],
-        effort: {
-          hours: 12,
-          complexity: 'moderate',
-        },
-        rationale: {
-          bestPractice: 'テストカバレッジ目標80%以上',
-        },
-      }],
+      ],
     });
-    
+
     // テンプレート2: 一貫性のない命名
     this.templates.push({
       id: 'naming-consistency',
-      condition: (data) => {
+      condition: data => {
         if (!data.useCases) return false;
         // 簡易チェック: ID形式の一貫性
         const ids = data.useCases.map((uc: UseCase) => uc.id);
         const patterns = new Set(ids.map((id: string) => id.replace(/[0-9]/g, '')));
         return patterns.size > 1;
       },
-      generate: (data) => [{
-        id: 'tmpl-naming-1',
-        title: 'ID命名規則の統一',
-        priority: RecommendationPriority.MEDIUM,
-        category: RecommendationCategory.MAINTAINABILITY,
-        problem: 'ユースケースIDの命名規則が一貫していません',
-        impact: {
-          scope: 'project',
-          affectedElements: data.useCases?.map(uc => uc.id) || [],
-          severity: 'medium',
+      generate: data => [
+        {
+          id: 'tmpl-naming-1',
+          title: 'ID命名規則の統一',
+          priority: RecommendationPriority.MEDIUM,
+          category: RecommendationCategory.MAINTAINABILITY,
+          problem: 'ユースケースIDの命名規則が一貫していません',
+          impact: {
+            scope: 'project',
+            affectedElements: data.useCases?.map(uc => uc.id) || [],
+            severity: 'medium',
+          },
+          solution: {
+            description: '統一された命名規則の適用',
+            steps: ['プロジェクト命名規則の策定', '既存IDのリネーム', '参照の更新'],
+          },
+          benefits: ['可読性の向上', '保守性の向上'],
+          effort: {
+            hours: 6,
+            complexity: 'simple',
+          },
+          rationale: {
+            bestPractice: '一貫した命名規則はコード品質の基本',
+          },
         },
-        solution: {
-          description: '統一された命名規則の適用',
-          steps: [
-            'プロジェクト命名規則の策定',
-            '既存IDのリネーム',
-            '参照の更新',
-          ],
-        },
-        benefits: [
-          '可読性の向上',
-          '保守性の向上',
-        ],
-        effort: {
-          hours: 6,
-          complexity: 'simple',
-        },
-        rationale: {
-          bestPractice: '一貫した命名規則はコード品質の基本',
-        },
-      }],
+      ],
     });
   }
 }

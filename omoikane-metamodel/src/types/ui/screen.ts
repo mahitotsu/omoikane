@@ -1,22 +1,22 @@
 /**
  * @fileoverview 画面定義
- * 
+ *
  * **目的:**
  * ユーザーインターフェースの画面構造を定義します。
  * 入力フィールド、表示項目、アクション等を含む画面の完全な定義を提供します。
- * 
+ *
  * **主要機能:**
  * 1. 画面タイプの分類（フォーム、一覧、詳細等）
  * 2. 入力フィールドの定義（インライン定義）
  * 3. 表示項目の定義
  * 4. 画面アクション（ボタン等）の定義
  * 5. バリデーションルールとの関連付け（参照）
- * 
+ *
  * **設計原則:**
  * - 凝集度: 入力フィールドは画面定義内にインライン定義
  * - 再利用: バリデーションルールは参照で再利用
  * - 段階的詳細化: 最小限から詳細まで段階的に定義可能
- * 
+ *
  * **使用例:**
  * ```typescript
  * const reservationFormScreen: Screen = {
@@ -44,7 +44,7 @@
  *   ]
  * };
  * ```
- * 
+ *
  * @module types/ui/screen
  */
 
@@ -66,7 +66,7 @@ export type ScreenType =
 
 /**
  * フィールドタイプ
- * 
+ *
  * HTML5の標準的な入力タイプに対応します。
  */
 export type FieldType =
@@ -86,7 +86,7 @@ export type FieldType =
 
 /**
  * 選択肢
- * 
+ *
  * select, radio, checkboxタイプのフィールドで使用します。
  */
 export type SelectOption = {
@@ -102,10 +102,10 @@ export type SelectOption = {
 
 /**
  * 入力フィールド
- * 
+ *
  * 画面内の入力フィールドを定義します。
  * 画面定義内にインライン定義されます。
- * 
+ *
  * **設計判断:**
  * - 入力フィールドは画面に属するため、画面定義内に配置
  * - 型定義は共通化し、インスタンスは画面ごとに定義
@@ -135,7 +135,7 @@ export type InputField = {
 
   /**
    * バリデーションルール（参照）
-   * 
+   *
    * 複数画面で再利用可能なバリデーションルールを参照します。
    */
   validationRules?: Ref<ValidationRule>[];
@@ -168,7 +168,7 @@ export type DisplayFieldType =
 
 /**
  * 表示フィールド
- * 
+ *
  * 確認画面や詳細画面で使用する表示専用のフィールドです。
  */
 export type DisplayField = {
@@ -204,7 +204,7 @@ export type ScreenActionType =
 
 /**
  * 画面アクション
- * 
+ *
  * ボタンやリンク等、ユーザーが実行できるアクションを定義します。
  */
 export type ScreenAction = {
@@ -232,14 +232,14 @@ export type ScreenAction = {
 
 /**
  * 画面定義
- * 
+ *
  * ユーザーインターフェースの画面構造を定義します。
- * 
+ *
  * **設計原則:**
  * - 凝集度: 入力フィールドは画面定義内に配置
  * - 再利用: バリデーションルールは参照
  * - トレーサビリティ: ビジネスルールとの関連付け
- * 
+ *
  * **関連性:**
  * - UseCaseStep.screen で参照される
  * - ScreenFlow で画面遷移を定義
@@ -247,7 +247,7 @@ export type ScreenAction = {
 export type Screen = DocumentBase & {
   /** 文書型識別子（固定値: 'screen'） */
   type?: 'screen';
-  
+
   /** 画面タイプ */
   screenType: ScreenType;
 
@@ -262,14 +262,14 @@ export type Screen = DocumentBase & {
 
   /**
    * 関連するビジネスルール
-   * 
+   *
    * この画面で適用されるビジネスルールを関連付けます。
    */
   businessRules?: Ref<BusinessRule>[];
 
   /**
    * アクセス権限
-   * 
+   *
    * この画面にアクセスするために必要な権限を指定します。
    */
   requiredPermissions?: string[];

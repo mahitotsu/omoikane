@@ -1,33 +1,33 @@
 /**
  * 来店予約管理システム - 店舗スタッフ予約変更ユースケース
- * 
+ *
  * 店舗スタッフが来店者の代理で予約内容を変更する機能を定義します。
- * 
+ *
  * 設計上の特徴:
  * - 予約番号なしで予約を特定可能（検索機能を利用）
  * - 変更理由と担当者IDの必須入力
  * - 旧枠取消と新枠確定の監査ログ記録
- * 
+ *
  * ビジネス上の意義:
  * - 来店者の希望に柔軟に対応
  * - 顧客対応の透明性と追跡可能性の確保
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessRuleRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    securityPolicyRef,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
-    typedScreenRef,
-    typedUseCaseRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessRuleRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  securityPolicyRef,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
+  typedScreenRef,
+  typedUseCaseRef,
 } from '../typed-references.js';
 const concurrentEditWarningSteps = [
   {
@@ -124,7 +124,8 @@ export const reservationStaffChange: ReservationUseCase = {
       stepId: 'return-to-list',
       actor: typedActorRef('store-staff'),
       action: '完了後、予約一覧画面に戻る',
-      expectedResult: '予約内容が更新され履歴に変更記録と枠の予約取消・予約確定情報が追加され、予約一覧画面が表示される',
+      expectedResult:
+        '予約内容が更新され履歴に変更記録と枠の予約取消・予約確定情報が追加され、予約一覧画面が表示される',
       screen: typedScreenRef('staff-reservation-list-screen'),
     },
   ],

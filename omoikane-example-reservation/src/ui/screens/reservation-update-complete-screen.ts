@@ -1,13 +1,13 @@
 /**
  * 予約変更完了画面
- * 
+ *
  * 予約変更が正常に完了したことを通知する画面。
- * 
+ *
  * 設計上の特徴:
  * - 変更完了メッセージの表示
  * - 変更後の予約内容サマリー
  * - 確認メール送信の案内
- * 
+ *
  * 関連ユースケース:
  * - reservation-update: 予約変更の最終ステップ
  */
@@ -20,7 +20,7 @@ export const reservationUpdateCompleteScreen: Screen = {
   type: 'screen',
   description: '予約変更が正常に完了したことを通知する画面。変更後の予約内容を表示します。',
   screenType: 'detail',
-  
+
   displayFields: [
     {
       id: 'success-message',

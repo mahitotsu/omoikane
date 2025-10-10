@@ -19,11 +19,7 @@
  */
 
 import type { UseCase } from 'omoikane-metamodel';
-import {
-    businessGoalRef,
-    businessRequirementRef,
-    typedActorRef,
-} from '../typed-references.js';
+import { businessGoalRef, businessRequirementRef, typedActorRef } from '../typed-references.js';
 
 export const staffAuthentication: UseCase = {
   id: 'staff-authentication',

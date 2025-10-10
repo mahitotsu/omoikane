@@ -1,14 +1,14 @@
 /**
  * 来店予約フォーム画面
- * 
+ *
  * 来店者が予約情報を入力する画面。
  * 日時選択、サービスメニュー選択、連絡先入力を含む。
- * 
+ *
  * 設計上の特徴:
  * - リアルタイム枠空き状況確認（日時選択時）
  * - 段階的なバリデーション（blur時と最終submit時）
  * - 特記事項は任意入力（アレルギー情報など）
- * 
+ *
  * 関連ユースケース:
  * - reservation-booking: このフォームは予約登録の最初のステップ
  */
@@ -20,9 +20,10 @@ export const reservationFormScreen: Screen = {
   id: 'reservation-form-screen',
   name: '予約フォーム画面',
   type: 'screen',
-  description: '来店者が予約情報を入力するフォーム画面。日時、サービスメニュー、連絡先を入力し、空き状況をリアルタイムで確認しながら予約を進められます。',
+  description:
+    '来店者が予約情報を入力するフォーム画面。日時、サービスメニュー、連絡先を入力し、空き状況をリアルタイムで確認しながら予約を進められます。',
   screenType: 'form',
-  
+
   inputFields: [
     {
       id: 'reservation-date',
@@ -58,9 +59,7 @@ export const reservationFormScreen: Screen = {
       required: true,
       placeholder: 'サービスを選択してください',
       helpText: 'ご利用されるサービスをお選びください',
-      validationRules: [
-        typedValidationRuleRef('validation-required-field'),
-      ],
+      validationRules: [typedValidationRuleRef('validation-required-field')],
     },
     {
       id: 'party-size',

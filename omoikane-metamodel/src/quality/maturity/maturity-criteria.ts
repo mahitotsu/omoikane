@@ -1,9 +1,9 @@
 /**
  * @fileoverview 成熟度評価基準定義
- * 
+ *
  * 目的: 各成熟度レベルに到達するために必要な基準を定義
  * 構成: レベル別・ディメンション別に体系化された基準リスト
- * 
+ *
  * 基準の構造:
  * - id: 一意の識別子（評価ロジックで使用）
  * - name: 基準の名前
@@ -13,12 +13,12 @@
  * - required: 必須基準かどうか（trueの場合、このレベルに到達するために必須）
  * - condition: 評価条件（評価ロジックの参考）
  * - weight: 基準の重要度（0-1スケール）
- * 
+ *
  * レベル2（REPEATABLE）の評価方針:
  * - ステップの質を評価: 全ステップが具体的な内容を持つ（action, expectedResult が各5文字以上）
  * - ステップ数は評価対象外: ドメイン特性に応じた柔軟な評価
  * - 詳細な設計判断: docs/maturity-criteria-evolution.md を参照
- * 
+ *
  * 拡張ポイント:
  * - 新しい基準を追加: 対応する配列（UseCaseMaturityCriteria/ActorMaturityCriteria）に追加
  * - 基準を評価: maturity-assessor.ts の evaluateXxxCriterion 関数に対応するcaseを追加
@@ -26,11 +26,7 @@
  * - 必須/オプションを変更: required プロパティを変更
  */
 
-import {
-    MaturityCriterion,
-    MaturityDimension,
-    MaturityLevel,
-} from './maturity-model.js';
+import { MaturityCriterion, MaturityDimension, MaturityLevel } from './maturity-model.js';
 
 // ============================================================================
 // ユースケース成熟度基準（24基準）
@@ -38,7 +34,7 @@ import {
 
 /**
  * ユースケース用の成熟度基準
- * 
+ *
  * 構成:
  * - レベル1（INITIAL）: 3基準（全て必須） - 基本的な定義
  * - レベル2（REPEATABLE）: 5基準（全て必須） - 詳細化と条件定義
@@ -294,14 +290,14 @@ export const UseCaseMaturityCriteria: MaturityCriterion[] = [
 
 /**
  * アクター用の成熟度基準
- * 
+ *
  * 構成:
  * - レベル1（INITIAL）: 1基準（必須） - 基本的な定義
  * - レベル2（REPEATABLE）: 2基準（全て必須） - 説明と役割
  * - レベル3（DEFINED）: 2基準（全て必須） - 責務の明確化
  * - レベル4（MANAGED）: 2基準（全て必須） - カバレッジと高品質な説明
  * - レベル5（OPTIMIZED）: 2基準（1必須、1オプション） - ゴールと包括的な説明
- * 
+ *
  * 注意:
  * - actor-managed-usecase-coverage: 実際のユースケース参照を確認（評価時に useCases 引数が必要）
  * - actor-optimized-goals: Actor型にgoalsプロパティが未実装（TODO）
@@ -414,14 +410,14 @@ export const ActorMaturityCriteria: MaturityCriterion[] = [
 
 /**
  * 業務要件定義用の成熟度基準
- * 
+ *
  * 構成:
  * - レベル1（INITIAL）: 1基準（必須） - 基本的な定義
  * - レベル2（REPEATABLE）: 3基準（全て必須） - 要約、ゴール、スコープ
  * - レベル3（DEFINED）: 4基準（全て必須） - ステークホルダー、指標、前提、制約
  * - レベル4（MANAGED）: 2基準（全て必須） - ビジネスルールとセキュリティ
  * - レベル5（OPTIMIZED）: 1基準（必須） - 完全なカバレッジ
- * 
+ *
  * 注意:
  * - br-optimized-coverage: プロジェクト全体のコンテキストが必要（TODO: 実装）
  */
@@ -556,7 +552,7 @@ export const BusinessRequirementMaturityCriteria: MaturityCriterion[] = [
  * @param elementType - 要素タイプ
  * @param level - 対象レベル
  * @returns 指定されたレベルの基準リスト
- * 
+ *
  * 使用例: レベル3に到達するために必要な基準を確認
  */
 export function getCriteriaByLevel(
@@ -572,7 +568,7 @@ export function getCriteriaByLevel(
  * @param elementType - 要素タイプ
  * @param dimension - 対象ディメンション
  * @returns 指定されたディメンションの基準リスト
- * 
+ *
  * 使用例: トレーサビリティディメンションの評価を確認
  */
 export function getCriteriaByDimension(
@@ -587,7 +583,7 @@ export function getCriteriaByDimension(
  * 要素タイプ別の全基準を取得
  * @param elementType - 要素タイプ
  * @returns 指定された要素タイプの全基準リスト
- * 
+ *
  * 拡張ポイント: 新しい要素タイプを追加する際は、ここに新しいcaseを追加
  */
 export function getCriteriaByElementType(

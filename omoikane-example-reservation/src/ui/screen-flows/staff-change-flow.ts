@@ -1,20 +1,20 @@
 /**
  * スタッフ予約変更画面遷移フロー
- * 
+ *
  * 店舗スタッフによる予約変更の画面遷移を定義。
  * 一覧 → 変更フォーム → 確認 → 完了（一覧に戻る）の4ステップで構成。
- * 
+ *
  * 設計上の特徴:
  * - 一覧から直接変更フローへ
  * - 変更理由の必須記録
  * - 確認画面から変更フォームへの戻りを許可
  * - 完了後は一覧に戻る
- * 
+ *
  * セキュリティ考慮:
  * - スタッフ権限の確認
  * - 変更理由の記録
  * - 操作ログの記録
- * 
+ *
  * 関連ユースケース:
  * - reservation-staff-change: このフローの基となるユースケース
  */
@@ -26,8 +26,9 @@ export const staffChangeFlow: ScreenFlow = {
   id: 'staff-change-flow',
   name: 'スタッフ予約変更フロー',
   type: 'screen-flow',
-  description: '店舗スタッフによる予約変更の画面遷移フロー。一覧→変更フォーム→確認→完了（一覧）の4ステップ。',
-  
+  description:
+    '店舗スタッフによる予約変更の画面遷移フロー。一覧→変更フォーム→確認→完了（一覧）の4ステップ。',
+
   screens: [
     typedScreenRef('staff-reservation-list-screen'),
     typedScreenRef('reservation-update-form-screen'),

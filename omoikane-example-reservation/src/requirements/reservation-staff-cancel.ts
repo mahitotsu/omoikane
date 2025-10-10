@@ -1,33 +1,33 @@
 /**
  * 来店予約管理システム - 店舗スタッフ予約取消ユースケース
- * 
+ *
  * 店舗スタッフが来店者の代理で予約を取り消す機能を定義します。
- * 
+ *
  * 設計上の特徴:
  * - 予約番号なしで予約を特定可能（検索機能を利用）
  * - 取消理由と担当者IDの必須入力
  * - 取消操作の監査ログ記録
- * 
+ *
  * ビジネス上の意義:
  * - 来店者からの電話等での取消依頼に対応
  * - 枠の即時解放による予約可能性の向上
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessRuleRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    securityPolicyRef,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
-    typedScreenRef,
-    typedUseCaseRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessRuleRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  securityPolicyRef,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
+  typedScreenRef,
+  typedUseCaseRef,
 } from '../typed-references.js';
 const concurrentEditWarningSteps = [
   {
@@ -50,7 +50,8 @@ export const reservationStaffCancel: ReservationUseCase = {
   name: '店舗スタッフによる予約取消',
   type: 'usecase',
   prerequisiteUseCases: [typedUseCaseRef('staff-authentication')],
-  description: '店舗スタッフが予約番号なしで特定した予約を、業務上の判断や来店者からの依頼に基づいて取消する。取消理由と担当者IDを必須入力とし、監査ログに記録することで、顧客対応の透明性と枠の適切な解放を実現する。',
+  description:
+    '店舗スタッフが予約番号なしで特定した予約を、業務上の判断や来店者からの依頼に基づいて取消する。取消理由と担当者IDを必須入力とし、監査ログに記録することで、顧客対応の透明性と枠の適切な解放を実現する。',
   actors: {
     primary: typedActorRef('store-staff'),
   },
@@ -116,8 +117,7 @@ export const reservationStaffCancel: ReservationUseCase = {
       stepId: 'confirm-cancel',
       actor: typedActorRef('store-staff'),
       action: 'キャンセル内容を最終確認し取消を確定する',
-      expectedResult:
-        '予約のキャンセルが確定される',
+      expectedResult: '予約のキャンセルが確定される',
       screen: typedScreenRef('staff-cancel-confirm-screen'),
     },
     {

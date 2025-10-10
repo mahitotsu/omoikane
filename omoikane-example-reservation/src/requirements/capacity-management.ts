@@ -1,40 +1,40 @@
 /**
  * 来店予約管理システム - 枠管理ユースケース
- * 
+ *
  * キャパシティプランナーによる予約枠の登録・削除を定義します。
- * 
+ *
  * 設計上の特徴:
  * - 営業日程とサービス提供計画に基づいた枠設定
  * - 既存予約との衝突チェック
  * - 来店者向け空き枠一覧への即時反映
- * 
+ *
  * 注意事項:
  * - 祝日は手動登録を前提（assumption参照）
  * - 予約枠は1時間単位を想定（assumption参照）
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
-    typedScreenRef,
-    typedUseCaseRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
+  typedScreenRef,
+  typedUseCaseRef,
 } from '../typed-references.js';
-
 
 export const capacityManagement: ReservationUseCase = {
   id: 'capacity-management',
   name: '枠管理',
   type: 'usecase',
   prerequisiteUseCases: [typedUseCaseRef('staff-authentication')],
-  description: 'キャパシティプランナーが営業日程とサービス提供計画に基づいて予約枠を登録・削除し、適切な受付キャパシティを維持する。既存予約との衝突を防ぎ、変更内容を即座に来店者向けの空き枠一覧に反映することで、過剰予約や空予約のリスクを最小化する。',
+  description:
+    'キャパシティプランナーが営業日程とサービス提供計画に基づいて予約枠を登録・削除し、適切な受付キャパシティを維持する。既存予約との衝突を防ぎ、変更内容を即座に来店者向けの空き枠一覧に反映することで、過剰予約や空予約のリスクを最小化する。',
   actors: {
     primary: typedActorRef('capacity-planner'),
   },
@@ -48,11 +48,11 @@ export const capacityManagement: ReservationUseCase = {
     stakeholders: [stakeholderRef('stakeholder-capacity-planner')],
     successMetrics: [successMetricRef('metric-slot-utilization')],
     assumptions: [
-    assumptionRef('assumption-single-location'),
-    assumptionRef('assumption-standard-business-hours'),
-    assumptionRef('assumption-holiday-manual-registration'),
-    assumptionRef('assumption-slot-interval-1-hour'),
-    assumptionRef('assumption-slot-capacity-single'),
+      assumptionRef('assumption-single-location'),
+      assumptionRef('assumption-standard-business-hours'),
+      assumptionRef('assumption-holiday-manual-registration'),
+      assumptionRef('assumption-slot-interval-1-hour'),
+      assumptionRef('assumption-slot-capacity-single'),
     ],
     constraints: [
       constraintRef('constraint-no-double-booking'),
@@ -132,5 +132,6 @@ export const capacityManagement: ReservationUseCase = {
     '削除対象に予約が入っている場合は警告が表示されること',
     '枠の登録・削除履歴が記録されること',
   ],
-  businessValue: '予約受付キャパシティの適切な管理により、過剰予約や空予約を防止し、店舗運営の効率を最大化',
+  businessValue:
+    '予約受付キャパシティの適切な管理により、過剰予約や空予約を防止し、店舗運営の効率を最大化',
 };

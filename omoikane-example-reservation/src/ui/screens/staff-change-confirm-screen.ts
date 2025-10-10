@@ -1,20 +1,20 @@
 /**
  * スタッフ予約変更確認画面
- * 
+ *
  * スタッフによる予約変更内容を確認し、最終確定する画面。
  * 来店者向けの変更確認画面とほぼ同じだが、スタッフ権限で操作します。
- * 
+ *
  * 設計上の特徴:
  * - 変更前・変更後の比較表示
  * - 変更理由の記録（必須）
  * - 操作スタッフIDの記録
  * - 監査ログへの記録
- * 
+ *
  * セキュリティ考慮:
  * - スタッフ権限の確認
  * - 変更理由の必須入力
  * - 操作履歴の記録
- * 
+ *
  * 関連ユースケース:
  * - reservation-staff-change: スタッフによる予約変更
  */
@@ -28,7 +28,7 @@ export const staffChangeConfirmScreen: Screen = {
   type: 'screen',
   description: 'スタッフによる予約変更内容を確認し、最終確定する画面。変更理由を記録します。',
   screenType: 'confirmation',
-  
+
   displayFields: [
     {
       id: 'confirm-reservation-number',
@@ -95,9 +95,7 @@ export const staffChangeConfirmScreen: Screen = {
       required: true,
       placeholder: '顧客からの電話依頼、店舗都合など',
       helpText: '変更の理由を明確に記載してください（監査ログに記録されます）',
-      validationRules: [
-        typedValidationRuleRef('validation-required-field'),
-      ],
+      validationRules: [typedValidationRuleRef('validation-required-field')],
     },
     {
       id: 'staff-note',

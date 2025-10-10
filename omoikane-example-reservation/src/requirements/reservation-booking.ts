@@ -1,40 +1,40 @@
 /**
  * 来店予約管理システム - 予約登録ユースケース
- * 
+ *
  * 来店者による新規予約の登録フローを定義します。
- * 
+ *
  * 設計上の特徴:
  * - セルフサービスによる営業時間外予約を実現
  * - 予約番号による予約内容の照会・変更を想定
  * - 店舗スタッフへの即時通知は手動通信を前提（assumption参照）
- * 
+ *
  * 関連ユースケース:
  * - reservation-cancel: 予約の取消
  * - reservation-update: 予約の変更
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessRuleRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    securityPolicyRef,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
-    typedScreenRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessRuleRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  securityPolicyRef,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
+  typedScreenRef,
 } from '../typed-references.js';
-
 
 export const reservationBooking: ReservationUseCase = {
   id: 'reservation-booking',
   name: '予約登録',
   type: 'usecase',
-  description: '来店者が希望日時と利用サービスを選択して予約を新規登録する。営業時間外でもセルフサービスで予約を確定でき、予約番号と予約内容が画面に表示される。予約確定操作は履歴に記録され、店舗スタッフの業務リストに即座に反映される。',
+  description:
+    '来店者が希望日時と利用サービスを選択して予約を新規登録する。営業時間外でもセルフサービスで予約を確定でき、予約番号と予約内容が画面に表示される。予約確定操作は履歴に記録され、店舗スタッフの業務リストに即座に反映される。',
   actors: {
     primary: typedActorRef('visitor'),
     secondary: [typedActorRef('store-staff')],
@@ -55,7 +55,7 @@ export const reservationBooking: ReservationUseCase = {
     assumptions: [
       assumptionRef('assumption-manual-communications'),
       assumptionRef('assumption-standard-business-hours'),
-  assumptionRef('assumption-slot-interval-1-hour'),
+      assumptionRef('assumption-slot-interval-1-hour'),
       assumptionRef('assumption-slot-capacity-single'),
     ],
     constraints: [
@@ -95,10 +95,7 @@ export const reservationBooking: ReservationUseCase = {
       action: '予約カレンダーから希望日と時間帯を選択する',
       expectedResult: '空き枠と所要時間の候補が表示される',
       screen: typedScreenRef('reservation-form-screen'),
-      validationRules: [
-        '選択日が現在日時以降であること',
-        '選択時刻が営業時間内であること',
-      ],
+      validationRules: ['選択日が現在日時以降であること', '選択時刻が営業時間内であること'],
       errorHandling: [
         '過去の日時が選択された場合はエラーメッセージを表示',
         '営業時間外が選択された場合は代替時間帯を提案',
@@ -131,10 +128,7 @@ export const reservationBooking: ReservationUseCase = {
         '選択した枠が依然として利用可能であること',
         '同一連絡先での重複予約がないこと',
       ],
-      errorHandling: [
-        '枠が確保できない場合は代替枠を提案',
-        '重複予約の場合は既存予約の情報を表示',
-      ],
+      errorHandling: ['枠が確保できない場合は代替枠を提案', '重複予約の場合は既存予約の情報を表示'],
     },
     {
       stepId: 'acknowledge-reservation-reference',

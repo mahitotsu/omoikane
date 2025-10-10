@@ -1,16 +1,16 @@
 /**
  * @fileoverview AI Agent向け推奨アクション生成エンジン（Recommendation Engine）
- * 
+ *
  * **目的:**
  * 品質評価結果から具体的な改善アクションを生成し、AIエージェントが実行可能な形式で提供します。
- * 
+ *
  * **主要機能:**
  * 1. generateRecommendations: 総合推奨アクション生成
  * 2. generateCompletenessRecommendations: 完全性に関する推奨
  * 3. generateConsistencyRecommendations: 一貫性に関する推奨
  * 4. generateValidityRecommendations: 妥当性に関する推奨
  * 5. generateTraceabilityRecommendations: 追跡可能性に関する推奨
- * 
+ *
  * **推奨アクションの構造:**
  * - priority: 優先度（high, medium, low）
  * - actionType: アクションタイプ（add_*, fix_*, improve_*）
@@ -18,18 +18,18 @@
  * - rationale: 根拠・理由
  * - affectedElements: 影響を受ける要素
  * - template: テンプレート（実行支援）
- * 
+ *
  * **優先度付けアルゴリズム:**
  * - high: 3点
  * - medium: 2点
  * - low: 1点
  * （降順ソート）
- * 
+ *
  * **拡張ポイント:**
  * - 新しいカテゴリーの推奨を追加
  * - テンプレートをカスタマイズ
  * - 優先度計算ロジックを改善
- * 
+ *
  * @module quality/recommendation-engine
  */
 
@@ -49,20 +49,20 @@ type UseCase = Functional.UseCase;
 
 /**
  * 推奨アクションを生成
- * 
+ *
  * **処理フロー:**
  * 1. 完全性の問題から推奨アクションを生成
  * 2. 一貫性の問題から推奨アクションを生成
  * 3. 妥当性の問題から推奨アクションを生成
  * 4. 追跡可能性の問題から推奨アクションを生成
  * 5. 優先度でソート（high → medium → low）
- * 
+ *
  * **推奨アクションのカテゴリー:**
  * - completeness: 欠落要素の追加、不完全な定義の補完
  * - consistency: 不整合の修正、命名規則の統一
  * - validity: 妥当性の検証、制約の追加
  * - traceability: 関連付けの追加、トレース情報の補完
- * 
+ *
  * **使用例:**
  * ```typescript
  * const recommendations = generateRecommendations(
@@ -76,7 +76,7 @@ type UseCase = Functional.UseCase;
  *   console.log(`  理由: ${rec.rationale}`);
  * });
  * ```
- * 
+ *
  * @param qualityResult 品質評価結果
  * @param businessRequirements ビジネス要件定義
  * @param actors アクター一覧
@@ -122,15 +122,15 @@ export function generateRecommendations(
 
 /**
  * 完全性に関する推奨アクション
- * 
+ *
  * **目的:**
  * 欠落している要素や不完全な定義を特定し、補完のための推奨アクションを生成します。
- * 
+ *
  * **チェック項目:**
  * - businessRequirements: ビジネスゴール、ステークホルダー、ビジネスルール
  * - actor: アクターの欠落
  * - useCase: 基本フロー、拡張フロー、例外フロー、前提条件、事後条件
- * 
+ *
  * **アクションタイプ:**
  * - add_business_goal: ビジネスゴールを追加
  * - add_stakeholder: ステークホルダーを追加
@@ -138,7 +138,7 @@ export function generateRecommendations(
  * - add_basic_flow: 基本フローを追加
  * - add_precondition: 前提条件を追加
  * - add_postcondition: 事後条件を追加
- * 
+ *
  * @param qualityResult 品質評価結果
  * @param businessRequirements ビジネス要件定義
  * @param actors アクター一覧

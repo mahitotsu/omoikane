@@ -2,7 +2,8 @@
 
 ## プロジェクト概要
 
-**Omoikane Metamodel**は、ITデリバリプロジェクトにおけるユースケース・要件定義を型安全に記述するためのTypeScriptフレームワークです。このプロジェクトは、他のプロジェクトから利用される**基盤技術（メタモデル）**です。
+**Omoikane
+Metamodel**は、ITデリバリプロジェクトにおけるユースケース・要件定義を型安全に記述するためのTypeScriptフレームワークです。このプロジェクトは、他のプロジェクトから利用される**基盤技術（メタモデル）**です。
 
 ## アーキテクチャ
 
@@ -153,8 +154,7 @@ export function findStepByIdOrNumber(
 
 #### 設計思想
 
-全てのドキュメント型に`type`フィールドを持たせ、実行時に型を識別できるようにします。
-これにより、インスタンスプロジェクトで型安全な参照関数を自動生成できます。
+全てのドキュメント型に`type`フィールドを持たせ、実行時に型を識別できるようにします。これにより、インスタンスプロジェクトで型安全な参照関数を自動生成できます。
 
 #### 型フィールドの定義
 
@@ -163,21 +163,21 @@ export function findStepByIdOrNumber(
 ```typescript
 // メタモデル側での定義
 export interface Actor extends DocumentBase {
-  type?: 'actor';  // 型識別子
+  type?: 'actor'; // 型識別子
   role: ActorRole;
   responsibilities: string[];
   goals?: string[];
 }
 
 export interface UseCase extends TraceableDocument {
-  type?: 'usecase';  // 型識別子
+  type?: 'usecase'; // 型識別子
   actors: UseCaseActors;
   mainFlow: UseCaseStep[];
   // ...
 }
 
 export interface ValidationRule extends DocumentBase {
-  type?: 'validation-rule';  // 型識別子
+  type?: 'validation-rule'; // 型識別子
   ruleType: ValidationRuleType;
   errorMessage: string;
   // ...
@@ -226,7 +226,7 @@ export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): 
 // 画面定義
 export interface Screen extends DocumentBase {
   type?: 'screen';
-  screenType: ScreenType;  // 'form' | 'list' | 'detail' | 'confirmation' | ...
+  screenType: ScreenType; // 'form' | 'list' | 'detail' | 'confirmation' | ...
   inputFields?: InputField[];
   displayFields?: DisplayField[];
   actions?: ScreenAction[];
@@ -259,10 +259,10 @@ export interface UseCaseStep {
   actor: Ref<Actor>;
   action: string;
   expectedResult: string;
-  
+
   // UI関連（画面との関連付け）
   screen?: Ref<Screen>;
-  inputFields?: string[];  // 画面内のフィールドID
+  inputFields?: string[]; // 画面内のフィールドID
 }
 ```
 
@@ -287,22 +287,25 @@ export interface UseCaseStep {
 #### レベル2（REPEATABLE）の評価方針
 
 **ステップの質を重視:**
+
 - 全ステップが具体的な内容を持つ（action, expectedResult が各5文字以上）
 - ステップ数は評価対象外（ドメイン特性を尊重）
 - フロー設計情報は参考として提供（成熟度スコアには非影響）
 
 **設計思想:**
+
 - 認証のようなシンプルなユースケース（2ステップ）も正当に評価
 - 複雑な業務フロー（10ステップ以上）も柔軟に評価
 - 本質的な品質指標（トレーサビリティ、テスト可能性）に注目
 
-詳細な基準と設計判断は `docs/maturity-criteria-evolution.md` を参照してください。
+詳細な基準と設計判断は `docs/maturity-criteria-evolution.md`
+を参照してください。
 
 #### 推奨事項の種類
 
 ```typescript
 export type RecommendationPriority = 'critical' | 'high' | 'medium' | 'low';
-export type RecommendationCategory = 
+export type RecommendationCategory =
   | 'completeness'
   | 'consistency'
   | 'validity'
@@ -316,28 +319,28 @@ export type RecommendationCategory =
 
 公開APIには以下を含むJSDocを記述：
 
-```typescript
+````typescript
 /**
  * 関数の簡潔な説明（1行）
- * 
+ *
  * **目的:**
  * この関数の目的を詳細に説明
- * 
+ *
  * **処理内容:**
  * 1. ステップ1
  * 2. ステップ2
- * 
+ *
  * **パラメータ:**
  * @param paramName - パラメータの説明
- * 
+ *
  * **戻り値:**
  * @returns 戻り値の説明
- * 
+ *
  * **使用例:**
  * ```typescript
  * const result = functionName(param);
  * ```
- * 
+ *
  * @example
  * ```typescript
  * // さらに詳細な例
@@ -347,31 +350,31 @@ export type RecommendationCategory =
 export function functionName(paramName: ParamType): ReturnType {
   // 実装
 }
-```
+````
 
 #### ファイルヘッダー
 
 各ファイルには`@fileoverview`を記述：
 
-```typescript
+````typescript
 /**
  * @fileoverview モジュールの説明
- * 
+ *
  * **目的:**
  * このモジュールの目的
- * 
+ *
  * **主要機能:**
  * 1. 機能1
  * 2. 機能2
- * 
+ *
  * **使用例:**
  * ```typescript
  * import { API } from './module.js';
  * ```
- * 
+ *
  * @module path/to/module
  */
-```
+````
 
 ### 6. テストとバリデーション
 
@@ -416,7 +419,8 @@ bun run quality-assessment
 const actor = typedActorRef('customer');
 ```
 
-**理由**: `typedActorRef`はインスタンスプロジェクトで自動生成される関数で、メタモデルには存在しません。
+**理由**:
+`typedActorRef`はインスタンスプロジェクトで自動生成される関数で、メタモデルには存在しません。
 
 ### ✅ 正しい: 標準的な参照形式
 
@@ -489,7 +493,8 @@ BREAKING CHANGE: None (backward compatible, goals is optional)
 ### コード生成時
 
 1. **既存パターンを踏襲** - `src/types/`内の既存ファイルのスタイルを参考に
-2. **レイヤーを意識** - 依存関係の方向を守る（Foundation → Business → Functional）
+2. **レイヤーを意識** - 依存関係の方向を守る（Foundation → Business →
+   Functional）
 3. **ジェネリクスを活用** - `Ref<T>`等の型パラメータで型安全性を確保
 4. **exampleは具体的に** - JSDocの例は実際に動作するコードを記述
 

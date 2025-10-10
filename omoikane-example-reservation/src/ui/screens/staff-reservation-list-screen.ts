@@ -1,19 +1,19 @@
 /**
  * スタッフ予約一覧画面
- * 
+ *
  * 検索結果の予約一覧を表示する画面。
  * 各予約に対して詳細確認、変更、取消、チェックインの操作が可能です。
- * 
+ *
  * 設計上の特徴:
  * - ページネーション対応（大量データ対応）
  * - ソート機能（日時、顧客名等）
  * - クイックアクション（一覧から直接操作）
  * - 色分け表示（ステータス別）
- * 
+ *
  * セキュリティ考慮:
  * - スタッフ権限の確認
  * - 操作ログの記録
- * 
+ *
  * 関連ユースケース:
  * - reservation-staff-search: 検索結果の表示
  * - reservation-staff-change: 一覧から変更
@@ -27,9 +27,10 @@ export const staffReservationListScreen: Screen = {
   id: 'staff-reservation-list-screen',
   name: 'スタッフ予約一覧画面',
   type: 'screen',
-  description: '検索結果の予約一覧を表示し、各予約に対する操作（詳細、変更、取消、チェックイン）を提供します。',
+  description:
+    '検索結果の予約一覧を表示し、各予約に対する操作（詳細、変更、取消、チェックイン）を提供します。',
   screenType: 'list',
-  
+
   displayFields: [
     {
       id: 'list-reservation-number',

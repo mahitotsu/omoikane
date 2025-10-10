@@ -1,13 +1,13 @@
 /**
  * 予約詳細画面
- * 
+ *
  * 照会された予約の詳細情報を表示し、変更・取消のアクションを提供する画面。
- * 
+ *
  * 設計上の特徴:
  * - 予約内容の完全な表示（読み取り専用）
  * - 変更・取消ボタンからそれぞれのフローへ遷移
  * - キャンセル期限の表示と判定
- * 
+ *
  * 関連ユースケース:
  * - reservation-update: 「予約を変更する」ボタンから遷移
  * - reservation-cancel: 「予約を取り消す」ボタンから遷移
@@ -21,7 +21,7 @@ export const reservationDetailScreen: Screen = {
   type: 'screen',
   description: '照会された予約の詳細情報を表示し、変更・取消の操作を提供する画面。',
   screenType: 'detail',
-  
+
   displayFields: [
     {
       id: 'detail-reservation-number',

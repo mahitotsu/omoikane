@@ -73,7 +73,7 @@ scripts/
 ```typescript
 // src/actors.ts
 export const visitor: Actor = {
-  id: 'visitor',  // ← ここで定義したIDが...
+  id: 'visitor', // ← ここで定義したIDが...
   name: '来店者',
   description: '店舗のサービスを利用するために予約を行う顧客。',
   role: 'primary',
@@ -93,7 +93,11 @@ bun run generate-references
 
 ```typescript
 // src/typed-references.ts (自動生成)
-export type KnownActorId = 'visitor' | 'store-staff' | 'capacity-planner' | 'system-admin';
+export type KnownActorId =
+  | 'visitor'
+  | 'store-staff'
+  | 'capacity-planner'
+  | 'system-admin';
 
 export function typedActorRef<T extends KnownActorId>(id: T): Ref<Actor> {
   return { id };
@@ -110,7 +114,7 @@ export const reservationBooking: UseCase = {
   id: 'reservation-booking',
   name: '予約登録',
   actors: {
-    primary: typedActorRef('visitor'),  // ← IDE補完が効く
+    primary: typedActorRef('visitor'), // ← IDE補完が効く
   },
   mainFlow: [
     {
@@ -156,13 +160,13 @@ bun run quality-assessment
 ```typescript
 /**
  * 来店予約管理システム - 予約登録ユースケース
- * 
+ *
  * 来店者が自ら予約を行うセルフサービス型の予約機能を定義します。
- * 
+ *
  * 設計上の特徴:
  * - 予約番号の自動生成（システムが一意に採番）
  * - 連絡先の必須入力（予約内容通知のため）
- * 
+ *
  * 関連ユースケース:
  * - reservation-cancel: 予約の取消
  * - reservation-update: 予約内容の変更
@@ -205,7 +209,7 @@ actors: {
 ```typescript
 mainFlow: [
   {
-    stepId: 'step-1',  // IDベース（番号ではない）
+    stepId: 'step-1', // IDベース（番号ではない）
     actor: typedActorRef('visitor'),
     action: '具体的な行動を記述',
     expectedResult: '期待される結果を記述',
@@ -215,11 +219,12 @@ mainFlow: [
     actor: typedActorRef('system'),
     action: 'システムの処理を記述',
     expectedResult: '処理結果を記述',
-    businessRules: [  // ビジネスルールの参照
+    businessRules: [
+      // ビジネスルールの参照
       typedBusinessRuleRef('rule-no-duplicate-reservation'),
     ],
   },
-]
+];
 ```
 
 #### alternativeFlowの推奨形式
@@ -237,9 +242,9 @@ alternativeFlows: [
         expectedResult: 'エラーメッセージが表示される',
       },
     ],
-    returnToStepId: 'select-datetime',  // IDで戻り先指定
+    returnToStepId: 'select-datetime', // IDで戻り先指定
   },
-]
+];
 ```
 
 ## 自動生成ファイルの管理
@@ -302,6 +307,7 @@ bun run quality-assessment
 品質評価レポートの「⚡ クイックウィン」は優先的に対応します。
 
 例：
+
 - 欠落している受け入れ基準の追加
 - 空のdescriptionフィールドの充実
 - businessRequirementCoverageの追加
@@ -347,7 +353,7 @@ mainFlow: [
     expectedResult: '変更内容が反映される',
     notes: '変更理由と担当者IDを記録',
   },
-]
+];
 ```
 
 ### パターン3: 業務ルールによる制約
@@ -364,7 +370,7 @@ mainFlow: [
       typedBusinessRuleRef('rule-advance-booking-limit'),
     ],
   },
-]
+];
 ```
 
 ## トラブルシューティング
@@ -374,6 +380,7 @@ mainFlow: [
 **原因**: `typed-references.ts`が生成されていない
 
 **解決**:
+
 ```bash
 bun run generate-references
 ```
@@ -383,6 +390,7 @@ bun run generate-references
 **原因**: 存在しないアクターIDを参照している
 
 **解決**:
+
 1. `src/actors.ts`でアクターが定義されているか確認
 2. `bun run generate-references`で再生成
 3. タイポがないか確認
@@ -390,6 +398,7 @@ bun run generate-references
 ### 品質スコアが下がった
 
 **確認ポイント**:
+
 1. 必須フィールド（description等）が空になっていないか
 2. businessRequirementCoverageが全ユースケースにあるか
 3. acceptanceCriteriaが定義されているか

@@ -1,10 +1,10 @@
 /**
  * @fileoverview ユースケース型定義（Functional Use Case）
- * 
+ *
  * **目的:**
  * システムとアクターの相互作用を記述するユースケースの型を定義します。
  * 段階的詳細化に対応し、基本情報と詳細情報を分離した柔軟な構造を提供します。
- * 
+ *
  * **型定義:**
  * 1. UseCaseComplexity: ユースケースの複雑度（simple, medium, complex）
  * 2. FlowProbability: 代替フローの発生確率（high, medium, low）
@@ -13,12 +13,12 @@
  * 5. AlternativeFlow: 代替フロー（例外処理の流れ）
  * 6. UseCaseActors: ユースケース内のアクター情報（主・副アクター）
  * 7. UseCase: ユースケース本体（メインフロー、代替フロー、要件）
- * 
+ *
  * **段階的詳細化の設計:**
  * - 基本フィールド（必須）: id, name, actors, preconditions, postconditions, mainFlow
  * - 詳細化フィールド（オプション）: complexity, estimatedEffort, acceptanceCriteria, 各種要件
  * - 初期段階では基本情報のみを記述し、後で詳細化可能
- * 
+ *
  * **使用例:**
  * ```typescript
  * // シンプルなユースケース（基本情報のみ）
@@ -49,7 +49,7 @@
  *   ],
  *   priority: 'high'
  * };
- * 
+ *
  * // 詳細化されたユースケース
  * const detailedUseCase: UseCase = {
  *   ...simpleUseCase,
@@ -81,11 +81,15 @@
  *   ]
  * };
  * ```
- * 
+ *
  * @module types/functional/use-case
  */
 
-import type { BusinessRequirementCoverage, BusinessRule, SecurityPolicy } from '../business/index.js';
+import type {
+  BusinessRequirementCoverage,
+  BusinessRule,
+  SecurityPolicy,
+} from '../business/index.js';
 import type { PriorityLevel, Ref, TraceableDocument } from '../foundation/index.js';
 import type { Screen } from '../ui/screen.js';
 import type { ActorReference } from './actor.js';
@@ -96,24 +100,24 @@ import type { ActorReference } from './actor.js';
 
 /**
  * ユースケースの複雑度
- * 
+ *
  * **複雑度定義:**
  * - simple: シンプル
  *   ステップ数が少ない（1-5ステップ程度）
  *   代替フローが少ない
  *   例: ログアウト、プロフィール閲覧
- * 
+ *
  * - medium: 中程度
  *   ステップ数が中程度（6-15ステップ程度）
  *   代替フローが複数ある
  *   例: ログイン、商品検索、注文履歴閲覧
- * 
+ *
  * - complex: 複雑
  *   ステップ数が多い（16ステップ以上）
  *   代替フローが多数ある
  *   複数のシステムやアクターが関与
  *   例: 商品購入、決済処理、在庫管理
- * 
+ *
  * **使用例:**
  * ```typescript
  * const complexity: UseCaseComplexity = 'medium';
@@ -123,12 +127,12 @@ export type UseCaseComplexity = 'simple' | 'medium' | 'complex';
 
 /**
  * 代替フローの発生確率
- * 
+ *
  * **確率定義:**
  * - high: 高確率（頻繁に発生する、50%以上）
  * - medium: 中確率（たまに発生する、10-50%）
  * - low: 低確率（稀に発生する、10%未満）
- * 
+ *
  * **使用例:**
  * ```typescript
  * const probability: FlowProbability = 'high';
@@ -138,12 +142,12 @@ export type FlowProbability = 'high' | 'medium' | 'low';
 
 /**
  * 代替フローの影響度
- * 
+ *
  * **影響度定義:**
  * - critical: 致命的（システムやビジネスに重大な影響）
  * - major: 大きい（機能に重大な影響、対応必須）
  * - minor: 小さい（影響は軽微、対応は任意）
- * 
+ *
  * **使用例:**
  * ```typescript
  * const impact: FlowImpact = 'major';
@@ -157,16 +161,16 @@ export type FlowImpact = 'critical' | 'major' | 'minor';
 
 /**
  * ユースケースのステップ
- * 
+ *
  * **目的:**
  * ユースケースの実行ステップを記述します。
  * 段階的詳細化に対応し、基本情報と詳細情報を分離しています。
- * 
+ *
  * **基本フィールド（必須）:**
  * - actor: ステップを実行するアクター
  * - action: アクションの説明
  * - expectedResult: 期待される結果
- * 
+ *
  * **詳細化フィールド（オプション）:**
  * - stepId: ステップID（代替フローの戻り先指定に使用）
  * - stepNumber: ステップ番号（自動計算される）
@@ -175,7 +179,7 @@ export type FlowImpact = 'critical' | 'major' | 'minor';
  * - errorHandling: エラーハンドリング
  * - performanceRequirement: パフォーマンス要件
  * - notes: 補足メモ
- * 
+ *
  * **使用例:**
  * ```typescript
  * // 基本的なステップ
@@ -184,7 +188,7 @@ export type FlowImpact = 'critical' | 'major' | 'minor';
  *   action: 'ログイン画面を開く',
  *   expectedResult: 'ログインフォームが表示される'
  * };
- * 
+ *
  * // 詳細化されたステップ
  * const step2: UseCaseStep = {
  *   stepId: 'step-login',
@@ -207,31 +211,31 @@ export type FlowImpact = 'critical' | 'major' | 'minor';
 export interface UseCaseStep {
   /** ステップID（オプション、戻り先参照に使用） */
   stepId?: string;
-  
+
   /** ステップ番号（実行時に自動計算） */
   readonly stepNumber?: number;
-  
+
   /** アクター（ステップを実行する主体） */
   actor: ActorReference;
-  
+
   /** アクションの説明（アクターが実行する操作） */
   action: string;
-  
+
   /** 期待される結果（アクション後のシステム状態や出力） */
   expectedResult: string;
-  
+
   /** 補足メモ（UI仕様、注意事項など） */
   notes?: string;
-  
+
   // UI関連（画面との関連付け）
-  
+
   /**
    * このステップで使用する画面
-   * 
+   *
    * アクターとシステムの相互作用のインターフェースとして機能します。
    * ユースケースステップと画面定義を関連付けることで、
    * 「どのステップでどの画面を使うか」が明確になります。
-   * 
+   *
    * **使用例:**
    * ```typescript
    * {
@@ -244,13 +248,13 @@ export interface UseCaseStep {
    * ```
    */
   screen?: Ref<Screen>;
-  
+
   /**
    * このステップで入力するフィールドID
-   * 
+   *
    * 画面内の特定のフィールドを指定する場合に使用します。
    * InputField.id を配列で指定します。
-   * 
+   *
    * **使用例:**
    * ```typescript
    * {
@@ -264,18 +268,18 @@ export interface UseCaseStep {
    * ```
    */
   inputFields?: string[];
-  
+
   // 詳細化フィールド（オプション）
-  
+
   /** 入力データ（ステップで必要なデータ項目） */
   inputData?: string[];
-  
+
   /** バリデーションルール（入力データの検証ルール） */
   validationRules?: string[];
-  
+
   /** エラーハンドリング（エラー発生時の処理） */
   errorHandling?: string[];
-  
+
   /** パフォーマンス要件（応答時間、スループットなど） */
   performanceRequirement?: string;
 }
@@ -286,23 +290,23 @@ export interface UseCaseStep {
 
 /**
  * 代替フロー
- * 
+ *
  * **目的:**
  * メインフローから分岐する例外的な処理の流れを記述します。
  * エラーハンドリング、特殊条件、例外ケースをカバーします。
- * 
+ *
  * **基本フィールド（必須）:**
  * - id: 代替フローID
  * - name: 代替フロー名
  * - condition: 発生条件
  * - steps: ステップ
- * 
+ *
  * **詳細化フィールド（オプション）:**
  * - returnToStepId: 戻り先ステップID（stepIdベースの戻り先指定）
  * - probability: 発生確率
  * - impact: 影響度
  * - mitigation: 緩和策
- * 
+ *
  * **使用例:**
  * ```typescript
  * // 基本的な代替フロー
@@ -323,7 +327,7 @@ export interface UseCaseStep {
  *     }
  *   ]
  * };
- * 
+ *
  * // 詳細化された代替フロー
  * const altFlow2: AlternativeFlow = {
  *   id: 'alt-002',
@@ -353,27 +357,27 @@ export interface UseCaseStep {
 export interface AlternativeFlow {
   /** 代替フローID（一意識別子） */
   id: string;
-  
+
   /** 代替フロー名（人間が読める名前） */
   name: string;
-  
+
   /** 発生条件（代替フローが発生するトリガー条件） */
   condition: string;
-  
+
   /** ステップ（代替フローの処理手順） */
   steps: UseCaseStep[];
-  
+
   /** 戻り先ステップID（stepIdベースの戻り先指定、省略時はフロー終了） */
   returnToStepId?: string;
-  
+
   // 詳細化フィールド（オプション）
-  
+
   /** 発生確率（high, medium, low） */
   probability?: FlowProbability;
-  
+
   /** 影響度（critical, major, minor） */
   impact?: FlowImpact;
-  
+
   /** 緩和策（影響を軽減する対策） */
   mitigation?: string[];
 }
@@ -384,27 +388,27 @@ export interface AlternativeFlow {
 
 /**
  * ユースケース内のアクター情報
- * 
+ *
  * **目的:**
  * ユースケースに関与する主アクターと副アクターを定義します。
- * 
+ *
  * **フィールド:**
  * - primary: 主アクター（ユースケースの主要な実行者、必須）
  * - secondary: 副アクター（主アクターを支援する関係者、オプション）
- * 
+ *
  * **使用例:**
  * ```typescript
  * // 主アクターのみ
  * const actors1: UseCaseActors = {
  *   primary: typedActorRef('actor-001') // 購入者
  * };
- * 
+ *
  * // 主アクターと副アクター
  * const actors2: UseCaseActors = {
  *   primary: typedActorRef('actor-001'), // 購入者
  *   secondary: ['actor-002', 'actor-003'] // 管理者、決済システム
  * };
- * 
+ *
  * // Ref<Actor>での指定
  * const actors3: UseCaseActors = {
  *   primary: { id: 'actor-001', displayName: '購入者' },
@@ -418,7 +422,7 @@ export interface AlternativeFlow {
 export interface UseCaseActors {
   /** 主アクター（ユースケースの主要な実行者） */
   primary: ActorReference;
-  
+
   /** 副アクター（主アクターを支援する関係者、システム） */
   secondary?: ActorReference[];
 }
@@ -429,11 +433,11 @@ export interface UseCaseActors {
 
 /**
  * ユースケース
- * 
+ *
  * **目的:**
  * システムとアクターの相互作用を記述します。
  * 段階的詳細化に対応し、基本情報と詳細情報を分離しています。
- * 
+ *
  * **基本フィールド（必須）:**
  * - id: ユースケースID
  * - name: ユースケース名
@@ -442,7 +446,7 @@ export interface UseCaseActors {
  * - postconditions: 事後条件
  * - mainFlow: メインフロー
  * - priority: 優先度
- * 
+ *
  * **詳細化フィールド（オプション）:**
  * - alternativeFlows: 代替フロー
  * - complexity: 複雑度
@@ -456,7 +460,7 @@ export interface UseCaseActors {
  * - performanceRequirements: パフォーマンス要件
  * - uiRequirements: UI要件
  * - businessRequirementCoverage: 業務要件カバレッジ
- * 
+ *
  * **段階的詳細化の例:**
  * ```typescript
  * // Phase 1: 基本情報のみ
@@ -475,7 +479,7 @@ export interface UseCaseActors {
  *   ],
  *   priority: 'high'
  * };
- * 
+ *
  * // Phase 2: 代替フロー追加
  * const phase2: UseCase = {
  *   ...phase1,
@@ -488,7 +492,7 @@ export interface UseCaseActors {
  *     }
  *   ]
  * };
- * 
+ *
  * // Phase 3: 詳細要件追加
  * const phase3: UseCase = {
  *   ...phase2,
@@ -507,7 +511,7 @@ export interface UseCaseActors {
  *   ]
  * };
  * ```
- * 
+ *
  * **TraceableDocumentからの継承:**
  * - relatedDocuments: 関連文書（要件、テストケースなど）
  * - traceabilityNote: トレーサビリティのメモ
@@ -517,84 +521,84 @@ export interface UseCaseActors {
 export interface UseCase extends TraceableDocument {
   /** 文書型識別子（固定値: 'usecase'） */
   type?: 'usecase';
-  
+
   /** アクター（主・副アクター） */
   actors: UseCaseActors;
-  
+
   /** 業務要件カバレッジ（ビジネスゴール、ルールとの対応） */
   businessRequirementCoverage?: BusinessRequirementCoverage;
-  
+
   /** 事前条件（ユースケース実行前に満たすべき条件） */
   preconditions: string[];
-  
+
   /**
    * 前提となるユースケース
-   * 
+   *
    * このユースケースを実行する前に完了している必要がある他のユースケース。
    * 横断的な前提機能（認証、設定、初期化など）への明示的な依存関係を表現します。
-   * 
+   *
    * **使用例:**
    * ```typescript
    * // スタッフ用機能は認証が前提
    * prerequisiteUseCases: [
    *   typedUseCaseRef('staff-authentication')
    * ]
-   * 
+   *
    * // 複数の前提がある場合
    * prerequisiteUseCases: [
    *   typedUseCaseRef('user-registration'),
    *   typedUseCaseRef('email-verification')
    * ]
    * ```
-   * 
+   *
    * **品質評価での活用:**
    * - トレーサビリティスコアの向上
    * - 前提ユースケースの存在チェック（整合性検証）
    * - 依存関係グラフでの可視化
    */
   prerequisiteUseCases?: Ref<UseCase>[];
-  
+
   /** 事後条件（ユースケース実行後に成立する条件） */
   postconditions: string[];
-  
+
   /** メインフロー（正常系の処理手順） */
   mainFlow: UseCaseStep[];
-  
+
   /** 代替フロー（例外系の処理手順） */
   alternativeFlows?: AlternativeFlow[];
-  
+
   /** 優先度（high, medium, low） */
   priority: PriorityLevel;
-  
+
   // 詳細化フィールド（オプション）
-  
+
   /** 複雑度（simple, medium, complex） */
   complexity?: UseCaseComplexity;
-  
+
   /** 見積もり工数（例: 3人日、1週間） */
   estimatedEffort?: string;
-  
+
   /** 受入基準（ユースケースの完了判定基準） */
   acceptanceCriteria?: string[];
-  
+
   /** 関連ビジネスルール（適用されるビジネスルールへの参照） */
   businessRules?: Ref<BusinessRule>[];
-  
+
   /** ビジネス価値（このユースケースがもたらす価値） */
   businessValue?: string;
-  
+
   /** データ要件（必要なデータ項目、データ構造） */
   dataRequirements?: string[];
-  
+
   /** セキュリティ要件（認証、認可、暗号化など） */
   securityRequirements?: string[];
-  
+
   /** 関連セキュリティポリシー（適用されるポリシーへの参照） */
   securityPolicies?: Ref<SecurityPolicy>[];
-  
+
   /** パフォーマンス要件（応答時間、スループット、同時接続数など） */
   performanceRequirements?: string[];
-  
+
   /** UI要件（画面レイアウト、UX、アクセシビリティなど） */
   uiRequirements?: string[];
 }

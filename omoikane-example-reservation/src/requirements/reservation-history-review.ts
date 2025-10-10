@@ -1,33 +1,33 @@
 /**
  * 来店予約管理システム - 予約履歴確認ユースケース
- * 
+ *
  * 店舗スタッフが来店者の予約履歴を確認する機能を定義します。
- * 
+ *
  * 設計上の特徴:
  * - 過去の予約状態（完了・キャンセル・No-show）の確認
  * - 未確認の予約変更・取消操作の把握
  * - プライバシー保護の観点での検索結果制限
- * 
+ *
  * ビジネス上の意義:
  * - 来店者の利用傾向の把握
  * - 未確認操作の検出によるコミュニケーションギャップの防止
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessRuleRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    securityPolicyRef,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
-    typedScreenRef,
-    typedUseCaseRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessRuleRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  securityPolicyRef,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
+  typedScreenRef,
+  typedUseCaseRef,
 } from '../typed-references.js';
 
 export const reservationHistoryReview: ReservationUseCase = {
@@ -35,7 +35,8 @@ export const reservationHistoryReview: ReservationUseCase = {
   name: '予約履歴確認',
   type: 'usecase',
   prerequisiteUseCases: [typedUseCaseRef('staff-authentication')],
-  description: '店舗スタッフが予約状況と予約確定・取消履歴を確認し既読状態を更新する。リアルタイムの予約状況把握と変更通知の見落とし防止により、店舗オペレーションの円滑化と顧客対応品質の向上を実現し、全ての閲覧操作を監査ログに記録することで説明責任を確保する。',
+  description:
+    '店舗スタッフが予約状況と予約確定・取消履歴を確認し既読状態を更新する。リアルタイムの予約状況把握と変更通知の見落とし防止により、店舗オペレーションの円滑化と顧客対応品質の向上を実現し、全ての閲覧操作を監査ログに記録することで説明責任を確保する。',
   actors: {
     primary: typedActorRef('store-staff'),
   },

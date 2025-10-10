@@ -19,7 +19,7 @@
 ### 計算式
 
 ```typescript
-健全性スコア = 
+健全性スコア =
   成熟度スコア × 30% +
   完全性スコア × 25% +
   一貫性スコア × 15% +
@@ -42,6 +42,7 @@
 ```
 
 **例:**
+
 ```
 アクター:
 - visitor: レベル4
@@ -66,11 +67,12 @@
 ```
 
 **詳細計算:**
+
 ```typescript
 // 各要素の評価
 for each 要素 in [アクター, ユースケース, 業務要件]:
   基準リスト = get基準(要素タイプ)
-  
+
   for each 基準 in 基準リスト:
     if 基準を満たしている:
       満たした重み += 基準.weight
@@ -80,6 +82,7 @@ for each 要素 in [アクター, ユースケース, 業務要件]:
 ```
 
 **例:**
+
 ```
 アクター基準（8個）:
 - actor-initial-basic-info (weight: 1.0) ✅
@@ -110,6 +113,7 @@ for each 要素 in [アクター, ユースケース, 業務要件]:
 ```
 
 **例:**
+
 ```
 5次元の達成率:
 - 構造: 100%  ← 最大
@@ -127,10 +131,11 @@ for each 要素 in [アクター, ユースケース, 業務要件]:
 #### 4. トレーサビリティスコア（15%）
 
 ```typescript
-トレーサビリティスコア = トレーサビリティ次元の達成率
+トレーサビリティスコア = トレーサビリティ次元の達成率;
 ```
 
 **詳細計算:**
+
 ```typescript
 トレーサビリティ基準 = [
   'uc-defined-business-coverage',
@@ -158,6 +163,7 @@ for each 要素 in [アクター, ユースケース, 業務要件]:
 ```
 
 **ペナルティ:**
+
 ```typescript
 循環依存ペナルティ = -10点 × 循環依存数
 孤立ノードペナルティ = -5点 × 孤立ノード数
@@ -184,21 +190,23 @@ for each 要素 in [アクター, ユースケース, 業務要件]:
 ### 1. 構造の完全性 (Structure)
 
 **対象基準:**
+
 ```typescript
 // アクター
-'actor-initial-basic-info'      // weight: 1.0
-'actor-repeatable-role'         // weight: 0.8
+'actor-initial-basic-info'; // weight: 1.0
+'actor-repeatable-role'; // weight: 0.8
 
 // ユースケース
-'uc-initial-basic-info'         // weight: 1.0
-'uc-initial-actors'             // weight: 0.9
-'uc-initial-flow'               // weight: 0.9
+'uc-initial-basic-info'; // weight: 1.0
+'uc-initial-actors'; // weight: 0.9
+'uc-initial-flow'; // weight: 0.9
 
 // 業務要件
-'br-initial-basic-info'         // weight: 1.0
+'br-initial-basic-info'; // weight: 1.0
 ```
 
 **計算例:**
+
 ```
 アクター (4個):
 - visitor: 2/2基準達成 (1.0 + 0.8 = 1.8 / 1.8)
@@ -218,23 +226,25 @@ for each 要素 in [アクター, ユースケース, 業務要件]:
 ### 2. 詳細度 (Detail)
 
 **対象基準:**
+
 ```typescript
 // アクター
-'actor-repeatable-description'       // weight: 0.9
-'actor-defined-description-detail'   // weight: 0.6
-'actor-managed-description-quality'  // weight: 0.7
-'actor-optimized-comprehensive-description' // weight: 0.6
+'actor-repeatable-description'; // weight: 0.9
+'actor-defined-description-detail'; // weight: 0.6
+'actor-managed-description-quality'; // weight: 0.7
+'actor-optimized-comprehensive-description'; // weight: 0.6
 
 // ユースケース
-'uc-repeatable-description'          // weight: 0.9
-'uc-repeatable-preconditions'        // weight: 0.7
-'uc-repeatable-postconditions'       // weight: 0.7
-'uc-defined-step-detail'             // weight: 0.8
-'uc-defined-acceptance-criteria'     // weight: 0.7
+'uc-repeatable-description'; // weight: 0.9
+'uc-repeatable-preconditions'; // weight: 0.7
+'uc-repeatable-postconditions'; // weight: 0.7
+'uc-defined-step-detail'; // weight: 0.8
+'uc-defined-acceptance-criteria'; // weight: 0.7
 // ... 他多数
 ```
 
 **計算例:**
+
 ```
 アクター基準 (4個 × 4基準):
 visitor:
@@ -257,20 +267,22 @@ capacityPlanner:
 ### 3. トレーサビリティ (Traceability)
 
 **対象基準:**
+
 ```typescript
 // ユースケース
-'uc-defined-business-coverage'       // weight: 0.9
-'uc-managed-security'                // weight: 0.7
-'uc-managed-business-rules'          // weight: 0.6
+'uc-defined-business-coverage'; // weight: 0.9
+'uc-managed-security'; // weight: 0.7
+'uc-managed-business-rules'; // weight: 0.6
 
 // アクター
-'actor-managed-usecase-coverage'     // weight: 0.9
+'actor-managed-usecase-coverage'; // weight: 0.9
 
 // 業務要件
-'br-optimized-coverage'              // weight: 0.8
+'br-optimized-coverage'; // weight: 0.8
 ```
 
 **計算の鍵:**
+
 - ユースケースが業務要件を参照しているか
 - セキュリティポリシーが関連付けられているか
 - ビジネスルールが紐付けられているか
@@ -279,15 +291,17 @@ capacityPlanner:
 ### 4. テスト可能性 (Testability)
 
 **対象基準:**
+
 ```typescript
 // ユースケース
-'uc-defined-acceptance-criteria'     // weight: 0.7
-'uc-managed-data-requirements'       // weight: 0.6
-'uc-optimized-error-handling'        // weight: 0.8
-'uc-optimized-validation'            // weight: 0.7
+'uc-defined-acceptance-criteria'; // weight: 0.7
+'uc-managed-data-requirements'; // weight: 0.6
+'uc-optimized-error-handling'; // weight: 0.8
+'uc-optimized-validation'; // weight: 0.7
 ```
 
 **達成のポイント:**
+
 - 受け入れ基準が明確
 - データ要件が定義されている
 - エラーハンドリングが記述されている
@@ -296,15 +310,17 @@ capacityPlanner:
 ### 5. 保守性 (Maintainability)
 
 **対象基準:**
+
 ```typescript
 // ユースケース
-'uc-defined-complexity'              // weight: 0.5
-'uc-managed-effort'                  // weight: 0.6
-'uc-optimized-ui-requirements'       // weight: 0.6
-'uc-optimized-business-value'        // weight: 0.7
+'uc-defined-complexity'; // weight: 0.5
+'uc-managed-effort'; // weight: 0.6
+'uc-optimized-ui-requirements'; // weight: 0.6
+'uc-optimized-business-value'; // weight: 0.7
 ```
 
 **達成のポイント:**
+
 - 複雑度が評価されている
 - 見積工数が記録されている
 - UI要件が定義されている
@@ -321,6 +337,7 @@ capacityPlanner:
 ```
 
 **レベル決定ロジック:**
+
 ```typescript
 function calculateProjectLevel(
   actors: Actor[],
@@ -330,27 +347,27 @@ function calculateProjectLevel(
   const actorLevels = actors.map(a => assessActorLevel(a));
   const useCaseLevels = useCases.map(uc => assessUseCaseLevel(uc));
   const requirementLevel = assessRequirementLevel(requirements[0]);
-  
+
   return Math.min(...actorLevels, ...useCaseLevels, requirementLevel);
 }
 
 function assessActorLevel(actor: Actor): MaturityLevel {
   let level = MaturityLevel.INITIAL;
-  
+
   // レベル1から順に必須基準をチェック
   for (let l = 1; l <= 5; l++) {
     const requiredCriteria = getRequiredCriteriaForLevel('actor', l);
-    const allSatisfied = requiredCriteria.every(c => 
-      evaluateCriterion(actor, c).satisfied
+    const allSatisfied = requiredCriteria.every(
+      c => evaluateCriterion(actor, c).satisfied
     );
-    
+
     if (allSatisfied) {
       level = l;
     } else {
       break; // 満たせないレベルに到達したら終了
     }
   }
-  
+
   return level;
 }
 ```
@@ -382,13 +399,14 @@ function assessActorLevel(actor: Actor): MaturityLevel {
 ```
 
 **コンテキスト調整:**
+
 ```typescript
 const stageCoefficients = {
-  POC: 0.5,           // 初期探索段階は緩い
-  MVP: 0.7,           // MVPは中程度
-  EARLY_DEV: 0.9,     // 初期開発は標準的
-  ACTIVE_DEV: 1.0,    // 本格開発は標準
-  MAINTENANCE: 1.2,   // 保守は厳しい
+  POC: 0.5, // 初期探索段階は緩い
+  MVP: 0.7, // MVPは中程度
+  EARLY_DEV: 0.9, // 初期開発は標準的
+  ACTIVE_DEV: 1.0, // 本格開発は標準
+  MAINTENANCE: 1.2, // 保守は厳しい
 };
 
 const criticalityCoefficients = {
@@ -450,15 +468,15 @@ function detectCycles(graph: DependencyGraph): Cycle[] {
   const visited = new Set<string>();
   const recursionStack = new Set<string>();
   const cycles: Cycle[] = [];
-  
+
   function dfs(nodeId: string, path: string[]): void {
     visited.add(nodeId);
     recursionStack.add(nodeId);
     path.push(nodeId);
-    
+
     for (const edge of graph.getOutgoingEdges(nodeId)) {
       const neighbor = edge.to;
-      
+
       if (!visited.has(neighbor)) {
         dfs(neighbor, path);
       } else if (recursionStack.has(neighbor)) {
@@ -470,17 +488,17 @@ function detectCycles(graph: DependencyGraph): Cycle[] {
         });
       }
     }
-    
+
     recursionStack.delete(nodeId);
     path.pop();
   }
-  
+
   for (const node of graph.nodes) {
     if (!visited.has(node.id)) {
       dfs(node.id, []);
     }
   }
-  
+
   return cycles;
 }
 ```
@@ -489,8 +507,8 @@ function detectCycles(graph: DependencyGraph): Cycle[] {
 
 ```typescript
 function detectIsolatedNodes(graph: DependencyGraph): Node[] {
-  return graph.nodes.filter(node => 
-    node.inDegree === 0 && node.outDegree === 0
+  return graph.nodes.filter(
+    node => node.inDegree === 0 && node.outDegree === 0
   );
 }
 ```
@@ -502,7 +520,7 @@ function calculateLayers(graph: DependencyGraph): LayerInfo[] {
   // トポロジカルソートでレイヤーを決定
   const layers = new Map<string, number>();
   const queue: string[] = [];
-  
+
   // 入次数0のノードをレイヤー0に
   for (const node of graph.nodes) {
     if (node.inDegree === 0) {
@@ -510,23 +528,23 @@ function calculateLayers(graph: DependencyGraph): LayerInfo[] {
       queue.push(node.id);
     }
   }
-  
+
   // BFSでレイヤーを伝播
   while (queue.length > 0) {
     const nodeId = queue.shift()!;
     const currentLayer = layers.get(nodeId)!;
-    
+
     for (const edge of graph.getOutgoingEdges(nodeId)) {
       const neighborLayer = layers.get(edge.to) ?? -1;
       const newLayer = currentLayer + 1;
-      
+
       if (newLayer > neighborLayer) {
         layers.set(edge.to, newLayer);
         queue.push(edge.to);
       }
     }
   }
-  
+
   return Array.from(layers.entries()).map(([id, layer]) => ({
     nodeId: id,
     layer,
@@ -546,7 +564,7 @@ function generateRecommendations(
   context: ProjectContext
 ): Recommendation[] {
   const recommendations: Recommendation[] = [];
-  
+
   // 1. 次のレベルに必要な必須基準
   for (const element of assessment.elements) {
     const nextLevel = element.overallLevel + 1;
@@ -554,7 +572,7 @@ function generateRecommendations(
       element.elementType,
       nextLevel
     );
-    
+
     for (const criterion of requiredCriteria) {
       if (!element.satisfiedCriteria.includes(criterion)) {
         recommendations.push({
@@ -567,7 +585,7 @@ function generateRecommendations(
       }
     }
   }
-  
+
   // 2. 影響度の高い要素の品質問題
   const highImpactNodes = findHighImpactNodes(assessment.dependencyGraph);
   for (const node of highImpactNodes) {
@@ -581,15 +599,17 @@ function generateRecommendations(
       });
     }
   }
-  
+
   // 3. クイックウィン（4時間以内）
-  const quickWins = recommendations.filter(r => 
-    parseEffort(r.estimatedEffort) <= 4
+  const quickWins = recommendations.filter(
+    r => parseEffort(r.estimatedEffort) <= 4
   );
-  
+
   return {
     all: recommendations,
-    highPriority: recommendations.filter(r => r.priority === 'high').slice(0, 5),
+    highPriority: recommendations
+      .filter(r => r.priority === 'high')
+      .slice(0, 5),
     quickWins: quickWins.slice(0, 5),
   };
 }
@@ -604,27 +624,27 @@ function estimateEffort(criterion: MaturityCriterion): string {
     'actor-repeatable-description': '1時間',
     'actor-defined-description-detail': '2時間',
     'actor-managed-description-quality': '2時間',
-    
+
     // 構造の追加
     'uc-repeatable-preconditions': '1時間',
     'uc-repeatable-postconditions': '1時間',
     'uc-defined-alternative-flows': '4時間',
-    
+
     // トレーサビリティ
     'uc-defined-business-coverage': '2時間',
     'actor-managed-usecase-coverage': '2時間',
-    
+
     // テスト可能性
     'uc-defined-acceptance-criteria': '3時間',
     'uc-optimized-error-handling': '6時間',
     'uc-optimized-validation': '4時間',
-    
+
     // 保守性
     'uc-managed-effort': '1時間',
     'uc-optimized-ui-requirements': '4時間',
     'uc-optimized-business-value': '2時間',
   };
-  
+
   return effortMap[criterion.id] ?? '2時間';
 }
 ```

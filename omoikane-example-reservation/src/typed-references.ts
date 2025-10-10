@@ -29,14 +29,16 @@ import type {
 
 export type KnownBusinessRequirementId = 'reservation-business-requirements';
 
-export type KnownBusinessGoalId = 'goal-accurate-capacity'
+export type KnownBusinessGoalId =
+  | 'goal-accurate-capacity'
   | 'goal-admin-managed-accounts'
   | 'goal-auditable-operations'
   | 'goal-empower-store-staff'
   | 'goal-self-service-booking'
   | 'goal-visitor-self-service-flexibility';
 
-export type KnownScopeItemId = 'scope-account-administration'
+export type KnownScopeItemId =
+  | 'scope-account-administration'
   | 'scope-business-day-configuration'
   | 'scope-capacity-planning'
   | 'scope-history-oversight'
@@ -45,19 +47,22 @@ export type KnownScopeItemId = 'scope-account-administration'
   | 'scope-visit-check-in'
   | 'scope-visitor-self-service-management';
 
-export type KnownStakeholderId = 'stakeholder-capacity-planner'
+export type KnownStakeholderId =
+  | 'stakeholder-capacity-planner'
   | 'stakeholder-store-ops-manager'
   | 'stakeholder-store-staff'
   | 'stakeholder-system-admin'
   | 'stakeholder-visitor';
 
-export type KnownSuccessMetricId = 'metric-admin-access-readiness'
+export type KnownSuccessMetricId =
+  | 'metric-admin-access-readiness'
   | 'metric-audit-confirmation-lag'
   | 'metric-booking-completion-rate'
   | 'metric-manual-adjustment-time'
   | 'metric-slot-utilization';
 
-export type KnownAssumptionId = 'assumption-holiday-manual-registration'
+export type KnownAssumptionId =
+  | 'assumption-holiday-manual-registration'
   | 'assumption-manual-communications'
   | 'assumption-single-location'
   | 'assumption-slot-capacity-single'
@@ -65,7 +70,8 @@ export type KnownAssumptionId = 'assumption-holiday-manual-registration'
   | 'assumption-staff-sign-in-required'
   | 'assumption-standard-business-hours';
 
-export type KnownConstraintId = 'constraint-late-arrival-grace-period'
+export type KnownConstraintId =
+  | 'constraint-late-arrival-grace-period'
   | 'constraint-log-retention'
   | 'constraint-no-double-booking'
   | 'constraint-operation-hours-visitor'
@@ -73,7 +79,8 @@ export type KnownConstraintId = 'constraint-late-arrival-grace-period'
   | 'constraint-staff-change-anytime-unless-checked-in'
   | 'constraint-visitor-own-reservation-only';
 
-export type KnownSecurityPolicyId = 'security-policy-account-admin-audit'
+export type KnownSecurityPolicyId =
+  | 'security-policy-account-admin-audit'
   | 'security-policy-concurrency-control'
   | 'security-policy-history-access-control'
   | 'security-policy-history-audit-log'
@@ -85,7 +92,8 @@ export type KnownSecurityPolicyId = 'security-policy-account-admin-audit'
   | 'security-policy-staff-search-audit'
   | 'security-policy-staff-visibility-governance';
 
-export type KnownBusinessRuleId = 'business-rule-account-deletion-approval'
+export type KnownBusinessRuleId =
+  | 'business-rule-account-deletion-approval'
   | 'business-rule-cancel-invalidate-reference'
   | 'business-rule-cancel-reason-category'
   | 'business-rule-change-retain-reference'
@@ -105,12 +113,10 @@ export type KnownBusinessRuleId = 'business-rule-account-deletion-approval'
   | 'business-rule-visitor-cutoff'
   | 'business-rule-visitor-single-reservation';
 
-export type KnownActorId = 'capacity-planner'
-  | 'store-staff'
-  | 'system-admin'
-  | 'visitor';
+export type KnownActorId = 'capacity-planner' | 'store-staff' | 'system-admin' | 'visitor';
 
-export type KnownUseCaseId = 'reservation-history-review'
+export type KnownUseCaseId =
+  | 'reservation-history-review'
   | 'reservation-staff-cancel'
   | 'reservation-staff-change'
   | 'reservation-staff-search'
@@ -123,7 +129,8 @@ export type KnownUseCaseId = 'reservation-history-review'
   | 'reservation-cancel'
   | 'reservation-update';
 
-export type KnownScreenId = 'reservation-cancel-complete-screen'
+export type KnownScreenId =
+  | 'reservation-cancel-complete-screen'
   | 'reservation-update-complete-screen'
   | 'account-operation-complete-screen'
   | 'reservation-cancel-confirm-screen'
@@ -149,7 +156,8 @@ export type KnownScreenId = 'reservation-cancel-complete-screen'
   | 'history-list-screen'
   | 'staff-search-screen';
 
-export type KnownValidationRuleId = 'validation-booking-window'
+export type KnownValidationRuleId =
+  | 'validation-booking-window'
   | 'validation-business-hours'
   | 'validation-cancellation-deadline'
   | 'validation-email-format'
@@ -162,7 +170,8 @@ export type KnownValidationRuleId = 'validation-booking-window'
   | 'validation-reservation-number-format'
   | 'validation-slot-availability';
 
-export type KnownScreenFlowId = 'account-registration-flow'
+export type KnownScreenFlowId =
+  | 'account-registration-flow'
   | 'capacity-management-flow'
   | 'reservation-booking-flow'
   | 'reservation-cancel-flow'
@@ -204,9 +213,7 @@ export function constraintRef<T extends KnownConstraintId>(id: T): ConstraintRef
   return { id, type: 'constraint-ref' };
 }
 
-export function securityPolicyRef<T extends KnownSecurityPolicyId>(
-  id: T
-): SecurityPolicyRef<T> {
+export function securityPolicyRef<T extends KnownSecurityPolicyId>(id: T): SecurityPolicyRef<T> {
   return { id, type: 'security-policy-ref' };
 }
 
@@ -234,7 +241,9 @@ export function typedScreenRef<T extends KnownScreenId>(id: T): Ref<Screen> {
   return { id };
 }
 
-export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): Ref<ValidationRule> {
+export function typedValidationRuleRef<T extends KnownValidationRuleId>(
+  id: T
+): Ref<ValidationRule> {
   return { id };
 }
 
@@ -278,5 +287,56 @@ export const generatedStats = {
   securityPolicies: 11,
   businessRules: 19,
   generatedAt: '2025-10-10T13:47:53.505Z',
-  sourceFiles: ['/home/akring/omoikane/omoikane-example-reservation/src/actors.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/account-administration.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/capacity-management.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-booking.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-check-in.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-history-review.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-change.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-search.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-update.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/staff-authentication.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/account-deletion-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/account-registration-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/capacity-management-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/check-in-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/history-review-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/reservation-booking-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/reservation-cancel-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/reservation-update-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/staff-cancel-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/staff-change-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/staff-search-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-deletion-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-list-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-operation-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-registration-form-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/capacity-calendar-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/capacity-slot-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/capacity-slot-form-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/check-in-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/check-in-console-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/history-detail-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/history-list-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-cancel-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-cancel-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-detail-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-form-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-lookup-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-update-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-update-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-update-form-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-cancel-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-change-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-reservation-list-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-search-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/validation-rules.ts'],
+  sourceFiles: [
+    '/home/akring/omoikane/omoikane-example-reservation/src/actors.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/account-administration.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/capacity-management.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-booking.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-cancel.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-check-in.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-history-review.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-cancel.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-change.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-search.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-update.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/requirements/staff-authentication.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/account-deletion-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/account-registration-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/capacity-management-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/check-in-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/history-review-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/reservation-booking-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/reservation-cancel-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/reservation-update-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/staff-cancel-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/staff-change-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/staff-search-flow.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-deletion-confirm-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-list-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-operation-complete-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-registration-form-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/capacity-calendar-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/capacity-slot-confirm-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/capacity-slot-form-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/check-in-complete-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/check-in-console-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/history-detail-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/history-list-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-cancel-complete-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-cancel-confirm-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-complete-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-confirm-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-detail-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-form-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-lookup-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-update-complete-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-update-confirm-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-update-form-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-cancel-confirm-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-change-confirm-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-reservation-list-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-search-screen.ts',
+    '/home/akring/omoikane/omoikane-example-reservation/src/ui/validation-rules.ts',
+  ],
 } as const;

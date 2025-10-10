@@ -49,10 +49,7 @@ const reservationLookupStep = {
   expectedResult: '本人と一致する予約のみが照会される',
   screen: typedScreenRef('reservation-lookup-screen'),
   inputData: ['予約番号', '連絡先情報'],
-  validationRules: [
-    '予約番号が有効な形式であること',
-    '連絡先情報が登録時と一致すること',
-  ],
+  validationRules: ['予約番号が有効な形式であること', '連絡先情報が登録時と一致すること'],
   errorHandling: [
     '予約番号が存在しない場合はエラーメッセージを表示',
     '連絡先が一致しない場合は本人確認手順を案内',
@@ -89,7 +86,8 @@ export const reservationCancel: ReservationUseCase = {
   id: 'reservation-cancel',
   name: '予約取消',
   type: 'usecase',
-  description: '来店者が確定済みの予約を取消し、予約していた枠を解放する。予約番号と連絡先による本人確認を行い、取消理由を記録することで、枠の適切な再利用と監査性を確保する。営業時間外でもセルフサービスで取消可能。',
+  description:
+    '来店者が確定済みの予約を取消し、予約していた枠を解放する。予約番号と連絡先による本人確認を行い、取消理由を記録することで、枠の適切な再利用と監査性を確保する。営業時間外でもセルフサービスで取消可能。',
   actors: {
     primary: typedActorRef('visitor'),
     secondary: [typedActorRef('store-staff')],
@@ -151,8 +149,7 @@ export const reservationCancel: ReservationUseCase = {
       stepId: 'confirm-cancel',
       actor: typedActorRef('visitor'),
       action: '必要に応じて取消理由を入力しキャンセルを確定する',
-      expectedResult:
-        '予約のキャンセルが確認される',
+      expectedResult: '予約のキャンセルが確認される',
       screen: typedScreenRef('reservation-cancel-confirm-screen'),
     },
     {
@@ -168,7 +165,7 @@ export const reservationCancel: ReservationUseCase = {
     {
       id: 'cancel-cutoff-exceeded',
       name: 'キャンセル可能時間を超過',
-  condition: '利用予定日時の前営業日の営業時間終了後である場合',
+      condition: '利用予定日時の前営業日の営業時間終了後である場合',
       steps: [
         {
           actor: typedActorRef('visitor'),

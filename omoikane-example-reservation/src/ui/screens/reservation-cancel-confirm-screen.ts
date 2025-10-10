@@ -1,19 +1,19 @@
 /**
  * 予約取消確認画面
- * 
+ *
  * 予約の取消を確認し、最終的に取消を実行する画面。
  * 取消は重要なアクションのため、確認メッセージを表示します。
- * 
+ *
  * 設計上の特徴:
  * - 取消対象の予約内容を完全表示
  * - 取消の影響（返金ポリシー等）を明示
  * - 確認メッセージでの二重確認
  * - キャンセル期限のチェック
- * 
+ *
  * セキュリティ考慮:
  * - キャンセル期限を過ぎている場合はエラー表示
  * - 取消操作の記録（監査ログ）
- * 
+ *
  * 関連ユースケース:
  * - reservation-cancel: 予約取消のメインフロー
  */
@@ -26,7 +26,7 @@ export const reservationCancelConfirmScreen: Screen = {
   type: 'screen',
   description: '予約取消の確認画面。取消対象の予約内容を表示し、本当に取り消すかを確認します。',
   screenType: 'confirmation',
-  
+
   displayFields: [
     {
       id: 'cancel-reservation-number',
@@ -69,7 +69,8 @@ export const reservationCancelConfirmScreen: Screen = {
       name: 'cancellationPolicy',
       label: 'キャンセルポリシー',
       dataType: 'text',
-      format: '予約時刻の24時間前までのキャンセルは無料です。それ以降のキャンセルは店舗にお電話ください。',
+      format:
+        '予約時刻の24時間前までのキャンセルは無料です。それ以降のキャンセルは店舗にお電話ください。',
     },
     {
       id: 'warning-message',

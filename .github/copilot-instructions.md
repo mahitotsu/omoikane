@@ -90,6 +90,7 @@ Conventional Commits形式を使用：
 ```
 
 ### Type
+
 - `feat`: 新機能
 - `fix`: バグ修正
 - `docs`: ドキュメント
@@ -98,6 +99,7 @@ Conventional Commits形式を使用：
 - `chore`: ビルド・設定変更
 
 ### Scope
+
 - `metamodel`: omoikane-metamodelの変更
 - `example-reservation`: omoikane-example-reservationの変更
 - `workspace`: ワークスペース全体の変更
@@ -135,6 +137,7 @@ feat(metamodel): add quality assessment framework
 - **レベル5 (OPTIMIZED)**: 最適化された、継続的改善
 
 **レベル2の評価方針:**
+
 - 全ステップの質を評価（action, expectedResult が各5文字以上）
 - ステップ数は評価対象外（シンプルなユースケースも正当に評価）
 - 詳細: `omoikane-metamodel/docs/maturity-criteria-evolution.md`
@@ -171,7 +174,11 @@ const actorRef = { id: 'customer' };
 ### インスタンス側（自動生成）
 
 ```typescript
-import { typedActorRef, typedUseCaseRef, typedValidationRuleRef } from './typed-references.js';
+import {
+  typedActorRef,
+  typedUseCaseRef,
+  typedValidationRuleRef,
+} from './typed-references.js';
 
 // 型安全な参照（IDE補完あり）
 const actorRef = typedActorRef('customer');
@@ -179,27 +186,27 @@ const useCaseRef = typedUseCaseRef('user-registration');
 const validationRef = typedValidationRuleRef('validation-email-format');
 ```
 
-**重要**: `typedActorRef`等はインスタンスプロジェクトで自動生成される関数です。メタモデル側のコード例では使用しないでください。
+**重要**:
+`typedActorRef`等はインスタンスプロジェクトで自動生成される関数です。メタモデル側のコード例では使用しないでください。
 
 ## 型検出システム（Type Detection System）
 
 ### 設計原則
 
-全てのドキュメント型に`type`フィールドを持たせ、実行時に型を識別できるようにします。
-これにより、インスタンスプロジェクトで型安全な参照関数を自動生成できます。
+全てのドキュメント型に`type`フィールドを持たせ、実行時に型を識別できるようにします。これにより、インスタンスプロジェクトで型安全な参照関数を自動生成できます。
 
 ### メタモデル側での定義
 
 ```typescript
 // メタモデル側: 型フィールドを定義
 export interface Actor extends DocumentBase {
-  type?: 'actor';  // 型識別子
+  type?: 'actor'; // 型識別子
   role: ActorRole;
   // ...
 }
 
 export interface ValidationRule extends DocumentBase {
-  type?: 'validation-rule';  // 型識別子
+  type?: 'validation-rule'; // 型識別子
   ruleType: ValidationRuleType;
   // ...
 }
@@ -212,7 +219,7 @@ export interface ValidationRule extends DocumentBase {
 export const visitor: Actor = {
   id: 'visitor',
   name: '来店者',
-  type: 'actor',  // ← これで自動検出される
+  type: 'actor', // ← これで自動検出される
   role: 'primary',
   responsibilities: ['予約の登録・変更・取消'],
 };
@@ -220,7 +227,7 @@ export const visitor: Actor = {
 export const emailValidation: ValidationRule = {
   id: 'validation-email-format',
   name: 'メールアドレス形式検証',
-  type: 'validation-rule',  // ← これで自動検出される
+  type: 'validation-rule', // ← これで自動検出される
   ruleType: 'email',
   errorMessage: '有効なメールアドレスを入力してください',
 };
@@ -280,9 +287,9 @@ export const formScreen: Screen = {
       label: 'メールアドレス',
       fieldType: 'email',
       required: true,
-      validationRules: [typedValidationRuleRef('validation-email-format')]
-    }
-  ]
+      validationRules: [typedValidationRuleRef('validation-email-format')],
+    },
+  ],
 };
 ```
 
@@ -297,9 +304,9 @@ mainFlow: [
     action: '予約情報を入力する',
     expectedResult: '入力内容が確認画面に表示される',
     screen: typedScreenRef('form-screen'),
-    inputFields: ['email', 'phone', 'date']  // 画面内のフィールドID
-  }
-]
+    inputFields: ['email', 'phone', 'date'], // 画面内のフィールドID
+  },
+];
 ```
 
 ## stepNumber 自動管理
@@ -316,15 +323,25 @@ mainFlow: [
 const useCase: UseCase = {
   // ...
   mainFlow: [
-    { stepId: 'login', actor: { id: 'user' }, action: '...', expectedResult: '...' },
-    { stepId: 'search', actor: { id: 'user' }, action: '...', expectedResult: '...' },
+    {
+      stepId: 'login',
+      actor: { id: 'user' },
+      action: '...',
+      expectedResult: '...',
+    },
+    {
+      stepId: 'search',
+      actor: { id: 'user' },
+      action: '...',
+      expectedResult: '...',
+    },
   ],
   alternativeFlows: [
     {
       id: 'error-flow',
-      returnToStepId: 'login'  // IDで指定（番号ではない）
-    }
-  ]
+      returnToStepId: 'login', // IDで指定（番号ではない）
+    },
+  ],
 };
 
 // stepNumberを自動計算
@@ -375,7 +392,6 @@ bun run build
 - **メタモデル側**: フレームワークの基盤、他プロジェクトからも使用される
   - 詳細なコメント、使用例、設計判断を記述
   - 破壊的変更に注意
-  
 - **インスタンス側**: 具体的な実装例、設計書として機能
   - 最小限のコメント（メタモデルやコードに無い情報のみ）
   - 型定義はメタモデルを活用

@@ -1,15 +1,15 @@
 /**
  * 予約変更フォーム画面
- * 
+ *
  * 既存の予約内容を変更するためのフォーム画面。
  * 予約登録フォームと類似しているが、既存データが初期値として設定されます。
- * 
+ *
  * 設計上の特徴:
  * - 既存の予約内容がデフォルト値として表示
  * - 変更可能な項目: 日時、サービス、人数、特記事項
  * - 変更不可項目: 予約番号、連絡先（本人確認情報）
  * - 変更後は確認画面へ遷移
- * 
+ *
  * 関連ユースケース:
  * - reservation-update: 予約変更のメインフロー
  */
@@ -21,9 +21,10 @@ export const reservationUpdateFormScreen: Screen = {
   id: 'reservation-update-form-screen',
   name: '予約変更フォーム画面',
   type: 'screen',
-  description: '既存予約の内容を変更するフォーム画面。日時、サービス、人数、特記事項を変更できます。',
+  description:
+    '既存予約の内容を変更するフォーム画面。日時、サービス、人数、特記事項を変更できます。',
   screenType: 'form',
-  
+
   displayFields: [
     {
       id: 'current-reservation-number',
@@ -74,9 +75,7 @@ export const reservationUpdateFormScreen: Screen = {
       required: true,
       placeholder: 'サービスを選択してください',
       helpText: '変更後のサービスを選択してください',
-      validationRules: [
-        typedValidationRuleRef('validation-required-field'),
-      ],
+      validationRules: [typedValidationRuleRef('validation-required-field')],
     },
     {
       id: 'new-party-size',

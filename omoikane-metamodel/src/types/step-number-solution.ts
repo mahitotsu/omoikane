@@ -1,21 +1,21 @@
 /**
  * @fileoverview stepNumber自動管理システム
- * 
+ *
  * **目的:**
  * ユースケースのステップ番号を自動計算し、開発者の負担を軽減します。
  * 手動でstepNumberを管理する必要がなく、保守性が向上します。
  * 戻り先指定はstepIdに統一し、ステップの挿入・削除に強い設計を実現します。
- * 
+ *
  * **主要機能:**
  * 1. enrichStepsWithNumbers(): stepNumberを自動計算してステップを補完
  * 2. findStepByIdOrNumber(): stepIdまたはstepNumberでステップを検索
  * 3. 使用例: 改善された書き方のサンプル
- * 
+ *
  * **設計原則:**
  * - 自動化: stepNumberは配列インデックスから自動計算
  * - ID重視: 戻り先指定はstepIdベース（番号ではなくID）
  * - 保守性: ステップの挿入・削除が容易
- * 
+ *
  * **従来の問題点:**
  * ```typescript
  * // 従来の書き方（手動でstepNumberを管理）
@@ -26,7 +26,7 @@
  * ]
  * // 問題: ステップを挿入・削除すると全ての番号を振り直す必要がある
  * ```
- * 
+ *
  * **改善された書き方:**
  * ```typescript
  * // stepNumberを省略（自動計算される）
@@ -36,7 +36,7 @@
  *   { stepId: 'step3', ... }   // stepNumber: 3（自動）
  * ]
  * // 利点: ステップを挿入・削除しても番号が自動更新される
- * 
+ *
  * // 戻り先指定はstepIdベース
  * alternativeFlows: [
  *   {
@@ -45,21 +45,21 @@
  *   }
  * ]
  * ```
- * 
+ *
  * **使用例:**
  * ```typescript
  * // ステップ番号を自動計算
  * const enrichedSteps = enrichStepsWithNumbers(useCase.mainFlow);
  * // enrichedSteps[0].stepNumber === 1
  * // enrichedSteps[1].stepNumber === 2
- * 
+ *
  * // ステップを検索
  * const result = findStepByIdOrNumber(useCase, 'payment');
  * if (result) {
  *   console.log(`ステップ${result.stepNumber}: ${result.step.action}`);
  * }
  * ```
- * 
+ *
  * @module types/step-number-solution
  */
 
@@ -78,33 +78,33 @@ type UseCaseStep = Functional.UseCaseStep;
 
 /**
  * stepNumberを自動計算してUseCaseStepを enrichする
- * 
+ *
  * **目的:**
  * ステップ配列を走査し、各ステップに自動計算されたstepNumberを付与します。
  * 配列のインデックス（0始まり）に1を加えた値をstepNumberとして設定します。
- * 
+ *
  * **処理内容:**
  * 1. ステップ配列を走査
  * 2. 各ステップのインデックスから番号を計算（index + 1）
  * 3. 元のステップオブジェクトにstepNumberを追加して返す
- * 
+ *
  * **パラメータ:**
  * @param steps - stepNumberを付与するステップ配列
- * 
+ *
  * **戻り値:**
  * @returns stepNumberが付与されたステップ配列
- * 
+ *
  * **使用例:**
  * ```typescript
  * const steps: UseCaseStep[] = [
  *   { stepId: 'login', actor: typedActorRef('user'), action: 'ログイン', expectedResult: '成功' },
  *   { stepId: 'search', actor: typedActorRef('user'), action: '検索', expectedResult: '結果表示' }
  * ];
- * 
+ *
  * const enrichedSteps = enrichStepsWithNumbers(steps);
  * // enrichedSteps[0].stepNumber === 1
  * // enrichedSteps[1].stepNumber === 2
- * 
+ *
  * // ユースケース全体に適用
  * const useCase: UseCase = {
  *   // ... その他のフィールド
@@ -121,23 +121,23 @@ export function enrichStepsWithNumbers(steps: UseCaseStep[]): UseCaseStep[] {
 
 /**
  * stepIdまたはstepNumberでステップを検索
- * 
+ *
  * **目的:**
  * ユースケースのメインフローから、stepIdまたはstepNumberでステップを検索します。
  * 検索に成功した場合、ステップオブジェクトと計算されたstepNumberを返します。
- * 
+ *
  * **検索方法:**
  * - string型の識別子: stepIdで検索
  * - number型の識別子: stepNumberで検索（1始まり）
- * 
+ *
  * **パラメータ:**
  * @param useCase - 検索対象のユースケース
  * @param identifier - ステップID（string）またはステップ番号（number）
- * 
+ *
  * **戻り値:**
  * @returns 検索結果（step: ステップオブジェクト、stepNumber: ステップ番号）
  *          見つからない場合はundefined
- * 
+ *
  * **使用例:**
  * ```typescript
  * const useCase: UseCase = {
@@ -148,27 +148,27 @@ export function enrichStepsWithNumbers(steps: UseCaseStep[]): UseCaseStep[] {
  *     { stepId: 'purchase', actor: typedActorRef('user'), action: '購入', expectedResult: '完了' }
  *   ]
  * };
- * 
+ *
  * // stepIdで検索
  * const result1 = findStepByIdOrNumber(useCase, 'search');
  * if (result1) {
  *   console.log(`ステップ${result1.stepNumber}: ${result1.step.action}`);
  *   // 出力: ステップ2: 検索
  * }
- * 
+ *
  * // stepNumberで検索
  * const result2 = findStepByIdOrNumber(useCase, 3);
  * if (result2) {
  *   console.log(`ステップID: ${result2.step.stepId}`);
  *   // 出力: ステップID: purchase
  * }
- * 
+ *
  * // 見つからない場合
  * const result3 = findStepByIdOrNumber(useCase, 'unknown');
  * if (!result3) {
  *   console.log('ステップが見つかりません');
  * }
- * 
+ *
  * // 代替フローの戻り先を解決
  * const altFlow = useCase.alternativeFlows?.[0];
  * if (altFlow?.returnToStepId) {
@@ -205,17 +205,17 @@ export function findStepByIdOrNumber(
 
 /**
  * 改善された書き方の例
- * 
+ *
  * **改善ポイント:**
  * 1. stepNumberを手動管理する必要がない（自動計算される）
  * 2. 戻り先指定はstepIdベース（番号振り直しの影響を受けない）
  * 3. ステップの挿入・削除が容易（番号を振り直さなくて良い）
- * 
+ *
  * **従来の問題:**
  * - ステップを追加・削除すると全てのstepNumberを手動で振り直し
  * - returnToStepNumberも手動で調整が必要
  * - 保守性が低く、エラーが発生しやすい
- * 
+ *
  * **改善後の利点:**
  * - stepNumberは自動計算（enrichStepsWithNumbers使用）
  * - returnToStepIdはID参照（ステップの位置が変わっても影響なし）

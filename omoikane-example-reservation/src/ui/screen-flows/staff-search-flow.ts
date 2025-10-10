@@ -1,18 +1,18 @@
 /**
  * スタッフ予約検索画面遷移フロー
- * 
+ *
  * 店舗スタッフによる予約検索の画面遷移を定義。
  * 検索 → 一覧表示の2ステップで構成。
- * 
+ *
  * 設計上の特徴:
  * - 複数検索条件のサポート
  * - 一覧から各種操作へ分岐可能
  * - 検索条件の保持（一覧から戻った時）
- * 
+ *
  * セキュリティ考慮:
  * - スタッフ認証の確認
  * - 権限レベルのチェック
- * 
+ *
  * 関連ユースケース:
  * - reservation-staff-search: このフローの基となるユースケース
  */
@@ -25,11 +25,8 @@ export const staffSearchFlow: ScreenFlow = {
   name: 'スタッフ予約検索フロー',
   type: 'screen-flow',
   description: '店舗スタッフによる予約検索の画面遷移フロー。検索→一覧表示の2ステップ。',
-  
-  screens: [
-    typedScreenRef('staff-search-screen'),
-    typedScreenRef('staff-reservation-list-screen'),
-  ],
+
+  screens: [typedScreenRef('staff-search-screen'), typedScreenRef('staff-reservation-list-screen')],
 
   transitions: [
     {

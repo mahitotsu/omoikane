@@ -1,46 +1,46 @@
 /**
  * @fileoverview 参照形式の自動変換スクリプト
- * 
+ *
  * **目的:**
  * ソースコード内の参照を双方向で変換します：
  * - 文字列参照 → 型安全参照（デフォルト）
  * - 型安全参照 → 文字列参照（--to-stringオプション）
- * 
+ *
  * **主要機能:**
  * 1. 文字列参照の検出と型安全参照への変換
  * 2. 型安全参照の検出と文字列への逆変換
  * 3. 単一プロパティと配列プロパティの両方に対応
  * 4. バックアップなしの直接上書き（Gitで管理されている前提）
- * 
+ *
  * **変換例（文字列 → 型安全）:**
  * ```typescript
  * // Before
  * actor: 'visitor'
  * actors: { primary: 'visitor', secondary: ['store-staff'] }
- * 
+ *
  * // After
  * actor: typedActorRef('visitor')
  * actors: { primary: typedActorRef('visitor'), secondary: [typedActorRef('store-staff')] }
  * ```
- * 
+ *
  * **変換例（型安全 → 文字列）:**
  * ```typescript
  * // Before
  * actor: typedActorRef('visitor')
- * 
+ *
  * // After
  * actor: 'visitor'
  * ```
- * 
+ *
  * **実行方法:**
  * ```bash
  * # 文字列 → 型安全参照（デフォルト）
  * bun run convert-references
- * 
+ *
  * # 型安全参照 → 文字列
  * bun run convert-references --to-string
  * ```
- * 
+ *
  * **対応する参照型:**
  * - typedActorRef
  * - typedUseCaseRef
@@ -53,12 +53,12 @@
  * - successMetricRef
  * - assumptionRef
  * - constraintRef
- * 
+ *
  * **設計判断:**
  * - Gitで管理されているためバックアップ不要
  * - 正規表現で柔軟なパターンマッチング
  * - ネストした配列もサポート
- * 
+ *
  * @module scripts/convert-references
  */
 
@@ -73,7 +73,7 @@ const SOURCE_DIR = join(process.cwd(), 'src');
 
 /**
  * 参照変換設定
- * 
+ *
  * 各参照関数の変換ルールを定義します。
  */
 interface ReferenceConversionConfig {
@@ -101,9 +101,9 @@ interface ReplacementResult {
 
 /**
  * 参照変換設定のリスト
- * 
+ *
  * 各参照型に対して、どのプロパティ名を変換対象とするかを定義します。
- * 
+ *
  * **設定項目:**
  * - factoryName: 参照関数名
  * - singleProperties: 単一値を持つプロパティ名（例: `actor: 'xxx'`）
@@ -170,21 +170,21 @@ const referenceConfigs: ReferenceConversionConfig[] = [
 
 /**
  * 単一プロパティの文字列参照を型安全参照に変換
- * 
+ *
  * **変換パターン:**
  * ```typescript
  * // Before
  * actor: 'visitor'
- * 
+ *
  * // After
  * actor: typedActorRef('visitor')
  * ```
- * 
+ *
  * **正規表現パターン:**
  * `(\\s*${property}:\\s*)'([^']+)'`
  * - キャプチャ1: プロパティ名と前後の空白
  * - キャプチャ2: ID文字列
- * 
+ *
  * @param content - 変換対象のコンテンツ
  * @param property - プロパティ名
  * @param factoryName - 参照関数名
@@ -206,21 +206,21 @@ function replaceSinglePropertyToTyped(
 
 /**
  * 単一プロパティの型安全参照を文字列に変換
- * 
+ *
  * **変換パターン:**
  * ```typescript
  * // Before
  * actor: typedActorRef('visitor')
- * 
+ *
  * // After
  * actor: 'visitor'
  * ```
- * 
+ *
  * **正規表現パターン:**
  * `(\\s*${property}:\\s*)${factoryName}\\('([^']+)'\\)`
  * - キャプチャ1: プロパティ名と前後の空白
  * - キャプチャ2: ID文字列
- * 
+ *
  * @param content - 変換対象のコンテンツ
  * @param property - プロパティ名
  * @param factoryName - 参照関数名
@@ -246,30 +246,30 @@ function replaceSinglePropertyToString(
 
 /**
  * 配列プロパティの文字列参照を型安全参照に変換
- * 
+ *
  * **変換パターン:**
  * ```typescript
  * // Before
  * actors: ['visitor', 'store-staff']
- * 
+ *
  * // After
  * actors: [
  *   typedActorRef('visitor'),
  *   typedActorRef('store-staff')
  * ]
  * ```
- * 
+ *
  * **処理内容:**
  * 1. 配列プロパティを正規表現で検出
  * 2. 既に型安全参照が含まれている場合はスキップ
  * 3. 純粋な文字列配列のみを変換
  * 4. インデントを保持したフォーマット出力
- * 
+ *
  * **スキップ条件:**
  * - 既に参照関数が使われている
  * - 配列内にオブジェクトが含まれる
  * - 文字列以外の要素が含まれる
- * 
+ *
  * @param content - 変換対象のコンテンツ
  * @param property - プロパティ名
  * @param factoryName - 参照関数名
@@ -318,7 +318,7 @@ function replaceArrayPropertyToTyped(
 
 /**
  * 配列プロパティの型安全参照を文字列に変換
- * 
+ *
  * **変換パターン:**
  * ```typescript
  * // Before
@@ -326,21 +326,21 @@ function replaceArrayPropertyToTyped(
  *   typedActorRef('visitor'),
  *   typedActorRef('store-staff')
  * ]
- * 
+ *
  * // After
  * actors: ['visitor', 'store-staff']
  * ```
- * 
+ *
  * **処理内容:**
  * 1. 配列プロパティを正規表現で検出
  * 2. 参照関数を抽出してIDのみを取得
  * 3. 純粋な参照関数配列のみを変換
  * 4. インデントを保持したフォーマット出力
- * 
+ *
  * **スキップ条件:**
  * - 参照関数が含まれていない
  * - 参照関数以外の要素が含まれる
- * 
+ *
  * @param content - 変換対象のコンテンツ
  * @param property - プロパティ名
  * @param factoryName - 参照関数名
@@ -385,24 +385,23 @@ function replaceArrayPropertyToString(
   return { content: updated, conversions };
 }
 
-
 // ============================================================================
 // 変換適用
 // ============================================================================
 
 /**
  * 全ての参照変換を適用
- * 
+ *
  * **処理フロー:**
  * 1. 設定リストをループ
  * 2. 単一プロパティを変換
  * 3. 配列プロパティを変換
  * 4. 変換回数を集計
- * 
+ *
  * **設計判断:**
  * - 全ての変換を1パスで実行（効率性）
  * - 変換順序は設定リストの順序に従う
- * 
+ *
  * @param content - 変換対象のコンテンツ
  * @param direction - 変換方向（'to-typed' | 'to-string'）
  * @returns 変換結果
@@ -447,16 +446,16 @@ function applyReferenceConversions(
 
 /**
  * 再帰的にTypeScriptファイルを取得
- * 
+ *
  * **処理内容:**
  * 1. ディレクトリを再帰的に走査
  * 2. .ts拡張子のファイルのみを収集
  * 3. ファイルパスのリストを返す
- * 
+ *
  * **設計判断:**
  * - Node.js標準機能のみを使用（依存なし）
  * - 再帰的な走査でネストディレクトリに対応
- * 
+ *
  * @param dir - 検索開始ディレクトリ
  * @returns TypeScriptファイルパスのリスト
  */
@@ -488,19 +487,19 @@ function getAllTsFiles(dir: string): string[] {
 
 /**
  * 文字列参照から型安全参照への変換（デフォルト動作）
- * 
+ *
  * **処理フロー:**
  * 1. src/ディレクトリ内の全.tsファイルを取得
  * 2. 各ファイルを読み込み
  * 3. applyReferenceConversions('to-typed')で変換
  * 4. 変換があればファイルを上書き
  * 5. 統計情報を表示
- * 
+ *
  * **使用例:**
  * ```bash
  * bun run convert-references
  * ```
- * 
+ *
  * **出力例:**
  * ```
  * 🔄 文字列参照から型安全参照への変換を開始...
@@ -554,24 +553,24 @@ async function convertStringReferences() {
 
 /**
  * 型安全参照から文字列参照への逆変換
- * 
+ *
  * **処理フロー:**
  * 1. src/ディレクトリ内の全.tsファイルを取得
  * 2. 各ファイルを読み込み
  * 3. applyReferenceConversions('to-string')で変換
  * 4. 変換があればファイルを上書き
  * 5. 統計情報を表示
- * 
+ *
  * **使用例:**
  * ```bash
  * bun run convert-references --to-string
  * ```
- * 
+ *
  * **用途:**
  * - デバッグ用途（型安全参照が不要な場合）
  * - シンプルな形式への戻し変換
  * - 互換性維持（旧形式への対応）
- * 
+ *
  * **注意:**
  * 通常は型安全参照を推奨します。この逆変換は特殊な用途のみ。
  */
@@ -614,11 +613,11 @@ async function convertToStringReferences() {
 
 /**
  * コマンドライン引数を処理して適切な変換を実行
- * 
+ *
  * **コマンドオプション:**
  * - なし または --to-typed: 文字列 → 型安全参照（デフォルト）
  * - --to-string: 型安全参照 → 文字列（逆変換）
- * 
+ *
  * **実行例:**
  * ```bash
  * bun scripts/convert-references.ts

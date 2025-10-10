@@ -1,19 +1,19 @@
 /**
  * スタッフ予約検索画面
- * 
+ *
  * 店舗スタッフが予約を検索するための画面。
  * 複数の検索条件（日付、顧客名、電話番号、予約番号）をサポートします。
- * 
+ *
  * 設計上の特徴:
  * - 複数検索条件の組み合わせ可能
  * - 日付範囲での検索
  * - 検索結果は一覧画面へ遷移
  * - 高度な検索機能（ステータス絞り込み）
- * 
+ *
  * セキュリティ考慮:
  * - スタッフ認証済みであることが前提
  * - 検索結果の件数制限（パフォーマンス保護）
- * 
+ *
  * 関連ユースケース:
  * - reservation-staff-search: スタッフ予約検索
  * - reservation-staff-change: 検索から変更へ
@@ -27,9 +27,10 @@ export const staffSearchScreen: Screen = {
   id: 'staff-search-screen',
   name: 'スタッフ予約検索画面',
   type: 'screen',
-  description: '店舗スタッフが予約を検索する画面。日付、顧客名、電話番号、予約番号などの複数条件で検索できます。',
+  description:
+    '店舗スタッフが予約を検索する画面。日付、顧客名、電話番号、予約番号などの複数条件で検索できます。',
   screenType: 'form',
-  
+
   inputFields: [
     {
       id: 'search-date-from',
@@ -66,9 +67,7 @@ export const staffSearchScreen: Screen = {
       required: false,
       placeholder: '03-1234-5678',
       helpText: 'ハイフンなしでも検索できます',
-      validationRules: [
-        typedValidationRuleRef('validation-phone-format'),
-      ],
+      validationRules: [typedValidationRuleRef('validation-phone-format')],
     },
     {
       id: 'search-reservation-number',
@@ -78,9 +77,7 @@ export const staffSearchScreen: Screen = {
       required: false,
       placeholder: 'RES-20231015-0001',
       helpText: '完全一致で検索します',
-      validationRules: [
-        typedValidationRuleRef('validation-reservation-number-format'),
-      ],
+      validationRules: [typedValidationRuleRef('validation-reservation-number-format')],
     },
     {
       id: 'search-status',

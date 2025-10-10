@@ -1,10 +1,10 @@
 /**
  * @fileoverview Omoikane Metamodel - ITデリバリフレームワーク
- * 
+ *
  * **概要:**
  * TypeScriptによるユースケース・業務要件定義のための包括的なメタモデルフレームワークです。
  * 型安全性、トレーサビリティ、品質評価を統合的に提供します。
- * 
+ *
  * **アーキテクチャ:**
  * ```
  * ┌─────────────────────────────────────────────────────┐
@@ -27,14 +27,14 @@
  * │  └─ カバレッジ分析                                     │
  * └─────────────────────────────────────────────────────┘
  * ```
- * 
+ *
  * **主要機能:**
  * 1. **型定義フレームワーク** - レイヤー化された型システム
  * 2. **品質評価** - 自動品質評価とAI推奨
  * 3. **トレーサビリティ** - 要件とユースケースの追跡
  * 4. **関係性分析** - アクターとユースケースの関係分析
  * 5. **カバレッジ分析** - セキュリティ・ビジネスルールのカバレッジ
- * 
+ *
  * **使用例:**
  * ```typescript
  * import {
@@ -45,7 +45,7 @@
  *   assessQuality,
  *   RelationshipAnalyzer
  * } from 'omoikane-metamodel';
- * 
+ *
  * // 業務要件定義の作成
  * const requirement: Business.BusinessRequirementDefinition = {
  *   id: 'br-001',
@@ -54,7 +54,7 @@
  *   scope: {...},
  *   metadata: {...}
  * };
- * 
+ *
  * // ユースケースの作成
  * const useCase: Functional.UseCase = {
  *   id: 'uc-001',
@@ -65,17 +65,17 @@
  *   mainFlow: [...],
  *   metadata: {...}
  * };
- * 
+ *
  * // 品質評価
  * const qualityResult = await assessQuality([requirement], [useCase]);
  * console.log(`品質スコア: ${qualityResult.overallScore}`);
- * 
+ *
  * // 関係性分析
  * const analyzer = new RelationshipAnalyzer();
  * analyzer.addUseCase(useCase);
  * const analysis = analyzer.analyze();
  * ```
- * 
+ *
  * @module index
  * @version 1.0.0
  * @license MIT
@@ -87,19 +87,19 @@
 
 /**
  * Foundation Layer - 基礎層
- * 
+ *
  * プリミティブ型、参照型、文書基底型などの基礎的な型定義を提供します。
- * 
+ *
  * **主要な型:**
  * - `Ref<T>`: 型安全な参照型
  * - `DocumentBase`: 文書の基底型
  * - `TraceableDocument`: トレーサビリティ対応文書
  * - `Metadata`: メタデータ型
- * 
+ *
  * @example
  * ```typescript
  * import { Foundation } from 'omoikane-metamodel';
- * 
+ *
  * const ref: Foundation.Ref<MyType> = {
  *   id: 'my-001',
  *   name: 'My Document'
@@ -110,18 +110,18 @@ export * as Foundation from './types/foundation/index.js';
 
 /**
  * Business Layer - 業務層
- * 
+ *
  * 業務要件定義に関連する型を提供します。
- * 
+ *
  * **主要な型:**
  * - `BusinessRequirementDefinition`: 業務要件定義
  * - `BusinessRule`: ビジネスルール
  * - `SecurityPolicy`: セキュリティポリシー
- * 
+ *
  * @example
  * ```typescript
  * import { Business } from 'omoikane-metamodel';
- * 
+ *
  * const requirement: Business.BusinessRequirementDefinition = {
  *   id: 'br-001',
  *   name: '業務要件書',
@@ -134,19 +134,19 @@ export * as Business from './types/business/index.js';
 
 /**
  * Functional Layer - 機能層
- * 
+ *
  * ユースケース、アクターなどの機能要素の型を提供します。
- * 
+ *
  * **主要な型:**
  * - `UseCase`: ユースケース
  * - `Actor`: アクター
  * - `UseCaseStep`: ユースケースステップ
  * - `AlternativeFlow`: 代替フロー
- * 
+ *
  * @example
  * ```typescript
  * import { Functional } from 'omoikane-metamodel';
- * 
+ *
  * const useCase: Functional.UseCase = {
  *   id: 'uc-001',
  *   name: '商品を購入する',
@@ -159,9 +159,9 @@ export * as Functional from './types/functional/index.js';
 
 /**
  * UI Layer - ユーザーインターフェース層
- * 
+ *
  * 画面定義、画面遷移、バリデーションルールなどのUI要素の型を提供します。
- * 
+ *
  * **主要な型:**
  * - `Screen`: 画面定義
  * - `ValidationRule`: バリデーションルール
@@ -169,11 +169,11 @@ export * as Functional from './types/functional/index.js';
  * - `InputField`: 入力フィールド
  * - `DisplayField`: 表示フィールド
  * - `ScreenAction`: 画面アクション
- * 
+ *
  * @example
  * ```typescript
  * import { UI } from 'omoikane-metamodel';
- * 
+ *
  * const screen: UI.Screen = {
  *   id: 'form-screen',
  *   name: 'フォーム画面',
@@ -186,18 +186,18 @@ export * as UI from './types/ui/index.js';
 
 /**
  * Cross-Cutting Layer - 横断層
- * 
+ *
  * トレーサビリティ、バージョニングなどの横断的関心事の型を提供します。
- * 
+ *
  * **主要な型:**
  * - `TraceabilityMatrix`: トレーサビリティマトリクス
  * - `DocumentRelationship`: 文書間関係
  * - `RelationType`: 関係タイプ
- * 
+ *
  * @example
  * ```typescript
  * import { CrossCutting } from 'omoikane-metamodel';
- * 
+ *
  * const matrix: CrossCutting.TraceabilityMatrix = {
  *   id: 'tm-001',
  *   name: 'トレーサビリティマトリクス',
@@ -224,60 +224,60 @@ export * as CrossCutting from './types/cross-cutting/index.js';
 
 // 基礎型
 export type {
-    /** 変更履歴エントリ */
-    ChangeLogEntry,
-    /** 日付範囲型 */
-    DateRange,
-    /** 文書の基底型 */
-    DocumentBase,
-    /** 一意識別子を持つオブジェクトのインターフェース */
-    Identifiable,
-    /** メタデータ型 */
-    Metadata,
-    /** 型安全な参照型 */
-    Ref,
-    /** 参照型の配列 */
-    RefArray,
-    /** トレーサビリティ対応文書 */
-    TraceableDocument
+  /** 変更履歴エントリ */
+  ChangeLogEntry,
+  /** 日付範囲型 */
+  DateRange,
+  /** 文書の基底型 */
+  DocumentBase,
+  /** 一意識別子を持つオブジェクトのインターフェース */
+  Identifiable,
+  /** メタデータ型 */
+  Metadata,
+  /** 型安全な参照型 */
+  Ref,
+  /** 参照型の配列 */
+  RefArray,
+  /** トレーサビリティ対応文書 */
+  TraceableDocument,
 } from './types/foundation/index.js';
 
 // インターフェース型
 export type {
-    /** 承認可能なオブジェクト */
-    Approvable,
-    /** カテゴリ化可能なオブジェクト */
-    Categorizable,
-    /** バージョン管理可能なオブジェクト */
-    Versionable
+  /** 承認可能なオブジェクト */
+  Approvable,
+  /** カテゴリ化可能なオブジェクト */
+  Categorizable,
+  /** バージョン管理可能なオブジェクト */
+  Versionable,
 } from './types/foundation/index.js';
 
 // プリミティブ型
 export type {
-    /** 優先度レベル */
-    PriorityLevel,
-    /** 品質レベル */
-    QualityLevel,
-    /** 深刻度レベル */
-    SeverityLevel
+  /** 優先度レベル */
+  PriorityLevel,
+  /** 品質レベル */
+  QualityLevel,
+  /** 深刻度レベル */
+  SeverityLevel,
 } from './types/foundation/index.js';
 
 // ヘルパー関数
 export {
-    /** 参照オブジェクトを作成 */
-    createRef,
-    /** 参照配列からIDを抽出 */
-    extractRefIds,
-    /** 承認可能かチェック */
-    isApprovable,
-    /** カテゴリ化可能かチェック */
-    isCategorizable,
-    /** トレーサブル文書かチェック */
-    isTraceableDocument,
-    /** 有効な参照かチェック */
-    isValidRef,
-    /** バージョン管理可能かチェック */
-    isVersionable
+  /** 参照オブジェクトを作成 */
+  createRef,
+  /** 参照配列からIDを抽出 */
+  extractRefIds,
+  /** 承認可能かチェック */
+  isApprovable,
+  /** カテゴリ化可能かチェック */
+  isCategorizable,
+  /** トレーサブル文書かチェック */
+  isTraceableDocument,
+  /** 有効な参照かチェック */
+  isValidRef,
+  /** バージョン管理可能かチェック */
+  isVersionable,
 } from './types/foundation/index.js';
 
 // ============================================================================
@@ -288,44 +288,44 @@ export {
  * Business層から頻繁に使用される型を再エクスポートします。
  */
 export type {
-    /** 業務要件カバレッジ */
-    BusinessRequirementCoverage,
-    /** 業務要件定義 */
-    BusinessRequirementDefinition,
-    /** 業務要件項目 */
-    BusinessRequirementItem,
-    /** 業務要件スコープ */
-    BusinessRequirementScope,
-    /** ビジネスルール */
-    BusinessRule,
-    /** セキュリティポリシー */
-    SecurityPolicy
+  /** 業務要件カバレッジ */
+  BusinessRequirementCoverage,
+  /** 業務要件定義 */
+  BusinessRequirementDefinition,
+  /** 業務要件項目 */
+  BusinessRequirementItem,
+  /** 業務要件スコープ */
+  BusinessRequirementScope,
+  /** ビジネスルール */
+  BusinessRule,
+  /** セキュリティポリシー */
+  SecurityPolicy,
 } from './types/business/index.js';
 
 /**
  * Business層 - 参照型
- * 
+ *
  * インスタンスプロジェクトのtyped-references.tsで使用される参照型。
  */
 export type {
-    /** 前提条件への参照 */
-    AssumptionRef,
-    /** ビジネスゴールへの参照 */
-    BusinessGoalRef,
-    /** 業務要件定義への参照 */
-    BusinessRequirementDefinitionRef,
-    /** ビジネスルールへの参照 */
-    BusinessRuleRef,
-    /** スコープ項目への参照 */
-    BusinessScopeRef,
-    /** 制約条件への参照 */
-    ConstraintRef,
-    /** セキュリティポリシーへの参照 */
-    SecurityPolicyRef,
-    /** ステークホルダーへの参照 */
-    StakeholderRef,
-    /** 成功指標への参照 */
-    SuccessMetricRef
+  /** 前提条件への参照 */
+  AssumptionRef,
+  /** ビジネスゴールへの参照 */
+  BusinessGoalRef,
+  /** 業務要件定義への参照 */
+  BusinessRequirementDefinitionRef,
+  /** ビジネスルールへの参照 */
+  BusinessRuleRef,
+  /** スコープ項目への参照 */
+  BusinessScopeRef,
+  /** 制約条件への参照 */
+  ConstraintRef,
+  /** セキュリティポリシーへの参照 */
+  SecurityPolicyRef,
+  /** ステークホルダーへの参照 */
+  StakeholderRef,
+  /** 成功指標への参照 */
+  SuccessMetricRef,
 } from './types/business/index.js';
 
 // ============================================================================
@@ -336,14 +336,14 @@ export type {
  * Functional層から頻繁に使用される型を再エクスポートします。
  */
 export type {
-    /** アクター */
-    Actor,
-    /** 代替フロー */
-    AlternativeFlow,
-    /** ユースケース */
-    UseCase,
-    /** ユースケースステップ */
-    UseCaseStep
+  /** アクター */
+  Actor,
+  /** 代替フロー */
+  AlternativeFlow,
+  /** ユースケース */
+  UseCase,
+  /** ユースケースステップ */
+  UseCaseStep,
 } from './types/functional/index.js';
 
 // ============================================================================
@@ -354,26 +354,26 @@ export type {
  * UI層から頻繁に使用される型を再エクスポートします。
  */
 export type {
-    /** 表示フィールド */
-    DisplayField,
-    /** 入力フィールド */
-    InputField,
-    /** 画面定義 */
-    Screen,
-    /** 画面アクション */
-    ScreenAction,
-    /** 画面遷移フロー */
-    ScreenFlow,
-    /** 画面遷移 */
-    ScreenTransition,
-    /** 画面タイプ */
-    ScreenType,
-    /** バリデーションルール */
-    ValidationRule,
-    /** バリデーションルールタイプ */
-    ValidationRuleType,
-    /** バリデーショントリガー */
-    ValidationTrigger
+  /** 表示フィールド */
+  DisplayField,
+  /** 入力フィールド */
+  InputField,
+  /** 画面定義 */
+  Screen,
+  /** 画面アクション */
+  ScreenAction,
+  /** 画面遷移フロー */
+  ScreenFlow,
+  /** 画面遷移 */
+  ScreenTransition,
+  /** 画面タイプ */
+  ScreenType,
+  /** バリデーションルール */
+  ValidationRule,
+  /** バリデーションルールタイプ */
+  ValidationRuleType,
+  /** バリデーショントリガー */
+  ValidationTrigger,
 } from './types/ui/index.js';
 
 // ============================================================================
@@ -382,70 +382,70 @@ export type {
 
 /**
  * セキュリティ要件カバレッジ分析
- * 
+ *
  * ユースケースがセキュリティポリシーをどの程度カバーしているかを分析します。
  */
 export type {
-    /** 任意のユースケース型（型安全性のため） */
-    AnyUseCase,
-    /** セキュリティポリシーカバレッジエントリ */
-    SecurityPolicyCoverageEntry,
-    /** セキュリティポリシー統計 */
-    SecurityPolicyStats,
-    /** セキュリティポリシーサマリー */
-    SecurityPolicySummary
+  /** 任意のユースケース型（型安全性のため） */
+  AnyUseCase,
+  /** セキュリティポリシーカバレッジエントリ */
+  SecurityPolicyCoverageEntry,
+  /** セキュリティポリシー統計 */
+  SecurityPolicyStats,
+  /** セキュリティポリシーサマリー */
+  SecurityPolicySummary,
 } from './quality/security-requirements.js';
 
 export {
-    /** セキュリティポリシーカバレッジを構築 */
-    buildSecurityPolicyCoverage,
-    /** セキュリティポリシー統計を計算 */
-    calculateSecurityPolicyStats,
-    /** セキュリティポリシーIDを収集 */
-    collectSecurityPolicyIds,
-    /** セキュリティポリシーをサマリー */
-    summarizeSecurityPolicies
+  /** セキュリティポリシーカバレッジを構築 */
+  buildSecurityPolicyCoverage,
+  /** セキュリティポリシー統計を計算 */
+  calculateSecurityPolicyStats,
+  /** セキュリティポリシーIDを収集 */
+  collectSecurityPolicyIds,
+  /** セキュリティポリシーをサマリー */
+  summarizeSecurityPolicies,
 } from './quality/security-requirements.js';
 
 /**
  * ビジネスルールカバレッジ分析
- * 
+ *
  * ユースケースがビジネスルールをどの程度カバーしているかを分析します。
  */
 export type {
-    /** ビジネスルールカバレッジエントリ */
-    BusinessRuleCoverageEntry,
-    /** ビジネスルール統計 */
-    BusinessRuleStats,
-    /** ビジネスルールサマリー */
-    BusinessRuleSummary
+  /** ビジネスルールカバレッジエントリ */
+  BusinessRuleCoverageEntry,
+  /** ビジネスルール統計 */
+  BusinessRuleStats,
+  /** ビジネスルールサマリー */
+  BusinessRuleSummary,
 } from './quality/business-rules.ts';
 
 export {
-    /** ビジネスルールカバレッジを構築 */
-    buildBusinessRuleCoverage,
-    /** ビジネスルール統計を計算 */
-    calculateBusinessRuleStats,
-    /** ビジネスルールIDを収集 */
-    collectBusinessRuleIds,
-    /** ビジネスルールをサマリー */
-    summarizeBusinessRules
+  /** ビジネスルールカバレッジを構築 */
+  buildBusinessRuleCoverage,
+  /** ビジネスルール統計を計算 */
+  calculateBusinessRuleStats,
+  /** ビジネスルールIDを収集 */
+  collectBusinessRuleIds,
+  /** ビジネスルールをサマリー */
+  summarizeBusinessRules,
 } from './quality/business-rules.ts';
 
 /**
  * 品質評価エンジン
- * 
+ *
  * 業務要件定義とユースケースの品質を総合的に評価します。
- * 
+ *
  * @example
  * ```typescript
  * import { assessQuality } from 'omoikane-metamodel';
- * 
+ *
  * const result = await assessQuality(
  *   [businessRequirement],
  *   [useCase1, useCase2]
  * );
- * 
+ *
  * console.log(`品質スコア: ${result.overallScore}`);
  * console.log(`改善提案: ${result.recommendations.length}件`);
  * ```
@@ -463,54 +463,53 @@ export type { QualityAssessmentResult } from './quality/types.js';
 
 /**
  * stepNumber自動管理ユーティリティ
- * 
+ *
  * ユースケースステップのstepNumberを自動的に計算・管理します。
- * 
+ *
  * @example
  * ```typescript
  * import { enrichStepsWithNumbers } from 'omoikane-metamodel';
- * 
+ *
  * const enrichedUseCase = enrichStepsWithNumbers(useCase);
  * // mainFlowの各ステップにstepNumberが自動付与される
  * ```
  */
 export {
-    /** ステップにstepNumberを自動付与 */
-    enrichStepsWithNumbers,
-    /** stepIdまたはstepNumberでステップを検索 */
-    findStepByIdOrNumber,
-    /** 改善された注文処理例（デモ用） */
-    improvedOrderProcessing
+  /** ステップにstepNumberを自動付与 */
+  enrichStepsWithNumbers,
+  /** stepIdまたはstepNumberでステップを検索 */
+  findStepByIdOrNumber,
+  /** 改善された注文処理例（デモ用） */
+  improvedOrderProcessing,
 } from './types/step-number-solution.js';
 
 /**
  * 関係性分析ユーティリティ
- * 
+ *
  * アクターとユースケースの関係を分析し、キーパーソンや複雑なユースケースを特定します。
- * 
+ *
  * @example
  * ```typescript
  * import { RelationshipAnalyzer } from 'omoikane-metamodel';
- * 
+ *
  * const analyzer = new RelationshipAnalyzer();
  * analyzer.addActor(actor1);
  * analyzer.addActor(actor2);
  * analyzer.addUseCase(useCase1);
  * analyzer.addUseCase(useCase2);
- * 
+ *
  * const analysis = analyzer.analyze();
  * console.log(analyzer.generateReport(analysis));
  * ```
  */
 export type {
-    /** アクター×ユースケース関係 */
-    ActorUseCaseRelationship,
-    /** 関係性分析結果 */
-    RelationshipAnalysis
+  /** アクター×ユースケース関係 */
+  ActorUseCaseRelationship,
+  /** 関係性分析結果 */
+  RelationshipAnalysis,
 } from './types/relationship-analyzer.js';
 
 export {
-    /** 関係性アナライザークラス */
-    RelationshipAnalyzer
+  /** 関係性アナライザークラス */
+  RelationshipAnalyzer,
 } from './types/relationship-analyzer.js';
-

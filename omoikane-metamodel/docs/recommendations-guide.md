@@ -19,6 +19,7 @@
 ### 1. 説明の充実化
 
 #### 推奨事項の例
+
 ```
 十分な説明: 説明が50文字以上で具体的に記述されている
 優先度: high
@@ -27,6 +28,7 @@
 ```
 
 #### 問題の背景
+
 - レベル2: 説明が1文字以上（基本）
 - レベル3: 説明が30文字以上（詳細）
 - レベル4: 説明が50文字以上（高品質）
@@ -37,6 +39,7 @@
 #### 対処手順
 
 1. **現状確認**
+
 ```typescript
 export const capacityPlanner: Actor = {
   id: 'capacity-planner',
@@ -48,11 +51,13 @@ export const capacityPlanner: Actor = {
 ```
 
 2. **改善実施**
+
 ```typescript
 export const capacityPlanner: Actor = {
   id: 'capacity-planner',
   name: 'キャパシティプランナー',
-  description: '予約可能な枠を作成・整理する店舗運営担当者。営業日程と提供サービスに基づいて予約枠を新規登録し、不要になった枠を削除する。枠の稼働状況を把握し、適切な予約受付キャパシティを維持することで、過剰予約や空予約を防ぐ責任を持つ。', // 96文字
+  description:
+    '予約可能な枠を作成・整理する店舗運営担当者。営業日程と提供サービスに基づいて予約枠を新規登録し、不要になった枠を削除する。枠の稼働状況を把握し、適切な予約受付キャパシティを維持することで、過剰予約や空予約を防ぐ責任を持つ。', // 96文字
   role: 'primary',
   responsibilities: [
     '予約枠の新規登録',
@@ -63,6 +68,7 @@ export const capacityPlanner: Actor = {
 ```
 
 #### 改善のポイント
+
 - **役割の明確化**: 何を担当するのか
 - **ビジネス文脈**: なぜその役割が必要か
 - **責任範囲**: どこまでの権限があるか
@@ -72,6 +78,7 @@ export const capacityPlanner: Actor = {
 ### 2. ユースケースカバレッジ
 
 #### 推奨事項の例
+
 ```
 ユースケースカバレッジ: 少なくとも1つのユースケースで使用されている
 優先度: high
@@ -80,7 +87,9 @@ export const capacityPlanner: Actor = {
 ```
 
 #### 問題の背景
+
 定義されているが、どのユースケースからも参照されていないアクターは：
+
 - 設計漏れの可能性
 - 不要な定義（削除すべき）
 - 参照の記述漏れ
@@ -88,6 +97,7 @@ export const capacityPlanner: Actor = {
 #### 対処手順
 
 1. **使用状況の確認**
+
 ```bash
 # アクターIDで検索
 grep -r "typedActorRef('capacity-planner')" src/requirements/
@@ -96,6 +106,7 @@ grep -r "typedActorRef('capacity-planner')" src/requirements/
 2. **参照されていない場合の対応**
 
 **パターンA: ユースケースに追加**
+
 ```typescript
 export const capacityManagement: ReservationUseCase = {
   id: 'capacity-management',
@@ -109,6 +120,7 @@ export const capacityManagement: ReservationUseCase = {
 ```
 
 **パターンB: 不要なアクターを削除**
+
 ```typescript
 // actors.ts から該当アクターを削除
 // export const unusedActor: Actor = { ... }; // 削除
@@ -117,6 +129,7 @@ export const capacityManagement: ReservationUseCase = {
 ### 3. 責務の明確化
 
 #### 推奨事項の例
+
 ```
 責務の明確化: 責務が具体的にリストアップされている
 優先度: medium
@@ -127,6 +140,7 @@ export const capacityManagement: ReservationUseCase = {
 #### 対処手順
 
 改善前（1つのみ）:
+
 ```typescript
 export const visitor: Actor = {
   id: 'visitor',
@@ -138,6 +152,7 @@ export const visitor: Actor = {
 ```
 
 改善後（2つ以上、具体的に）:
+
 ```typescript
 export const visitor: Actor = {
   id: 'visitor',
@@ -160,6 +175,7 @@ export const visitor: Actor = {
 ### 1. 説明の充実化（50文字以上）
 
 #### 推奨事項の例
+
 ```
 十分な説明: 説明が50文字以上で具体的に記述されている
 優先度: high
@@ -170,6 +186,7 @@ export const visitor: Actor = {
 #### 対処手順
 
 改善前（23文字）:
+
 ```typescript
 export const reservationBooking: ReservationUseCase = {
   id: 'reservation-booking',
@@ -180,16 +197,19 @@ export const reservationBooking: ReservationUseCase = {
 ```
 
 改善後（96文字）:
+
 ```typescript
 export const reservationBooking: ReservationUseCase = {
   id: 'reservation-booking',
   name: '予約登録',
-  description: '来店者が希望日時と利用サービスを選択して予約を新規登録する。営業時間外でもセルフサービスで予約を確定でき、予約番号と予約内容が画面に表示される。予約確定操作は履歴に記録され、店舗スタッフの業務リストに即座に反映される。',
+  description:
+    '来店者が希望日時と利用サービスを選択して予約を新規登録する。営業時間外でもセルフサービスで予約を確定でき、予約番号と予約内容が画面に表示される。予約確定操作は履歴に記録され、店舗スタッフの業務リストに即座に反映される。',
   // ...
 };
 ```
 
 #### 改善のポイント
+
 - **誰が**: アクター（主語）を明確に
 - **何を**: 具体的なアクション
 - **どのように**: 手段や条件
@@ -199,6 +219,7 @@ export const reservationBooking: ReservationUseCase = {
 ### 2. 事前条件・事後条件の追加
 
 #### 推奨事項の例
+
 ```
 事前条件: 事前条件が明確に定義されている
 優先度: medium
@@ -208,17 +229,21 @@ export const reservationBooking: ReservationUseCase = {
 #### 対処手順
 
 改善前（なし）:
+
 ```typescript
 export const reservationBooking: ReservationUseCase = {
   id: 'reservation-booking',
   name: '予約登録',
   // preconditions なし
   // postconditions なし
-  mainFlow: [/* ... */],
+  mainFlow: [
+    /* ... */
+  ],
 };
 ```
 
 改善後:
+
 ```typescript
 export const reservationBooking: ReservationUseCase = {
   id: 'reservation-booking',
@@ -232,19 +257,23 @@ export const reservationBooking: ReservationUseCase = {
     '店舗スタッフの業務リストに予約が追加されている',
     '来店者が予約番号と連絡先で照会・変更できるページへのアクセス方法を理解している',
   ],
-  mainFlow: [/* ... */],
+  mainFlow: [
+    /* ... */
+  ],
 };
 ```
 
 #### 書き方のコツ
 
 **事前条件（Preconditions）**:
+
 - システムの状態
 - ユーザーの権限
 - 必要なデータの存在
 - 外部システムの稼働状態
 
 **事後条件（Postconditions）**:
+
 - システム状態の変化
 - データの作成・更新
 - 通知の送信
@@ -253,6 +282,7 @@ export const reservationBooking: ReservationUseCase = {
 ### 3. 代替フローの追加
 
 #### 推奨事項の例
+
 ```
 代替フロー: 代替フローが定義されている
 優先度: high
@@ -282,7 +312,8 @@ export const reservationBooking: ReservationUseCase = {
         {
           actor: typedActorRef('visitor'),
           action: '画面上の枠確保失敗メッセージを確認し代替候補を検討する',
-          expectedResult: '選択可能な別枠が提示され再選択のガイダンスが表示される',
+          expectedResult:
+            '選択可能な別枠が提示され再選択のガイダンスが表示される',
         },
         {
           actor: typedActorRef('visitor'),
@@ -297,6 +328,7 @@ export const reservationBooking: ReservationUseCase = {
 ```
 
 #### 代替フローの考え方
+
 - **エラーケース**: 入力エラー、バリデーション失敗
 - **例外ケース**: データ不整合、タイムアウト
 - **並行処理**: 同時実行による競合
@@ -306,6 +338,7 @@ export const reservationBooking: ReservationUseCase = {
 ### 4. 業務要件カバレッジの追加
 
 #### 推奨事項の例
+
 ```
 業務要件カバレッジ: 業務要件との関連が明確
 優先度: high
@@ -324,22 +357,14 @@ export const reservationBooking: ReservationUseCase = {
       businessGoalRef('goal-self-service-booking'),
       businessGoalRef('goal-accurate-capacity'),
     ],
-    scopeItems: [
-      businessScopeRef('scope-online-booking'),
-    ],
+    scopeItems: [businessScopeRef('scope-online-booking')],
     stakeholders: [
       stakeholderRef('stakeholder-visitor'),
       stakeholderRef('stakeholder-store-staff'),
     ],
-    successMetrics: [
-      successMetricRef('metric-booking-completion-rate'),
-    ],
-    assumptions: [
-      assumptionRef('assumption-manual-communications'),
-    ],
-    constraints: [
-      constraintRef('constraint-operation-hours-visitor'),
-    ],
+    successMetrics: [successMetricRef('metric-booking-completion-rate')],
+    assumptions: [assumptionRef('assumption-manual-communications')],
+    constraints: [constraintRef('constraint-operation-hours-visitor')],
     businessRules: [
       businessRuleRef('business-rule-visitor-single-reservation'),
     ],
@@ -358,6 +383,7 @@ export const reservationBooking: ReservationUseCase = {
 ### 1. ステークホルダーの追加
 
 #### 推奨事項の例
+
 ```
 ステークホルダー: ステークホルダーが2人以上定義されている
 優先度: medium
@@ -400,6 +426,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
 ### 2. 成功指標の定義
 
 #### 推奨事項の例
+
 ```
 成功指標: 成功指標が定義されている
 優先度: high
@@ -415,7 +442,8 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     {
       id: 'metric-booking-completion-rate',
       name: '予約完了率',
-      description: '予約プロセスを開始したユーザーのうち、実際に予約を完了した割合',
+      description:
+        '予約プロセスを開始したユーザーのうち、実際に予約を完了した割合',
       target: '80%以上',
       measurement: 'Webアナリティクス（予約完了数 / 予約開始数）',
       baseline: '現状未計測',
@@ -440,7 +468,9 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
 ### ビジネスゴールとユースケースの紐付け
 
 #### 問題の背景
+
 トレーサビリティが低い（50%未満）場合：
+
 - 変更影響分析が困難
 - なぜその機能が必要か不明
 - ROI測定ができない
@@ -448,6 +478,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
 #### 対処手順
 
 1. **ビジネスゴールを確認**
+
 ```typescript
 // business-requirements.ts
 businessGoals: [
@@ -457,10 +488,11 @@ businessGoals: [
     priority: 'high',
     successCriteria: ['予約完了率80%以上'],
   },
-]
+];
 ```
 
 2. **各ユースケースに紐付け**
+
 ```typescript
 // reservation-booking.ts
 businessRequirementCoverage: reservationBusinessRequirementCoverage({
@@ -473,6 +505,7 @@ businessRequirementCoverage: reservationBusinessRequirementCoverage({
 ```
 
 3. **カバレッジを確認**
+
 ```bash
 bun run quality-assessment
 # トレーサビリティの%を確認
@@ -485,6 +518,7 @@ bun run quality-assessment
 ### レベル2 → レベル3への到達
 
 #### 必要な改善
+
 - [ ] 全ユースケースの説明を50文字以上に
 - [ ] 全ステップに完全な構造（stepId, actor, action, expectedResult）
 - [ ] 各ユースケースに代替フローを1つ以上追加
@@ -493,6 +527,7 @@ bun run quality-assessment
 - [ ] 複雑度を評価
 
 #### 推奨順序
+
 1. **クイックウィン**: 説明の拡充（各2時間）
 2. **構造整備**: ステップの完全化（各1時間）
 3. **関連付け**: 業務要件カバレッジ（各2時間）
@@ -501,6 +536,7 @@ bun run quality-assessment
 ### レベル3 → レベル4への到達
 
 #### 必要な改善
+
 - [ ] 全アクターがユースケースで使用されている
 - [ ] アクターの説明を50文字以上に
 - [ ] 見積工数を記録
@@ -510,6 +546,7 @@ bun run quality-assessment
 - [ ] ビジネスルールを関連付け
 
 #### 推奨順序
+
 1. **トレーサビリティ**: 未使用アクターの解消（各2時間）
 2. **測定可能性**: 工数見積もり（各1時間）
 3. **非機能要件**: データ・性能・セキュリティ（各3時間）
@@ -517,6 +554,7 @@ bun run quality-assessment
 ### レベル4 → レベル5への到達
 
 #### 必要な改善（高難度）
+
 - [ ] Actor型にgoalsフィールドを追加（型定義の拡張が必要）
 - [ ] 全アクターの説明を80文字以上に
 - [ ] UI要件を定義
@@ -525,6 +563,7 @@ bun run quality-assessment
 - [ ] ビジネス価値を20文字以上で記述
 
 #### 推奨順序
+
 1. **型拡張**: Actor型のgoalsフィールド追加（8時間）
 2. **包括的な説明**: 80文字以上へ拡充（各2時間）
 3. **詳細仕様**: エラーハンドリング・バリデーション（各要素6時間）
@@ -536,6 +575,7 @@ bun run quality-assessment
 ### 効率的な改善の進め方
 
 1. **現状把握**
+
    ```bash
    bun run quality-assessment
    ```
@@ -550,6 +590,7 @@ bun run quality-assessment
    - 次の成熟度レベルの必須項目
 
 4. **定期的に評価**（週次・スプリント毎）
+
    ```bash
    bun run quality-assessment
    # 改善の進捗を確認

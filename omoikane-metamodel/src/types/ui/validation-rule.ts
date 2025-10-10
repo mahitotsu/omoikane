@@ -1,15 +1,15 @@
 /**
  * @fileoverview バリデーションルール定義
- * 
+ *
  * **目的:**
  * 画面入力のバリデーションルールを定義します。
  * 複数画面で再利用可能な独立した型として設計されています。
- * 
+ *
  * **主要機能:**
  * 1. 標準的なバリデーションルール（必須、長さ、パターン等）
  * 2. ビジネスルールとの連携
  * 3. サーバーサイド検証の指定
- * 
+ *
  * **使用例:**
  * ```typescript
  * const emailValidation: ValidationRule = {
@@ -20,7 +20,7 @@
  *   errorMessage: '有効なメールアドレスを入力してください',
  * };
  * ```
- * 
+ *
  * @module types/ui/validation-rule
  */
 
@@ -47,7 +47,7 @@ export type ValidationRuleType =
 
 /**
  * バリデーショントリガーイベント
- * 
+ *
  * いつバリデーションを実行するかを指定します。
  */
 export type ValidationTrigger =
@@ -58,10 +58,10 @@ export type ValidationTrigger =
 
 /**
  * バリデーションルール
- * 
+ *
  * 画面入力のバリデーションルールを定義します。
  * 複数の画面・フィールドで再利用可能です。
- * 
+ *
  * **設計原則:**
  * - 独立性: 画面定義から独立し、再利用可能
  * - ビジネスルール連携: 必要に応じてビジネスルールと関連付け
@@ -70,13 +70,13 @@ export type ValidationTrigger =
 export type ValidationRule = DocumentBase & {
   /** 文書型識別子（固定値: 'validation-rule'） */
   type?: 'validation-rule';
-  
+
   /** ルールの種類 */
   ruleType: ValidationRuleType;
 
   /**
    * ルールのパラメータ
-   * 
+   *
    * 例:
    * - minLength: { length: 5 }
    * - pattern: { pattern: "^[0-9]+$" }
@@ -93,7 +93,7 @@ export type ValidationRule = DocumentBase & {
 
   /**
    * 関連するビジネスルール（任意）
-   * 
+   *
    * バリデーションルールがビジネスルールに基づく場合に設定します。
    * 例: 予約可能期間の制限、重複予約チェック等
    */
@@ -101,7 +101,7 @@ export type ValidationRule = DocumentBase & {
 
   /**
    * サーバーサイド検証も必要か
-   * 
+   *
    * true の場合、クライアント側だけでなくサーバー側でも検証を行います。
    * セキュリティ上重要な検証や、データベース参照が必要な検証に設定します。
    */
@@ -109,10 +109,10 @@ export type ValidationRule = DocumentBase & {
 
   /**
    * バリデーション実行タイミング
-   * 
+   *
    * いつバリデーションを実行するかを指定します。
    * 複数指定可能です。
-   * 
+   *
    * 例:
    * - ['blur', 'submit']: フォーカス離脱時とフォーム送信時
    * - ['change']: 値変更ごとにリアルタイム検証

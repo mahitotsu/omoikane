@@ -1,10 +1,10 @@
 /**
  * 来店予約管理システム - 業務要件定義
- * 
+ *
  * 本システムの全体的な業務要件を定義します。
  * すべてのユースケースは businessRequirementCoverage を通じて
  * この業務要件定義とトレーサビリティを確保します。
- * 
+ *
  * 構成要素:
  * - businessGoals: ビジネス目標
  * - scopeItems: スコープ項目
@@ -171,8 +171,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'assumption-holiday-manual-registration',
-      description:
-        '祝日は自動設定されずキャパシティプランナーが営業日／非営業日を手動登録する',
+      description: '祝日は自動設定されずキャパシティプランナーが営業日／非営業日を手動登録する',
     },
     {
       id: 'assumption-slot-interval-1-hour',
@@ -191,13 +190,11 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'constraint-operation-hours-visitor',
-      description:
-        '来店者による予約・変更・取消は予約日時の前営業日の営業時間終了までに限定する',
+      description: '来店者による予約・変更・取消は予約日時の前営業日の営業時間終了までに限定する',
     },
     {
       id: 'constraint-staff-change-anytime-unless-checked-in',
-      description:
-        '店舗スタッフによる予約変更は来店確認済みでない限り営業時間外でも可能とする',
+      description: '店舗スタッフによる予約変更は来店確認済みでない限り営業時間外でも可能とする',
     },
     {
       id: 'constraint-log-retention',
@@ -232,7 +229,8 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     {
       id: 'business-rule-visitor-single-reservation',
       category: 'scope',
-      description: '予約は来店者本人1名分のみを対象とし来店者は自分が作成した予約のみ確認・変更できる',
+      description:
+        '予約は来店者本人1名分のみを対象とし来店者は自分が作成した予約のみ確認・変更できる',
     },
     {
       id: 'business-rule-reservation-number-display-once',
@@ -242,7 +240,8 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     {
       id: 'business-rule-record-all-reservation-actions',
       category: 'audit',
-      description: '予約の確定・変更・取消操作は履歴に記録され履歴確認ユースケースで確認未済／済の状態を更新する',
+      description:
+        '予約の確定・変更・取消操作は履歴に記録され履歴確認ユースケースで確認未済／済の状態を更新する',
     },
     {
       id: 'business-rule-history-review-status',
@@ -252,7 +251,8 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     {
       id: 'business-rule-visitor-cutoff',
       category: 'process',
-      description: '来店者によるオンライン予約・変更・取消は利用予定日時の前営業日の営業時間終了までに限定する',
+      description:
+        '来店者によるオンライン予約・変更・取消は利用予定日時の前営業日の営業時間終了までに限定する',
     },
     {
       id: 'business-rule-cancel-invalidate-reference',
@@ -262,7 +262,8 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     {
       id: 'business-rule-cancel-reason-category',
       category: 'process',
-      description: 'キャンセル理由の入力は任意とし入力する場合は定義済みカテゴリーから選択し自由記述欄で補足できる',
+      description:
+        'キャンセル理由の入力は任意とし入力する場合は定義済みカテゴリーから選択し自由記述欄で補足できる',
     },
     {
       id: 'business-rule-no-show-cancel',
@@ -361,7 +362,8 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     },
     {
       id: 'security-policy-account-admin-audit',
-      description: 'システム管理者によるユーザー登録・削除操作をすべて監査ログに記録し削除前に影響範囲と承認状況を確認する',
+      description:
+        'システム管理者によるユーザー登録・削除操作をすべて監査ログに記録し削除前に影響範囲と承認状況を確認する',
     },
     {
       id: 'security-policy-least-privilege',

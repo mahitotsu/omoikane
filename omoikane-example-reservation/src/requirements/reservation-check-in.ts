@@ -1,31 +1,31 @@
 /**
  * 来店予約管理システム - チェックインユースケース
- * 
+ *
  * 来店者の到着時に店舗スタッフが実行するチェックイン操作を定義します。
- * 
+ *
  * 設計上の特徴:
  * - 予約ステータスを「来店済み」に更新
  * - チェックイン後の予約変更・取消を制限
  * - 対応準備開始のトリガーとなる重要な操作
- * 
+ *
  * ビジネス上の意義:
  * - 枠の適切な管理とオペレーション整合性の確保
  * - No-show（無断欠席）の検出基準
  */
 
 import {
-    ReservationUseCase,
-    assumptionRef,
-    businessGoalRef,
-    businessRequirementRef,
-    businessScopeRef,
-    constraintRef,
-    reservationBusinessRequirementCoverage,
-    stakeholderRef,
-    successMetricRef,
-    typedActorRef,
-    typedScreenRef,
-    typedUseCaseRef,
+  ReservationUseCase,
+  assumptionRef,
+  businessGoalRef,
+  businessRequirementRef,
+  businessScopeRef,
+  constraintRef,
+  reservationBusinessRequirementCoverage,
+  stakeholderRef,
+  successMetricRef,
+  typedActorRef,
+  typedScreenRef,
+  typedUseCaseRef,
 } from '../typed-references.js';
 
 export const reservationCheckIn: ReservationUseCase = {
@@ -33,7 +33,8 @@ export const reservationCheckIn: ReservationUseCase = {
   name: '来店受付',
   type: 'usecase',
   prerequisiteUseCases: [typedUseCaseRef('staff-authentication')],
-  description: '来店者が店舗に到着した際に店舗スタッフがチェックイン操作を行い、予約ステータスを「来店済み」に更新する。これにより対応準備が開始され、以降の予約変更・取消を制限することで、オペレーションの整合性と枠の適切な管理を実現する。',
+  description:
+    '来店者が店舗に到着した際に店舗スタッフがチェックイン操作を行い、予約ステータスを「来店済み」に更新する。これにより対応準備が開始され、以降の予約変更・取消を制限することで、オペレーションの整合性と枠の適切な管理を実現する。',
   actors: {
     primary: typedActorRef('store-staff'),
     secondary: [typedActorRef('visitor')],
@@ -53,7 +54,7 @@ export const reservationCheckIn: ReservationUseCase = {
     assumptions: [
       assumptionRef('assumption-single-location'),
       assumptionRef('assumption-standard-business-hours'),
-  assumptionRef('assumption-slot-interval-1-hour'),
+      assumptionRef('assumption-slot-interval-1-hour'),
     ],
     constraints: [
       constraintRef('constraint-privacy-minimization'),
@@ -93,10 +94,7 @@ export const reservationCheckIn: ReservationUseCase = {
       action: 'チェックインコンソールで予約を検索し対象レコードを開く',
       expectedResult: '対象予約が表示され来店ステータス変更が可能になる',
       screen: typedScreenRef('check-in-console-screen'),
-      validationRules: [
-        '予約が存在すること',
-        '予約が「確定済み」状態であること',
-      ],
+      validationRules: ['予約が存在すること', '予約が「確定済み」状態であること'],
       errorHandling: [
         '予約が見つからない場合は手動検索を案内',
         'キャンセル済みの場合はその旨を表示',
@@ -108,12 +106,8 @@ export const reservationCheckIn: ReservationUseCase = {
       action: 'チェックインコンソールで来店済みに更新し必要なメモを記録する',
       expectedResult: '予約カレンダー上のステータスが「来店済み」に変更される',
       screen: typedScreenRef('check-in-complete-screen'),
-      validationRules: [
-        'チェックイン時刻が予約枠の範囲内またはgrace period内であること',
-      ],
-      errorHandling: [
-        '大幅な遅刻の場合は受け入れ可否の確認を促す',
-      ],
+      validationRules: ['チェックイン時刻が予約枠の範囲内またはgrace period内であること'],
+      errorHandling: ['大幅な遅刻の場合は受け入れ可否の確認を促す'],
     },
   ],
   alternativeFlows: [

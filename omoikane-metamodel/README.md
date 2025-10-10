@@ -4,11 +4,14 @@ TypeScript ITDelivery Framework - ユースケース・要件定義のための�
 
 ## 概要
 
-Omoikane Metamodel は、ITデリバリプロジェクトにおけるユースケース・要件定義を型安全に記述するための TypeScript フレームワークです。
+Omoikane
+Metamodel は、ITデリバリプロジェクトにおけるユースケース・要件定義を型安全に記述するための TypeScript フレームワークです。
 
 **レイヤードアーキテクチャ**:
+
 - **Foundation**: 基礎層（Ref<T>, DocumentBase, primitives）
-- **Business**: 業務層（BusinessRequirementDefinition, BusinessRule, SecurityPolicy）
+- **Business**: 業務層（BusinessRequirementDefinition, BusinessRule,
+  SecurityPolicy）
 - **Functional**: 機能層（Actor, UseCase）
 - **UI**: UI層（Screen, ValidationRule, ScreenFlow）
 - **Cross-Cutting**: 横断層（TraceabilityMatrix）
@@ -39,7 +42,7 @@ import type { Ref } from 'omoikane-metamodel';
 const customer: Functional.Actor = {
   id: 'customer',
   name: '顧客',
-  type: 'actor',  // 自動検出用
+  type: 'actor', // 自動検出用
   description: 'ECサイトで商品を購入する一般ユーザー',
   role: 'primary',
   responsibilities: ['商品の閲覧・検索', 'アカウント登録・管理'],
@@ -49,7 +52,7 @@ const customer: Functional.Actor = {
 const userRegistration: Functional.UseCase = {
   id: 'user-registration',
   name: 'ユーザー登録',
-  type: 'usecase',  // 自動検出用
+  type: 'usecase', // 自動検出用
   description: '新規ユーザーがアカウントを作成する',
   actors: {
     primary: Foundation.createRef<Functional.Actor>('customer'),
@@ -73,22 +76,26 @@ const userRegistration: Functional.UseCase = {
 ### 型定義
 
 **Foundation 層**:
+
 - `Ref<T>`: 統一参照型 `{id: string}`
 - `DocumentBase`: 基本ドキュメント型（id, name, description）
 - `TraceableDocument`: トレース可能ドキュメント（extends DocumentBase）
 
 **Business 層**:
+
 - `BusinessRequirementDefinition`: 業務要件定義
 - `BusinessRule`: ビジネスルール
 - `SecurityPolicy`: セキュリティポリシー
 
 **Functional 層**:
+
 - `Actor`: システムの利用者・関係者
 - `UseCase`: ユースケース
 - `UseCaseStep`: ユースケースのステップ
 - `AlternativeFlow`: 代替フロー
 
 **UI 層**:
+
 - `Screen`: 画面定義
 - `ValidationRule`: バリデーションルール
 - `ScreenFlow`: 画面遷移フロー
@@ -212,6 +219,7 @@ console.log(`推奨事項: ${recommendations.recommendations.length}件`);
 ## 📚 ドキュメント
 
 ### 品質評価システム
+
 - **[品質評価ガイド](./docs/quality-assessment-guide.md)** - レポートの読み方と基本概念
 - **[推奨事項対処ガイド](./docs/recommendations-guide.md)** - 具体的な改善方法とコード例
 - **[メトリクス算出方法](./docs/metrics-calculation.md)** - 各指標の詳細な計算方法
@@ -222,5 +230,7 @@ console.log(`推奨事項: ${recommendations.recommendations.length}件`);
 ## ライセンス
 
 MIT
+
+```
 
 ```
