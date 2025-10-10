@@ -91,6 +91,7 @@
 
 export * from './ai-recommendation-engine.js';
 export * from './ai-recommendation-model.js';
+export * from './coherence-validator.js';
 export * from './context-engine.js';
 export * from './context-model.js';
 export * from './dependency-graph-analyzer.js';

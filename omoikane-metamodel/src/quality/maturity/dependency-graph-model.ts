@@ -309,6 +309,97 @@ export interface CircularDependency {
   severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
 }
 
+// ============================================================================
+// UseCaseとScreenFlowの整合性検証（Coherence Validation）
+// ============================================================================
+
+/**
+ * 整合性問題の種類
+ */
+export type CoherenceIssueType =
+  | 'screen-sequence-mismatch'      // 画面順序の不一致
+  | 'transition-missing'            // 遷移の未定義
+  | 'start-screen-mismatch'         // 開始画面の不一致
+  | 'end-screen-mismatch'           // 終了画面の不一致
+  | 'transition-condition-missing'; // 遷移条件の欠落
+
+/**
+ * 整合性問題の重大度
+ */
+export type CoherenceIssueSeverity = 'high' | 'medium' | 'low';
+
+/**
+ * UseCaseとScreenFlowの整合性問題
+ * 
+ * **用途:**
+ * UseCaseのmainFlowで定義された画面遷移順序と、
+ * ScreenFlowの遷移定義の間の不整合を表現します。
+ * 
+ * **検証内容:**
+ * 1. 画面順序の一致性
+ * 2. 遷移の完全性
+ * 3. 開始・終了画面の一致性
+ * 4. 遷移条件の明示性
+ */
+export interface CoherenceIssue {
+  /** 問題の種類 */
+  type: CoherenceIssueType;
+  
+  /** 重大度 */
+  severity: CoherenceIssueSeverity;
+  
+  /** 問題の説明 */
+  description: string;
+  
+  /** 影響を受けるユースケースID */
+  useCaseId: string;
+  
+  /** 影響を受けるスクリーンフローID */
+  screenFlowId?: string;
+  
+  /** 期待値（UseCaseで定義された内容） */
+  expected?: string;
+  
+  /** 実際の値（ScreenFlowで定義された内容） */
+  actual?: string;
+  
+  /** 影響を受けるステップID */
+  affectedStepIds?: string[];
+  
+  /** 影響を受ける画面ID */
+  affectedScreenIds?: string[];
+}
+
+/**
+ * 整合性検証結果
+ */
+export interface CoherenceValidationResult {
+  /** 検証が成功したか */
+  valid: boolean;
+  
+  /** 検証したユースケースの数 */
+  totalUseCases: number;
+  
+  /** 検証したスクリーンフローの数 */
+  totalScreenFlows: number;
+  
+  /** 検出された問題の総数 */
+  totalIssues: number;
+  
+  /** 問題のリスト */
+  issues: CoherenceIssue[];
+  
+  /** 重大度別の集計 */
+  issuesBySeverity: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  
+  /** ユースケース別の集計 */
+  issuesByUseCase: Map<string, CoherenceIssue[]>;
+}
+
 /**
  * 変更影響分析結果
  */
@@ -411,6 +502,9 @@ export interface GraphAnalysisResult {
   
   /** 孤立ノードリスト */
   isolatedNodes: string[];
+  
+  /** 整合性検証結果 */
+  coherenceValidation?: CoherenceValidationResult;
   
   /** トポロジカルソート結果（可能な場合） */
   topologicalOrder?: string[];

@@ -574,6 +574,87 @@ export class AIRecommendationEngine {
       });
     }
     
+    // UseCaseとScreenFlowの整合性エラー
+    if (graph.coherenceValidation && graph.coherenceValidation.totalIssues > 0) {
+      const cv = graph.coherenceValidation;
+      
+      // High重大度の整合性エラー
+      const highIssues = cv.issues.filter((i: any) => i.severity === 'high');
+      for (const issue of highIssues) {
+        recommendations.push({
+          id: `coherence-${issue.useCaseId}-${issue.type}`,
+          title: `UseCaseとScreenFlowの整合性確保: ${issue.useCaseId}`,
+          priority: RecommendationPriority.HIGH,
+          category: RecommendationCategory.ARCHITECTURE,
+          problem: issue.description,
+          impact: {
+            scope: 'module',
+            affectedElements: [issue.useCaseId, ...(issue.affectedScreenIds || [])],
+            severity: 'high',
+          },
+          solution: {
+            description: 'UseCaseの画面遷移定義とScreenFlowの整合性を確保',
+            steps: [
+              'UseCaseのmainFlowで定義された画面順序を確認',
+              'ScreenFlowの遷移定義を確認',
+              '不一致箇所を特定し、どちらが正しいかを決定',
+              '一方を修正して整合性を確保',
+            ],
+          },
+          benefits: [
+            '実装時の混乱を防止',
+            'トレーサビリティの向上',
+            '設計書の品質向上',
+          ],
+          effort: {
+            hours: 2,
+            complexity: 'simple',
+          },
+          risks: [
+            'UseCaseまたはScreenFlowの変更が必要',
+          ],
+          rationale: {
+            dependencyIssue: 'UseCaseとScreenFlowの不整合は実装精度に影響',
+            bestPractice: 'ユースケース駆動開発では画面遷移の整合性が重要',
+          },
+        });
+      }
+      
+      // Medium重大度の整合性エラー（開始/終了画面の不一致）
+      const mediumIssues = cv.issues.filter((i: any) => i.severity === 'medium');
+      if (mediumIssues.length > 0) {
+        recommendations.push({
+          id: 'coherence-boundary-screens',
+          title: `開始・終了画面の整合性確保: ${mediumIssues.length}件`,
+          priority: RecommendationPriority.MEDIUM,
+          category: RecommendationCategory.ARCHITECTURE,
+          problem: `UseCaseとScreenFlowで開始画面または終了画面が不一致です`,
+          impact: {
+            scope: 'module',
+            affectedElements: mediumIssues.map((i: any) => i.useCaseId),
+            severity: 'medium',
+          },
+          solution: {
+            description: 'ScreenFlowのstartScreenとendScreensを適切に設定',
+            steps: [
+              'UseCaseの最初と最後のステップで使用される画面を確認',
+              'ScreenFlowのstartScreenとendScreensを更新',
+            ],
+          },
+          benefits: [
+            'フローのエントリーポイントと終了条件が明確化',
+          ],
+          effort: {
+            hours: 1,
+            complexity: 'simple',
+          },
+          rationale: {
+            bestPractice: '明確なエントリー/エグジットポイントの定義',
+          },
+        });
+      }
+    }
+    
     // 重要ノードの品質強化
     if (graph.nodeImportance) {
       const topNodes = graph.nodeImportance

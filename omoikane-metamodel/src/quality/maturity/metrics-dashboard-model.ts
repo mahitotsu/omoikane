@@ -118,6 +118,12 @@ export interface MetricsSnapshot {
       low: number;
       info: number;
     };
+    /** 重大度別の整合性エラー数（UseCaseとScreenFlowの不一致） */
+    coherenceIssues?: {
+      high: number;
+      medium: number;
+      low: number;
+    };
   };
   
   /** プロジェクトコンテキスト */

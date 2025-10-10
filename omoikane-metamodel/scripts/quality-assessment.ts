@@ -64,6 +64,7 @@ import {
     buildDependencyGraph,
     inferContext,
     MetricsDashboard,
+    validateUseCaseScreenFlowCoherence,
 } from '../src/quality/maturity/index.js';
 
 // ============================================================================
@@ -416,6 +417,29 @@ function displayV2Report(
       console.log(`    ... 他${graphAnalysis.isolatedNodes.length - 5}件`);
     }
   }
+  
+  // 整合性エラーの表示
+  if (graphAnalysis.coherenceValidation && graphAnalysis.coherenceValidation.totalIssues > 0) {
+    const cv = graphAnalysis.coherenceValidation;
+    console.log(`  整合性エラー: ${cv.totalIssues}件 (UseCase ↔ ScreenFlow)`);
+    console.log('  重大度別:');
+    console.log(`    🔴 High: ${cv.issuesBySeverity.high}件`);
+    console.log(`    🟡 Medium: ${cv.issuesBySeverity.medium}件`);
+    console.log(`    🟢 Low: ${cv.issuesBySeverity.low}件`);
+    
+    // High重大度のエラーを詳細表示
+    const highIssues = cv.issues.filter((i: any) => i.severity === 'high');
+    if (highIssues.length > 0) {
+      console.log('\n  ⚠️ 要対応の整合性エラー:');
+      for (const issue of highIssues.slice(0, 3)) {
+        console.log(`    • [${issue.useCaseId}] ${issue.description}`);
+      }
+      if (highIssues.length > 3) {
+        console.log(`    ... 他${highIssues.length - 3}件`);
+      }
+    }
+  }
+  
   console.log();
   
   console.log('【AI推奨事項】');
@@ -584,6 +608,13 @@ async function main() {
     console.log('🔗 依存関係を分析しています...');
     const graph = buildDependencyGraph(businessRequirements, actors, useCases, screens, screenFlows);
     const graphAnalysis = analyzeGraph(graph);
+    
+    // 整合性検証を実行
+    const coherenceValidation = validateUseCaseScreenFlowCoherence(useCases, screenFlows);
+    
+    // GraphAnalysisResultに整合性検証結果を追加
+    graphAnalysis.coherenceValidation = coherenceValidation;
+    
     console.log(`  完了: ${graphAnalysis.statistics.nodeCount}ノード\n`);
 
     console.log('🤖 AI推奨事項を生成しています...');

@@ -245,6 +245,11 @@ export class MetricsDashboard {
           low: data.graph.circularDependencies?.filter(c => c.severity === 'low').length || 0,
           info: data.graph.circularDependencies?.filter(c => c.severity === 'info').length || 0,
         },
+        coherenceIssues: data.graph.coherenceValidation ? {
+          high: data.graph.coherenceValidation.issuesBySeverity.high,
+          medium: data.graph.coherenceValidation.issuesBySeverity.medium,
+          low: data.graph.coherenceValidation.issuesBySeverity.low,
+        } : undefined,
       } : undefined,
       context: data.context,
     };
@@ -328,7 +333,7 @@ export class MetricsDashboard {
     // トレーサビリティスコア
     const traceabilityScore = (snapshot.dimensionScores.get('traceability' as MaturityDimension) || 0) * 100;
     
-    // アーキテクチャスコア（重大な循環依存・孤立ノードがないほど高い）
+    // アーキテクチャスコア（重大な循環依存・孤立ノード・整合性エラーがないほど高い）
     // info レベルの循環（画面遷移の双方向性等）は減点対象外
     let architectureScore = 100;
     if (snapshot.graphStats) {
@@ -342,6 +347,14 @@ export class MetricsDashboard {
       architectureScore -= mediumCycles * 8;     // 中程度の循環は中減点
       architectureScore -= lowCycles * 3;        // 軽微な循環は小減点
       architectureScore -= snapshot.graphStats.isolatedNodes * 5;
+      
+      // 整合性エラー（UseCaseとScreenFlowの不一致）の減点
+      if (snapshot.graphStats.coherenceIssues) {
+        architectureScore -= snapshot.graphStats.coherenceIssues.high * 10;    // 高重大度の整合性エラー
+        architectureScore -= snapshot.graphStats.coherenceIssues.medium * 5;   // 中重大度の整合性エラー
+        architectureScore -= snapshot.graphStats.coherenceIssues.low * 2;      // 低重大度の整合性エラー
+      }
+      
       architectureScore = Math.max(0, architectureScore);
     }
     

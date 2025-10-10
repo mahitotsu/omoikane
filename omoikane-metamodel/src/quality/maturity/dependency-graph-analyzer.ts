@@ -43,6 +43,8 @@ import type {
 import type {
     ChangeImpactAnalysis,
     CircularDependency,
+    CoherenceIssue,
+    CoherenceValidationResult,
     DependencyGraph,
     GraphAnalysisResult,
     GraphEdge,
