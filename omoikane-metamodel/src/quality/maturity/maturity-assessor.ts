@@ -10,11 +10,10 @@
  * 3. レベルを計算: 全ての必須基準を満たす最高レベル
  * 4. ディメンション、次のステップ、工数見積を含む評価結果を構築
  * 
- * 重要な変更（2024年）:
- * - レベル2の評価基準「uc-repeatable-flow-detail」を削除（mainFlow.length >= 3）
- * - 代わりに「uc-repeatable-steps-quality」を導入（全ステップの品質評価）
- * - 理由: ステップ数はドメインに依存し、本質的な品質指標ではない
- * - 詳細: docs/maturity-criteria-evolution.md を参照
+ * 評価ロジックの特徴:
+ * - uc-repeatable-steps-quality: 全ステップの品質を評価（action, expectedResult 各5文字以上）
+ * - ステップ数は評価対象外: ドメイン特性に応じた柔軟な評価
+ * - 詳細な設計判断: docs/maturity-criteria-evolution.md を参照
  * 
  * 拡張ポイント:
  * - 新しい要素タイプを追加: maturity-criteria.ts の getCriteriaByElementType を更新

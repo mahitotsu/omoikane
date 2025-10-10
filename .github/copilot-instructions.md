@@ -134,10 +134,9 @@ feat(metamodel): add quality assessment framework
 - **レベル4 (MANAGED)**: 管理された、測定可能なプロセス
 - **レベル5 (OPTIMIZED)**: 最適化された、継続的改善
 
-**重要な変更（2024年）:**
-- レベル2の必須条件から「mainFlow.length >= 3」を削除
-- 代わりに「全ステップの品質評価」を導入
-- ステップ数ではなく、ステップの質を重視
+**レベル2の評価方針:**
+- 全ステップの質を評価（action, expectedResult が各5文字以上）
+- ステップ数は評価対象外（シンプルなユースケースも正当に評価）
 - 詳細: `omoikane-metamodel/docs/maturity-criteria-evolution.md`
 
 ### 使用方法

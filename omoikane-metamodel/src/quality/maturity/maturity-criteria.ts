@@ -14,11 +14,10 @@
  * - condition: 評価条件（評価ロジックの参考）
  * - weight: 基準の重要度（0-1スケール）
  * 
- * 重要な変更（2024年）:
- * - レベル2の必須条件「mainFlow.length >= 3」を削除
- * - 代わりに「全ステップの品質評価」(uc-repeatable-steps-quality)を導入
- * - 理由: ステップ数はドメインに依存し、本質的な品質指標ではない
- * - 詳細: docs/maturity-criteria-evolution.md を参照
+ * レベル2（REPEATABLE）の評価方針:
+ * - ステップの質を評価: 全ステップが具体的な内容を持つ（action, expectedResult が各5文字以上）
+ * - ステップ数は評価対象外: ドメイン特性に応じた柔軟な評価
+ * - 詳細な設計判断: docs/maturity-criteria-evolution.md を参照
  * 
  * 拡張ポイント:
  * - 新しい基準を追加: 対応する配列（UseCaseMaturityCriteria/ActorMaturityCriteria）に追加
