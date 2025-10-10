@@ -254,9 +254,20 @@ function evaluateUseCaseCriterion(
       evidence = satisfied ? `事後条件 ${useCase.postconditions?.length ?? 0}個` : '事後条件未定義';
       break;
       
-    case 'uc-repeatable-flow-detail':
-      satisfied = (useCase.mainFlow?.length ?? 0) >= 3;
-      evidence = `メインフロー ${useCase.mainFlow?.length ?? 0} ステップ`;
+    case 'uc-repeatable-steps-quality':
+      const hasQualitySteps = useCase.mainFlow?.every(step =>
+        step.stepId &&
+        step.actor &&
+        step.action &&
+        step.expectedResult &&
+        (step.action?.length ?? 0) >= 5 &&
+        (step.expectedResult?.length ?? 0) >= 5
+      ) ?? false;
+      const stepCount = useCase.mainFlow?.length ?? 0;
+      satisfied = hasQualitySteps && stepCount > 0;
+      evidence = satisfied 
+        ? `全${stepCount}ステップが具体的な内容を持つ`
+        : `一部ステップの品質不足（action/expectedResultが5文字未満）`;
       break;
       
     case 'uc-repeatable-priority':

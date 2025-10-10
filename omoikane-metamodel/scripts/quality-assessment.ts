@@ -64,6 +64,7 @@ import {
     buildDependencyGraph,
     inferContext,
     MetricsDashboard,
+    validateFlowDesign,
     validatePrerequisiteUseCases,
     validateUseCaseScreenFlowCoherence,
 } from '../src/quality/maturity/index.js';
@@ -478,6 +479,30 @@ function displayV2Report(
     }
   }
   
+  // フロー設計情報の表示（成熟度非影響）
+  if (graphAnalysis.flowDesignInfo) {
+    const flowInfo = graphAnalysis.flowDesignInfo;
+    
+    if (flowInfo.info.length > 0 || flowInfo.warnings.length > 0) {
+      console.log('\n【フロー設計情報】');
+      console.log('※ ステップ数に関する情報（成熟度スコアには影響しません）\n');
+      
+      if (flowInfo.info.length > 0) {
+        console.log('  ℹ️  情報:');
+        for (const msg of flowInfo.info) {
+          console.log(`    ${msg}`);
+        }
+      }
+      
+      if (flowInfo.warnings.length > 0) {
+        console.log('\n  ⚠️  警告:');
+        for (const msg of flowInfo.warnings) {
+          console.log(`    ${msg}`);
+        }
+      }
+    }
+  }
+  
   console.log();
   
   console.log('【AI推奨事項】');
@@ -650,6 +675,7 @@ async function main() {
     // 整合性検証を実行
     const coherenceValidation = validateUseCaseScreenFlowCoherence(useCases, screenFlows);
     const prerequisiteValidation = validatePrerequisiteUseCases(useCases);
+    const flowDesignInfo = validateFlowDesign(useCases);
     
     // 整合性検証結果を統合
     const allCoherenceIssues = [
@@ -675,6 +701,9 @@ async function main() {
         ...Array.from(prerequisiteValidation.issuesByUseCase.entries())
       ]),
     };
+    
+    // フロー設計情報を追加（成熟度非影響）
+    (graphAnalysis as any).flowDesignInfo = flowDesignInfo;
     
     console.log(`  完了: ${graphAnalysis.statistics.nodeCount}ノード\n`);
 

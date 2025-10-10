@@ -106,13 +106,13 @@ export const UseCaseMaturityCriteria: MaturityCriterion[] = [
     weight: 0.9,
   },
   {
-    id: 'uc-repeatable-flow-detail',
-    name: 'フローの詳細化',
-    description: 'メインフローが複数ステップで構成されている',
+    id: 'uc-repeatable-steps-quality',
+    name: 'ステップの品質',
+    description: '全ステップが基本情報と具体的な内容を持つ',
     level: MaturityLevel.REPEATABLE,
-    dimension: MaturityDimension.DETAIL,
+    dimension: MaturityDimension.STRUCTURE,
     required: true,
-    condition: 'mainFlow.length >= 3',
+    condition: '全ステップにstepId, actor, action, expectedResult (各5文字以上)',
     weight: 0.7,
   },
   {

@@ -438,3 +438,48 @@ function checkCircularPrerequisite(
   
   return false;
 }
+
+// ============================================================================
+// 公開API: フロー設計の妥当性検証（成熟度非影響）
+// ============================================================================
+
+/**
+ * UseCaseのフロー設計の妥当性を検証
+ * 
+ * ステップ数が極端に少ない、または多い場合に情報/警告を出します。
+ * この検証は成熟度スコアには影響せず、設計の参考情報として提供されます。
+ * 
+ * **検証内容:**
+ * - 1ステップ: 情報レベル（ユースケースとして不完全な可能性）
+ * - 15ステップ超: 警告レベル（分割を検討すべき）
+ * 
+ * @param useCases ユースケースリスト
+ * @returns フロー設計に関する情報・警告のリスト
+ */
+export function validateFlowDesign(useCases: UseCase[]): {
+  info: string[];
+  warnings: string[];
+} {
+  const info: string[] = [];
+  const warnings: string[] = [];
+  
+  for (const useCase of useCases) {
+    const stepCount = useCase.mainFlow?.length ?? 0;
+    
+    if (stepCount === 1) {
+      info.push(
+        `[${useCase.id}] ${useCase.name}: 1ステップのみ。` +
+        `通常のユースケースは複数ステップで構成されますが、` +
+        `シンプルな通知や参照のみのユースケースでは問題ありません。`
+      );
+    } else if (stepCount > 15) {
+      warnings.push(
+        `[${useCase.id}] ${useCase.name}: ${stepCount}ステップ。` +
+        `ステップ数が多すぎる可能性があります。` +
+        `複数のユースケースへの分割を検討してください。`
+      );
+    }
+  }
+  
+  return { info, warnings };
+}

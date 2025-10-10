@@ -50,12 +50,6 @@ export const staffAuthentication: UseCase = {
 
   mainFlow: [
     {
-      stepId: 'access-login',
-      actor: typedActorRef('store-staff'),
-      action: 'システムのログイン画面にアクセスする',
-      expectedResult: 'ログインフォームが表示される',
-    },
-    {
       stepId: 'input-credentials',
       actor: typedActorRef('store-staff'),
       action: 'メールアドレスとパスワードを入力する',
