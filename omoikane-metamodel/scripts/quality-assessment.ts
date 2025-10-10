@@ -418,53 +418,60 @@ function displayV2Report(
     }
   }
   
-  // 整合性エラーの表示
-  if (graphAnalysis.coherenceValidation && graphAnalysis.coherenceValidation.totalIssues > 0) {
+  // 整合性検証の結果を常に表示
+  if (graphAnalysis.coherenceValidation) {
     const cv = graphAnalysis.coherenceValidation;
-    console.log(`  整合性エラー: ${cv.totalIssues}件 (UseCase ↔ ScreenFlow)`);
-    console.log('  重大度別:');
-    console.log(`    🔴 High: ${cv.issuesBySeverity.high}件`);
-    console.log(`    🟡 Medium: ${cv.issuesBySeverity.medium}件`);
-    console.log(`    🟢 Low: ${cv.issuesBySeverity.low}件`);
     
-    // High重大度のエラーを詳細表示
-    const highIssues = cv.issues.filter((i: any) => i.severity === 'high');
-    if (highIssues.length > 0) {
-      console.log('\n  ⚠️ 要対応の整合性エラー (High):');
-      for (const issue of highIssues.slice(0, 3)) {
-        console.log(`    • [${issue.useCaseId}] ${issue.description}`);
-      }
-      if (highIssues.length > 3) {
-        console.log(`    ... 他${highIssues.length - 3}件`);
-      }
-    }
-    
-    // Medium重大度のエラーを詳細表示
-    const mediumIssues = cv.issues.filter((i: any) => i.severity === 'medium');
-    if (mediumIssues.length > 0) {
-      console.log('\n  ⚠️ 整合性エラー (Medium):');
-      for (const issue of mediumIssues) {
-        console.log(`    • [${issue.useCaseId}] ${issue.description}`);
-        if (issue.expected) {
-          console.log(`      期待: ${JSON.stringify(issue.expected)}`);
+    if (cv.totalIssues === 0) {
+      // 整合性検証成功
+      console.log(`  整合性検証: ✅ 問題なし (${cv.totalUseCases}個のUseCaseと${cv.totalScreenFlows}個のScreenFlowを検証)`);
+    } else {
+      // 整合性エラーあり
+      console.log(`  整合性エラー: ${cv.totalIssues}件 (UseCase ↔ ScreenFlow)`);
+      console.log('  重大度別:');
+      console.log(`    🔴 High: ${cv.issuesBySeverity.high}件`);
+      console.log(`    🟡 Medium: ${cv.issuesBySeverity.medium}件`);
+      console.log(`    🟢 Low: ${cv.issuesBySeverity.low}件`);
+      
+      // High重大度のエラーを詳細表示
+      const highIssues = cv.issues.filter((i: any) => i.severity === 'high');
+      if (highIssues.length > 0) {
+        console.log('\n  ⚠️ 要対応の整合性エラー (High):');
+        for (const issue of highIssues.slice(0, 3)) {
+          console.log(`    • [${issue.useCaseId}] ${issue.description}`);
         }
-        if (issue.actual) {
-          console.log(`      実際: ${JSON.stringify(issue.actual)}`);
+        if (highIssues.length > 3) {
+          console.log(`    ... 他${highIssues.length - 3}件`);
         }
       }
-    }
-    
-    // Low重大度のエラーを詳細表示
-    const lowIssues = cv.issues.filter((i: any) => i.severity === 'low');
-    if (lowIssues.length > 0) {
-      console.log('\n  ℹ️  整合性エラー (Low):');
-      for (const issue of lowIssues) {
-        console.log(`    • [${issue.useCaseId}] ${issue.description}`);
-        if (issue.expected) {
-          console.log(`      期待される遷移: ${issue.expected}`);
+      
+      // Medium重大度のエラーを詳細表示
+      const mediumIssues = cv.issues.filter((i: any) => i.severity === 'medium');
+      if (mediumIssues.length > 0) {
+        console.log('\n  ⚠️ 整合性エラー (Medium):');
+        for (const issue of mediumIssues) {
+          console.log(`    • [${issue.useCaseId}] ${issue.description}`);
+          if (issue.expected) {
+            console.log(`      期待: ${JSON.stringify(issue.expected)}`);
+          }
+          if (issue.actual) {
+            console.log(`      実際: ${JSON.stringify(issue.actual)}`);
+          }
         }
-        if (issue.affectedStepIds && issue.affectedStepIds.length > 0) {
-          console.log(`      関連ステップ: ${issue.affectedStepIds.join(', ')}`);
+      }
+      
+      // Low重大度のエラーを詳細表示
+      const lowIssues = cv.issues.filter((i: any) => i.severity === 'low');
+      if (lowIssues.length > 0) {
+        console.log('\n  ℹ️  整合性エラー (Low):');
+        for (const issue of lowIssues) {
+          console.log(`    • [${issue.useCaseId}] ${issue.description}`);
+          if (issue.expected) {
+            console.log(`      期待される遷移: ${issue.expected}`);
+          }
+          if (issue.affectedStepIds && issue.affectedStepIds.length > 0) {
+            console.log(`      関連ステップ: ${issue.affectedStepIds.join(', ')}`);
+          }
         }
       }
     }
