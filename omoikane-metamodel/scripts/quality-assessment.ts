@@ -64,8 +64,8 @@ import {
     buildDependencyGraph,
     inferContext,
     MetricsDashboard,
-    validateUseCaseScreenFlowCoherence,
     validatePrerequisiteUseCases,
+    validateUseCaseScreenFlowCoherence,
 } from '../src/quality/maturity/index.js';
 
 // ============================================================================

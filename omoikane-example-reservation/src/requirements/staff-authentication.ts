@@ -20,9 +20,9 @@
 
 import type { UseCase } from 'omoikane-metamodel';
 import {
-  typedActorRef,
-  businessRequirementRef,
-  businessGoalRef,
+    businessGoalRef,
+    businessRequirementRef,
+    typedActorRef,
 } from '../typed-references.js';
 
 export const staffAuthentication: UseCase = {
@@ -49,6 +49,12 @@ export const staffAuthentication: UseCase = {
   },
 
   mainFlow: [
+    {
+      stepId: 'access-login',
+      actor: typedActorRef('store-staff'),
+      action: 'システムのログイン画面にアクセスする',
+      expectedResult: 'ログインフォームが表示される',
+    },
     {
       stepId: 'input-credentials',
       actor: typedActorRef('store-staff'),
