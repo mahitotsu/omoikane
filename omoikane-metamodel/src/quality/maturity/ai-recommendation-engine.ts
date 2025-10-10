@@ -40,19 +40,19 @@
 
 import type { Actor, BusinessRequirementDefinition, UseCase } from '../../types/index.js';
 import type {
-    AIAgentRecommendations,
-    AIRecommendationTemplate,
-    RecommendationBundle,
-    RecommendationOptions,
-    StructuredRecommendation,
+  AIAgentRecommendations,
+  AIRecommendationTemplate,
+  RecommendationBundle,
+  RecommendationOptions,
+  StructuredRecommendation,
 } from './ai-recommendation-model.js';
 import { RecommendationCategory, RecommendationPriority } from './ai-recommendation-model.js';
 import type { ContextApplicationResult, ProjectContext } from './context-model.js';
 import type { GraphAnalysisResult } from './dependency-graph-model.js';
 import type {
-    MaturityDimension,
-    MaturityLevel,
-    ProjectMaturityAssessment,
+  MaturityDimension,
+  MaturityLevel,
+  ProjectMaturityAssessment,
 } from './maturity-model.js';
 
 // ============================================================================

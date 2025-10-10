@@ -25,19 +25,19 @@
 import { normalizeActorRef } from '../../types/functional/actor.js';
 import type { Actor, BusinessRequirementDefinition, UseCase } from '../../types/index.js';
 import {
-    getCriteriaByDimension,
-    getCriteriaByElementType,
-    getCriteriaByLevel,
+  getCriteriaByDimension,
+  getCriteriaByElementType,
+  getCriteriaByLevel,
 } from './maturity-criteria.js';
 import {
-    CriterionEvaluation,
-    DimensionMaturity,
-    ElementMaturityAssessment,
-    MaturityCriterion,
-    MaturityDimension,
-    MaturityLevel,
-    NextStep,
-    ProjectMaturityAssessment,
+  CriterionEvaluation,
+  DimensionMaturity,
+  ElementMaturityAssessment,
+  MaturityCriterion,
+  MaturityDimension,
+  MaturityLevel,
+  NextStep,
+  ProjectMaturityAssessment,
 } from './maturity-model.js';
 
 // ============================================================================

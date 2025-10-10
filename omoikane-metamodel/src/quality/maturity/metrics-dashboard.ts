@@ -46,16 +46,16 @@ import type { ProjectContext } from './context-model.js';
 import type { GraphAnalysisResult } from './dependency-graph-model.js';
 import type { MaturityDimension, ProjectMaturityAssessment } from './maturity-model.js';
 import type {
-    ChartData,
-    DashboardConfig,
-    DashboardDataStore,
-    DashboardReport,
-    ExportOptions,
-    MetricsAlert,
-    MetricsComparison,
-    MetricsSnapshot,
-    MetricsTrend,
-    ProjectHealthScore,
+  ChartData,
+  DashboardConfig,
+  DashboardDataStore,
+  DashboardReport,
+  ExportOptions,
+  MetricsAlert,
+  MetricsComparison,
+  MetricsSnapshot,
+  MetricsTrend,
+  ProjectHealthScore,
 } from './metrics-dashboard-model.js';
 
 // ============================================================================

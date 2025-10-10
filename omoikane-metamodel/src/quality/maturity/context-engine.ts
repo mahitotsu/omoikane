@@ -27,19 +27,19 @@
  */
 
 import type {
-    ContextApplicationResult,
-    ContextualEvaluationRule,
-    ProjectContext,
+  ContextApplicationResult,
+  ContextualEvaluationRule,
+  ProjectContext,
 } from './context-model.js';
 import {
-    CriticalityRecommendedFocus,
-    DevelopmentStage,
-    DomainRecommendedFocus,
-    ProjectCriticality,
-    ProjectDomain,
-    StageRecommendedFocus,
-    TeamSize,
-    TeamSizeRecommendedFocus,
+  CriticalityRecommendedFocus,
+  DevelopmentStage,
+  DomainRecommendedFocus,
+  ProjectCriticality,
+  ProjectDomain,
+  StageRecommendedFocus,
+  TeamSize,
+  TeamSizeRecommendedFocus,
 } from './context-model.js';
 import { MaturityDimension } from './maturity-model.js';
 
