@@ -43,6 +43,9 @@ export const accountRegistrationFlow: ScreenFlow = {
     },
   ],
   startScreen: typedScreenRef('account-list-screen'),
-  endScreens: [typedScreenRef('account-list-screen')],
+  endScreens: [
+    typedScreenRef('account-list-screen'),
+    typedScreenRef('account-operation-complete-screen'),
+  ],
   relatedUseCase: typedUseCaseRef('user-account-registration'),
 };

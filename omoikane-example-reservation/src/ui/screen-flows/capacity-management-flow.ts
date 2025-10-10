@@ -48,6 +48,9 @@ export const capacityManagementFlow: ScreenFlow = {
     },
   ],
   startScreen: typedScreenRef('capacity-calendar-screen'),
-  endScreens: [typedScreenRef('capacity-calendar-screen')],
+  endScreens: [
+    typedScreenRef('capacity-calendar-screen'),
+    typedScreenRef('capacity-slot-confirm-screen'),
+  ],
   relatedUseCase: typedUseCaseRef('capacity-management'),
 };

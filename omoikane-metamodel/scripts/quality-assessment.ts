@@ -430,12 +430,27 @@ function displayV2Report(
     // High重大度のエラーを詳細表示
     const highIssues = cv.issues.filter((i: any) => i.severity === 'high');
     if (highIssues.length > 0) {
-      console.log('\n  ⚠️ 要対応の整合性エラー:');
+      console.log('\n  ⚠️ 要対応の整合性エラー (High):');
       for (const issue of highIssues.slice(0, 3)) {
         console.log(`    • [${issue.useCaseId}] ${issue.description}`);
       }
       if (highIssues.length > 3) {
         console.log(`    ... 他${highIssues.length - 3}件`);
+      }
+    }
+    
+    // Medium重大度のエラーを詳細表示
+    const mediumIssues = cv.issues.filter((i: any) => i.severity === 'medium');
+    if (mediumIssues.length > 0) {
+      console.log('\n  ⚠️ 整合性エラー (Medium):');
+      for (const issue of mediumIssues) {
+        console.log(`    • [${issue.useCaseId}] ${issue.description}`);
+        if (issue.expected) {
+          console.log(`      期待: ${JSON.stringify(issue.expected)}`);
+        }
+        if (issue.actual) {
+          console.log(`      実際: ${JSON.stringify(issue.actual)}`);
+        }
       }
     }
   }
