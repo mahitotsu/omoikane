@@ -27,6 +27,7 @@ import {
     successMetricRef,
     typedActorRef,
     typedScreenRef,
+    typedUseCaseRef,
 } from '../typed-references.js';
 const concurrentEditWarningSteps = [
   {
@@ -48,6 +49,7 @@ export const reservationStaffCancel: ReservationUseCase = {
   id: 'reservation-staff-cancel',
   name: '店舗スタッフによる予約取消',
   type: 'usecase',
+  prerequisiteUseCases: [typedUseCaseRef('staff-authentication')],
   description: '店舗スタッフが予約番号なしで特定した予約を、業務上の判断や来店者からの依頼に基づいて取消する。取消理由と担当者IDを必須入力とし、監査ログに記録することで、顧客対応の透明性と枠の適切な解放を実現する。',
   actors: {
     primary: typedActorRef('store-staff'),

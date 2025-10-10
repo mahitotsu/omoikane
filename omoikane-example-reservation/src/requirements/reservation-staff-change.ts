@@ -27,6 +27,7 @@ import {
     successMetricRef,
     typedActorRef,
     typedScreenRef,
+    typedUseCaseRef,
 } from '../typed-references.js';
 const concurrentEditWarningSteps = [
   {
@@ -53,6 +54,7 @@ export const reservationStaffChange: ReservationUseCase = {
   actors: {
     primary: typedActorRef('store-staff'),
   },
+  prerequisiteUseCases: [typedUseCaseRef('staff-authentication')],
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
     requirement: businessRequirementRef('reservation-business-requirements'),
     businessGoals: [

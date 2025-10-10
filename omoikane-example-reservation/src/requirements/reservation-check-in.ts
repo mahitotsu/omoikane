@@ -25,12 +25,14 @@ import {
     successMetricRef,
     typedActorRef,
     typedScreenRef,
+    typedUseCaseRef,
 } from '../typed-references.js';
 
 export const reservationCheckIn: ReservationUseCase = {
   id: 'reservation-check-in',
   name: '来店受付',
   type: 'usecase',
+  prerequisiteUseCases: [typedUseCaseRef('staff-authentication')],
   description: '来店者が店舗に到着した際に店舗スタッフがチェックイン操作を行い、予約ステータスを「来店済み」に更新する。これにより対応準備が開始され、以降の予約変更・取消を制限することで、オペレーションの整合性と枠の適切な管理を実現する。',
   actors: {
     primary: typedActorRef('store-staff'),
