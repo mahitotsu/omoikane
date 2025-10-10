@@ -215,6 +215,7 @@ console.log(`推奨事項: ${recommendations.recommendations.length}件`);
 - **[品質評価ガイド](./docs/quality-assessment-guide.md)** - レポートの読み方と基本概念
 - **[推奨事項対処ガイド](./docs/recommendations-guide.md)** - 具体的な改善方法とコード例
 - **[メトリクス算出方法](./docs/metrics-calculation.md)** - 各指標の詳細な計算方法
+- **[成熟度基準の進化](./docs/maturity-criteria-evolution.md)** - ステップ数基準削除の背景と設計判断
 
 詳細は [docs/README.md](./docs/README.md) を参照してください。
 

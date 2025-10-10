@@ -70,8 +70,26 @@ bun run dev
 - **型安全性**: TypeScriptによる厳密な型定義
 - **自動化**: stepId管理、参照変換の自動化
 - **段階的詳細化**: シンプルから複雑まで段階的に記述可能
+- **品質評価**: CMMI準拠5段階成熟度評価とAI推奨システム
 - **実用例**: 予約管理ユースケースによる具体的な使用例
 - **モノレポ**: 効率的な依存関係管理
+
+## 品質評価
+
+プロジェクトの設計品質を評価し、改善推奨事項を提供します。
+
+```bash
+cd omoikane-example-reservation
+bun run quality-assessment
+```
+
+**評価内容:**
+- 成熟度レベル1-5の評価（INITIAL → REPEATABLE → DEFINED → MANAGED → OPTIMIZED）
+- 5次元評価（構造、詳細度、トレーサビリティ、テスト可能性、保守性）
+- AI推奨事項（クイックウィン、最優先改善項目）
+- 依存関係分析（循環依存、孤立ノードの検出）
+
+詳細は[品質評価ガイド](./omoikane-metamodel/docs/quality-assessment-guide.md)を参照してください。
 
 ## ライセンス
 
