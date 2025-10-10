@@ -317,11 +317,14 @@ export interface CircularDependency {
  * 整合性問題の種類
  */
 export type CoherenceIssueType =
-  | 'screen-sequence-mismatch'      // 画面順序の不一致
-  | 'transition-missing'            // 遷移の未定義
-  | 'start-screen-mismatch'         // 開始画面の不一致
-  | 'end-screen-mismatch'           // 終了画面の不一致
-  | 'transition-condition-missing'; // 遷移条件の欠落
+  | 'screen-sequence-mismatch'        // 画面順序の不一致
+  | 'transition-missing'              // 遷移の未定義
+  | 'start-screen-mismatch'           // 開始画面の不一致
+  | 'end-screen-mismatch'             // 終了画面の不一致
+  | 'transition-condition-missing'    // 遷移条件の欠落
+  | 'prerequisite-usecase-missing'    // 前提ユースケースの不在
+  | 'prerequisite-priority-mismatch'  // 前提ユースケースの優先度不整合
+  | 'prerequisite-circular-dependency'; // 前提ユースケースの循環参照
 
 /**
  * 整合性問題の重大度

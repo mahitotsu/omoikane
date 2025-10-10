@@ -282,3 +282,159 @@ function arraysEqual<T>(arr1: T[], arr2: T[]): boolean {
   
   return true;
 }
+
+// ============================================================================
+// 公開API: 前提ユースケースの検証
+// ============================================================================
+
+/**
+ * 前提ユースケースの存在と整合性を検証
+ * 
+ * **検証内容:**
+ * 1. prerequisiteUseCasesで参照されているユースケースが存在するか
+ * 2. 循環参照がないか（A→B→Aのような依存）
+ * 3. 前提ユースケースの優先度が適切か（前提は同等以上の優先度）
+ * 
+ * @param useCases ユースケースリスト
+ * @returns 検証結果
+ */
+export function validatePrerequisiteUseCases(
+  useCases: UseCase[]
+): CoherenceValidationResult {
+  const issues: CoherenceIssue[] = [];
+  const issuesByUseCase = new Map<string, CoherenceIssue[]>();
+  
+  // UseCaseをマップ化（高速検索用）
+  const useCaseMap = new Map<string, UseCase>();
+  for (const uc of useCases) {
+    useCaseMap.set(uc.id, uc);
+  }
+  
+  // 各UseCaseについて検証
+  for (const useCase of useCases) {
+    if (!useCase.prerequisiteUseCases || useCase.prerequisiteUseCases.length === 0) {
+      continue;
+    }
+    
+    const useCaseIssues: CoherenceIssue[] = [];
+    
+    // 1. 参照先の存在チェック
+    for (const prerequisiteRef of useCase.prerequisiteUseCases) {
+      const prerequisite = useCaseMap.get(prerequisiteRef.id);
+      
+      if (!prerequisite) {
+        useCaseIssues.push({
+          type: 'prerequisite-usecase-missing',
+          severity: 'high',
+          description: `前提ユースケース「${prerequisiteRef.id}」が存在しません`,
+          useCaseId: useCase.id,
+          expected: prerequisiteRef.id,
+          actual: '存在しない',
+          affectedStepIds: [],
+          affectedScreenIds: [],
+        });
+      } else {
+        // 2. 優先度チェック（前提は同等以上の優先度であるべき）
+        const priorityOrder: Record<string, number> = {
+          critical: 4,
+          high: 3,
+          medium: 2,
+          low: 1,
+        };
+        
+        const currentPriority = priorityOrder[useCase.priority] || 0;
+        const prerequisitePriority = priorityOrder[prerequisite.priority] || 0;
+        
+        if (prerequisitePriority < currentPriority) {
+          useCaseIssues.push({
+            type: 'prerequisite-priority-mismatch',
+            severity: 'medium',
+            description: `前提ユースケース「${prerequisite.name}」の優先度（${prerequisite.priority}）が、このユースケースの優先度（${useCase.priority}）より低い`,
+            useCaseId: useCase.id,
+            expected: `優先度 >= ${useCase.priority}`,
+            actual: `優先度 = ${prerequisite.priority}`,
+            affectedStepIds: [],
+            affectedScreenIds: [],
+          });
+        }
+        
+        // 3. 循環参照チェック
+        const visited = new Set<string>();
+        const hasCircular = checkCircularPrerequisite(
+          prerequisite,
+          useCase.id,
+          useCaseMap,
+          visited
+        );
+        
+        if (hasCircular) {
+          useCaseIssues.push({
+            type: 'prerequisite-circular-dependency',
+            severity: 'high',
+            description: `前提ユースケースに循環参照が検出されました: ${useCase.id} ↔ ${prerequisite.id}`,
+            useCaseId: useCase.id,
+            expected: '前提ユースケースに循環参照なし',
+            actual: '循環参照あり',
+            affectedStepIds: [],
+            affectedScreenIds: [],
+          });
+        }
+      }
+    }
+    
+    if (useCaseIssues.length > 0) {
+      issuesByUseCase.set(useCase.id, useCaseIssues);
+      issues.push(...useCaseIssues);
+    }
+  }
+  
+  // 重大度別に集計
+  const issuesBySeverity = {
+    high: issues.filter(i => i.severity === 'high').length,
+    medium: issues.filter(i => i.severity === 'medium').length,
+    low: issues.filter(i => i.severity === 'low').length,
+  };
+  
+  return {
+    valid: issues.length === 0,
+    totalUseCases: useCases.length,
+    totalScreenFlows: 0,  // N/A for this validation
+    totalIssues: issues.length,
+    issues,
+    issuesBySeverity,
+    issuesByUseCase,
+  };
+}
+
+/**
+ * 循環参照をチェック（再帰的）
+ */
+function checkCircularPrerequisite(
+  current: UseCase,
+  targetId: string,
+  useCaseMap: Map<string, UseCase>,
+  visited: Set<string>
+): boolean {
+  if (visited.has(current.id)) {
+    return false;  // 既に訪問済み（このパスでは循環なし）
+  }
+  
+  if (current.id === targetId) {
+    return true;  // 循環参照発見
+  }
+  
+  visited.add(current.id);
+  
+  if (!current.prerequisiteUseCases || current.prerequisiteUseCases.length === 0) {
+    return false;
+  }
+  
+  for (const prerequisiteRef of current.prerequisiteUseCases) {
+    const prerequisite = useCaseMap.get(prerequisiteRef.id);
+    if (prerequisite && checkCircularPrerequisite(prerequisite, targetId, useCaseMap, visited)) {
+      return true;
+    }
+  }
+  
+  return false;
+}

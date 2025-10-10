@@ -283,6 +283,11 @@ function evaluateUseCaseCriterion(
       evidence = satisfied ? '業務要件カバレッジが定義されている' : 'カバレッジ未定義';
       break;
       
+    case 'uc-defined-prerequisite-usecases':
+      satisfied = (useCase.prerequisiteUseCases?.length ?? 0) >= 1;
+      evidence = satisfied ? `前提ユースケース ${useCase.prerequisiteUseCases?.length ?? 0}個` : '前提ユースケース未定義';
+      break;
+      
     case 'uc-defined-acceptance-criteria':
       satisfied = (useCase.acceptanceCriteria?.length ?? 0) >= 1;
       evidence = satisfied ? `受け入れ基準 ${useCase.acceptanceCriteria?.length ?? 0}個` : '受け入れ基準未定義';

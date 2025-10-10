@@ -158,6 +158,16 @@ export const UseCaseMaturityCriteria: MaturityCriterion[] = [
     weight: 0.8,
   },
   {
+    id: 'uc-defined-prerequisite-usecases',
+    name: '前提ユースケースの明示',
+    description: '前提となるユースケース（認証、設定等）が明示的に参照されている',
+    level: MaturityLevel.DEFINED,
+    dimension: MaturityDimension.TRACEABILITY,
+    required: false,
+    condition: 'prerequisiteUseCases が定義されている（該当する場合）',
+    weight: 0.6,
+  },
+  {
     id: 'uc-defined-acceptance-criteria',
     name: '受け入れ基準',
     description: '受け入れ基準が明確に定義されている',

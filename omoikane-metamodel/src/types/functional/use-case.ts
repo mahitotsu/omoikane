@@ -527,6 +527,33 @@ export interface UseCase extends TraceableDocument {
   /** 事前条件（ユースケース実行前に満たすべき条件） */
   preconditions: string[];
   
+  /**
+   * 前提となるユースケース
+   * 
+   * このユースケースを実行する前に完了している必要がある他のユースケース。
+   * 横断的な前提機能（認証、設定、初期化など）への明示的な依存関係を表現します。
+   * 
+   * **使用例:**
+   * ```typescript
+   * // スタッフ用機能は認証が前提
+   * prerequisiteUseCases: [
+   *   typedUseCaseRef('staff-authentication')
+   * ]
+   * 
+   * // 複数の前提がある場合
+   * prerequisiteUseCases: [
+   *   typedUseCaseRef('user-registration'),
+   *   typedUseCaseRef('email-verification')
+   * ]
+   * ```
+   * 
+   * **品質評価での活用:**
+   * - トレーサビリティスコアの向上
+   * - 前提ユースケースの存在チェック（整合性検証）
+   * - 依存関係グラフでの可視化
+   */
+  prerequisiteUseCases?: Ref<UseCase>[];
+  
   /** 事後条件（ユースケース実行後に成立する条件） */
   postconditions: string[];
   

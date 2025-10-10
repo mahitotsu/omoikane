@@ -65,6 +65,7 @@ import {
     inferContext,
     MetricsDashboard,
     validateUseCaseScreenFlowCoherence,
+    validatePrerequisiteUseCases,
 } from '../src/quality/maturity/index.js';
 
 // ============================================================================
@@ -648,9 +649,32 @@ async function main() {
     
     // 整合性検証を実行
     const coherenceValidation = validateUseCaseScreenFlowCoherence(useCases, screenFlows);
+    const prerequisiteValidation = validatePrerequisiteUseCases(useCases);
+    
+    // 整合性検証結果を統合
+    const allCoherenceIssues = [
+      ...coherenceValidation.issues,
+      ...prerequisiteValidation.issues
+    ];
+    const totalCoherenceIssues = {
+      high: coherenceValidation.issuesBySeverity.high + prerequisiteValidation.issuesBySeverity.high,
+      medium: coherenceValidation.issuesBySeverity.medium + prerequisiteValidation.issuesBySeverity.medium,
+      low: coherenceValidation.issuesBySeverity.low + prerequisiteValidation.issuesBySeverity.low,
+    };
     
     // GraphAnalysisResultに整合性検証結果を追加
-    graphAnalysis.coherenceValidation = coherenceValidation;
+    graphAnalysis.coherenceValidation = {
+      valid: coherenceValidation.valid && prerequisiteValidation.valid,
+      totalUseCases: useCases.length,
+      totalScreenFlows: screenFlows.length,
+      totalIssues: allCoherenceIssues.length,
+      issues: allCoherenceIssues,
+      issuesBySeverity: totalCoherenceIssues,
+      issuesByUseCase: new Map([
+        ...Array.from(coherenceValidation.issuesByUseCase.entries()),
+        ...Array.from(prerequisiteValidation.issuesByUseCase.entries())
+      ]),
+    };
     
     console.log(`  完了: ${graphAnalysis.statistics.nodeCount}ノード\n`);
 
