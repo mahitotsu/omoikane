@@ -178,20 +178,9 @@ function validateTransitions(
         affectedStepIds: [currentStep.stepId, nextStep.stepId].filter((id): id is string => !!id),
         affectedScreenIds: [fromScreenId, toScreenId],
       });
-    } else if (!transition.condition && currentStep.expectedResult) {
-      // 遷移条件の欠落チェック
-      issues.push({
-        type: 'transition-condition-missing',
-        severity: 'low',
-        description: `画面遷移の条件が未定義です: ${fromScreenId} → ${toScreenId}（UseCaseでは「${currentStep.expectedResult}」が期待される）`,
-        useCaseId: useCase.id,
-        screenFlowId: screenFlow.id,
-        expected: currentStep.expectedResult,
-        actual: '未定義',
-        affectedStepIds: currentStep.stepId ? [currentStep.stepId] : [],
-        affectedScreenIds: [fromScreenId, toScreenId],
-      });
     }
+    // Note: transition.condition はオプションフィールドであり、必須ではない
+    // expectedResult は「ステップ実行後の結果」であり、遷移条件ではないため検証しない
   }
   
   return issues;

@@ -453,6 +453,21 @@ function displayV2Report(
         }
       }
     }
+    
+    // Low重大度のエラーを詳細表示
+    const lowIssues = cv.issues.filter((i: any) => i.severity === 'low');
+    if (lowIssues.length > 0) {
+      console.log('\n  ℹ️  整合性エラー (Low):');
+      for (const issue of lowIssues) {
+        console.log(`    • [${issue.useCaseId}] ${issue.description}`);
+        if (issue.expected) {
+          console.log(`      期待される遷移: ${issue.expected}`);
+        }
+        if (issue.affectedStepIds && issue.affectedStepIds.length > 0) {
+          console.log(`      関連ステップ: ${issue.affectedStepIds.join(', ')}`);
+        }
+      }
+    }
   }
   
   console.log();
