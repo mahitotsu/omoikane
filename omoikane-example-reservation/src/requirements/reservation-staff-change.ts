@@ -115,8 +115,15 @@ export const reservationStaffChange: ReservationUseCase = {
       stepId: 'confirm-change',
       actor: typedActorRef('store-staff'),
       action: '変更理由とフォロー計画を入力し更新を確定する',
-      expectedResult: '予約内容が更新され履歴に変更記録と枠の予約取消・予約確定情報が追加される',
+      expectedResult: '予約内容が更新される',
       screen: typedScreenRef('staff-change-confirm-screen'),
+    },
+    {
+      stepId: 'return-to-list',
+      actor: typedActorRef('store-staff'),
+      action: '完了後、予約一覧画面に戻る',
+      expectedResult: '予約内容が更新され履歴に変更記録と枠の予約取消・予約確定情報が追加され、予約一覧画面が表示される',
+      screen: typedScreenRef('staff-reservation-list-screen'),
     },
   ],
   alternativeFlows: [

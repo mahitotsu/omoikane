@@ -69,6 +69,13 @@ export const reservationCheckIn: ReservationUseCase = {
   ],
   mainFlow: [
     {
+      stepId: 'access-list',
+      actor: typedActorRef('store-staff'),
+      action: 'スタッフ用予約一覧画面にアクセスする',
+      expectedResult: '当日の予約一覧が表示される',
+      screen: typedScreenRef('staff-reservation-list-screen'),
+    },
+    {
       stepId: 'confirm-arrival',
       actor: typedActorRef('store-staff'),
       action: '来店者から予約名または予約番号をヒアリングする',

@@ -115,8 +115,16 @@ export const reservationStaffCancel: ReservationUseCase = {
       actor: typedActorRef('store-staff'),
       action: 'キャンセル内容を最終確認し取消を確定する',
       expectedResult:
-        '予約ステータスがキャンセル済みに更新され枠解放（予約取消）の履歴が未確認として追加される',
+        '予約のキャンセルが確定される',
       screen: typedScreenRef('staff-cancel-confirm-screen'),
+    },
+    {
+      stepId: 'return-to-list',
+      actor: typedActorRef('store-staff'),
+      action: '完了後、予約一覧画面に戻る',
+      expectedResult:
+        '予約ステータスがキャンセル済みに更新され枠解放（予約取消）の履歴が記録され、予約一覧画面が表示される',
+      screen: typedScreenRef('staff-reservation-list-screen'),
     },
   ],
   alternativeFlows: [

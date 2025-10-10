@@ -6,9 +6,23 @@
  * 設計上の特徴:
  * - 予約番号と連絡先による本人確認
  * - 取消理由の記録による監査性確保
- * - 枠の即時解放による予約可能性の向上
- * 
- * 関連ユースケース:
+ * - 枠の即時解放による予約可能    {
+      stepId: 'confirm-cancel',
+      actor: typedActorRef('visitor'),
+      action: '必要に応じて取消理由を入力しキャンセルを確定する',
+      expectedResult:
+        '予約のキャンセルが確認される',
+      screen: typedScreenRef('reservation-cancel-confirm-screen'),
+    },
+    {
+      stepId: 'view-completion',
+      actor: typedActorRef('visitor'),
+      action: 'キャンセル完了画面でキャンセル完了メッセージを確認する',
+      expectedResult:
+        'システムが予約ステータスをキャンセル済みに更新し、枠解放（予約取消）が履歴に記録される',
+      screen: typedScreenRef('reservation-cancel-complete-screen'),
+    },
+  ], * 関連ユースケース:
  * - reservation-booking: 予約の新規登録
  * - reservation-staff-cancel: スタッフによる予約取消
  */
@@ -136,10 +150,18 @@ export const reservationCancel: ReservationUseCase = {
     {
       stepId: 'confirm-cancel',
       actor: typedActorRef('visitor'),
-  action: '必要に応じて取消理由を入力しキャンセルを確定する',
+      action: '必要に応じて取消理由を入力しキャンセルを確定する',
       expectedResult:
-        'システムが予約ステータスをキャンセル済みに更新し、枠解放（予約取消）を未確認記録として履歴に追加した上で確認画面を表示する',
+        '予約のキャンセルが確認される',
       screen: typedScreenRef('reservation-cancel-confirm-screen'),
+    },
+    {
+      stepId: 'view-completion',
+      actor: typedActorRef('visitor'),
+      action: 'キャンセル完了画面でキャンセル完了メッセージを確認する',
+      expectedResult:
+        'システムが予約ステータスをキャンセル済みに更新し、枠解放（予約取消）が履歴に記録される',
+      screen: typedScreenRef('reservation-cancel-complete-screen'),
     },
   ],
   alternativeFlows: [

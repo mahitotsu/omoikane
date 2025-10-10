@@ -21,10 +21,8 @@
 
 import type { ScreenFlow, UseCase } from '../../types/index.js';
 import type {
-  CoherenceIssue,
-  CoherenceIssueType,
-  CoherenceIssueSeverity,
-  CoherenceValidationResult,
+    CoherenceIssue,
+    CoherenceValidationResult
 } from './dependency-graph-model.js';
 
 // ============================================================================

@@ -13,6 +13,7 @@ export const historyReviewFlow: ScreenFlow = {
   screens: [
     typedScreenRef('history-list-screen'),
     typedScreenRef('history-detail-screen'),
+    typedScreenRef('history-list-screen'),
   ],
   transitions: [
     {

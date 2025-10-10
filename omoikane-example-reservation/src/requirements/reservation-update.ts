@@ -129,8 +129,16 @@ export const reservationUpdate: ReservationUseCase = {
       actor: typedActorRef('visitor'),
       action: '検証結果と更新後の内容を確認して変更を確定する',
       expectedResult:
-        '予約番号は維持されたまま内容が更新され、旧枠の予約取消と新枠の予約確定が履歴に未確認記録として追加される',
+        '予約内容が更新される',
       screen: typedScreenRef('reservation-update-confirm-screen'),
+    },
+    {
+      stepId: 'view-completion',
+      actor: typedActorRef('visitor'),
+      action: '完了画面で更新完了メッセージと更新後の予約内容を確認する',
+      expectedResult:
+        '予約番号は維持されたまま内容が更新され、旧枠の予約取消と新枠の予約確定が履歴に記録される',
+      screen: typedScreenRef('reservation-update-complete-screen'),
     },
   ],
   alternativeFlows: [

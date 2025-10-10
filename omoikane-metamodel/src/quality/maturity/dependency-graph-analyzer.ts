@@ -43,15 +43,13 @@ import type {
 import type {
     ChangeImpactAnalysis,
     CircularDependency,
-    CoherenceIssue,
-    CoherenceValidationResult,
     DependencyGraph,
     GraphAnalysisResult,
     GraphEdge,
     GraphNode,
     GraphStatistics,
     LayerAnalysis,
-    NodeImportance,
+    NodeImportance
 } from './dependency-graph-model.js';
 import {
     EdgeType,
