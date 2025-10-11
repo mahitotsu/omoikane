@@ -32,8 +32,7 @@ export type {
     NamingConsistencyAssessment,
     NamingStyle,
     NamingStyleAnalysis,
-    StepIdNamingAssessment,
-    TerminologyConsistency
+    StepIdNamingAssessment
 } from './naming-consistency.js';
 
 export {
@@ -41,7 +40,6 @@ export {
     assessIdNaming,
     assessNamingConsistency,
     assessStepIdNaming,
-    assessTerminologyConsistency,
     detectNamingStyle,
     toKebabCase
 } from './naming-consistency.js';
