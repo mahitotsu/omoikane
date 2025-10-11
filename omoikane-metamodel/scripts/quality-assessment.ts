@@ -677,10 +677,13 @@ async function main() {
     console.log('🎯 コンテキストを分析しています...');
     const partialContext = inferContext(projectDir, businessRequirements);
     // デフォルト値で完全なコンテキストを構築
+    // 成熟度レベルが高い場合（レベル4以上）、デフォルトステージをproductionに設定
+    const defaultStage =
+      maturityResult.projectLevel >= 4 ? 'production' : (partialContext.stage || 'poc');
     const context = {
       projectName: partialContext.projectName || 'Unknown Project',
       domain: partialContext.domain || 'general',
-      stage: partialContext.stage || 'poc',
+      stage: defaultStage,
       teamSize: partialContext.teamSize || 'solo',
       criticality: partialContext.criticality || 'experimental',
       tags: partialContext.tags || [],

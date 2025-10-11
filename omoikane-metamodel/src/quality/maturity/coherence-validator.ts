@@ -105,6 +105,19 @@ export function validateUseCaseScreenFlowCoherence(
 
 /**
  * 画面順序の一致性を検証
+ *
+ * **設計判断:**
+ * UseCaseの画面順序とScreenFlowの画面集合を比較します。
+ *
+ * **循環パターンの扱い:**
+ * UseCaseで「A → B → C → A」のような循環がある場合、
+ * ScreenFlowでは「A, B, C」の3画面が定義されていれば整合しているとみなします。
+ * なぜなら、ScreenFlowはグラフ構造であり、循環は遷移（A→B, B→C, C→A）で表現されるためです。
+ *
+ * **検証方針:**
+ * 1. UseCaseの画面順序から循環部分を除去（最後の画面が最初の画面と同じ場合）
+ * 2. 残った画面集合がScreenFlowの画面集合と一致するか確認
+ * 3. 遷移の完全性は別途 validateTransitions で検証
  */
 function validateScreenSequence(useCase: UseCase, screenFlow: ScreenFlow): CoherenceIssue[] {
   const issues: CoherenceIssue[] = [];
@@ -116,8 +129,17 @@ function validateScreenSequence(useCase: UseCase, screenFlow: ScreenFlow): Coher
   const metadata = deriveScreenFlowMetadata(screenFlow);
   const flowScreens = metadata.screens;
 
+  // 循環パターンを考慮: 最後の画面が最初の画面と同じ場合は除去
+  const useCaseScreensNormalized = [...useCaseScreens];
+  if (
+    useCaseScreensNormalized.length > 1 &&
+    useCaseScreensNormalized[0] === useCaseScreensNormalized[useCaseScreensNormalized.length - 1]
+  ) {
+    useCaseScreensNormalized.pop(); // 循環部分を除去
+  }
+
   // 順序が完全に一致するかチェック
-  if (!arraysEqual(useCaseScreens, flowScreens)) {
+  if (!arraysEqual(useCaseScreensNormalized, flowScreens)) {
     issues.push({
       type: 'screen-sequence-mismatch',
       severity: 'high',
@@ -257,6 +279,14 @@ function validateBoundaryScreens(useCase: UseCase, screenFlow: ScreenFlow): Cohe
 
 /**
  * UseCaseのmainFlowから画面順序を抽出
+ *
+ * **設計判断:**
+ * 連続する同一画面は1つにまとめますが、循環（最初と最後が同じ画面）は許容します。
+ * 例: [A, A, B, C, A] → [A, B, C, A]（連続重複を排除、循環は保持）
+ *
+ * **循環パターンの扱い:**
+ * 多くのUIフローは「一覧 → 詳細 → 一覧」のように最初の画面に戻ります。
+ * これは正常な設計パターンであり、エラーではありません。
  */
 function extractScreenSequence(useCase: UseCase): string[] {
   const screens: string[] = [];
