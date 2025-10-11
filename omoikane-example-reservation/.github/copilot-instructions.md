@@ -480,9 +480,3 @@ feat(example-reservation): add account administration use cases
 2. **スコアを確認** - 変更前後でスコアの変化を確認
 3. **バランスを保つ** - 過度に詳細化せず、適切な粒度を維持
 4. **レベル5を維持** - 既に達成している高品質を保つ
-
-## 参考リソース
-
-- [メタモデルREADME](../omoikane-metamodel/README.md)
-- [品質評価ガイド](../omoikane-metamodel/docs/quality-assessment-guide.md)
-- [ワークスペースREADME](../README.md)

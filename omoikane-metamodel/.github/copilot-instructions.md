@@ -582,8 +582,8 @@ BREAKING CHANGE: None (backward compatible, goals is optional)
 
 ## 参考リソース
 
-- [メインREADME](../README.md)
-- [品質評価ガイド](./docs/quality-assessment-guide.md)
+- [メインREADME](../../README.md)
+- [品質評価ガイド](../docs/quality-assessment-guide.md)
 - [TypeScript公式ドキュメント](https://www.typescriptlang.org/docs/)
 - [Bun公式ドキュメント](https://bun.sh/docs)
 
