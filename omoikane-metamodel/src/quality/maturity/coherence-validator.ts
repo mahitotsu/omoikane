@@ -45,28 +45,6 @@ export function validateUseCaseScreenFlowCoherence(
   const issues: CoherenceIssue[] = [];
   const issuesByUseCase = new Map<string, CoherenceIssue[]>();
 
-  // UseCaseをマップ化（存在チェック用）
-  const useCaseMap = new Map<string, UseCase>();
-  for (const useCase of useCases) {
-    useCaseMap.set(useCase.id, useCase);
-  }
-
-  // ScreenFlow → UseCase の参照整合性チェック
-  for (const flow of screenFlows) {
-    const relatedUseCaseId = flow.relatedUseCase.id;
-    
-    if (!useCaseMap.has(relatedUseCaseId)) {
-      // 存在しないUseCaseを参照している
-      issues.push({
-        type: 'prerequisite-usecase-missing',
-        severity: 'high',
-        description: `ScreenFlow「${flow.name}」が参照しているユースケース「${relatedUseCaseId}」が存在しません`,
-        useCaseId: relatedUseCaseId,
-        screenFlowId: flow.id,
-      });
-    }
-  }
-
   // ScreenFlowをマップ化（高速検索用）
   const screenFlowMap = new Map<string, ScreenFlow>();
   for (const flow of screenFlows) {
