@@ -145,8 +145,8 @@ export const businessHoursValidation: ValidationRule = {
  *
  * 予約は最大N日先まで、最低M時間前までという制約。
  */
-export const bookingWindowValidation: ValidationRule = {
-  id: 'validation-booking-window',
+export const reservationWindowValidation: ValidationRule = {
+  id: 'validation-reservation-window',
   name: '予約期限検証',
   type: 'validation-rule',
   description: '予約可能な期間内（最大90日先まで、最低1時間前まで）であることを検証します。',
@@ -285,7 +285,7 @@ export const allValidationRules: ValidationRule[] = [
   // 日時検証
   futureDateValidation,
   businessHoursValidation,
-  bookingWindowValidation,
+  reservationWindowValidation,
 
   // 予約固有検証
   noDuplicateReservationValidation,

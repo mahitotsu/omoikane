@@ -10,7 +10,7 @@
  * - 予約内容のサマリー表示
  *
  * 関連ユースケース:
- * - reservation-booking: 予約登録の最終ステップ
+ * - reservation-registration: 予約登録の最終ステップ
  */
 
 import type { Screen } from 'omoikane-metamodel';

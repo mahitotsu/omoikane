@@ -14,15 +14,15 @@
  * - CSRF対策トークンの検証
  *
  * 関連ユースケース:
- * - reservation-booking: このフローの基となるユースケース
+ * - reservation-registration: このフローの基となるユースケース
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+import { typedScreenActionRef, typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
 // typedScreenActionRef を追加しました
 
 export const reservationBookingFlow: ScreenFlow = {
-  id: 'reservation-booking-flow',
+  id: 'reservation-registration-flow',
   name: '予約登録フロー',
   type: 'screen-flow',
   description:
@@ -37,7 +37,7 @@ export const reservationBookingFlow: ScreenFlow = {
     {
       from: typedScreenRef('reservation-confirm-screen'),
       to: typedScreenRef('reservation-complete-screen'),
-      trigger: typedScreenActionRef('reservation-confirm-screen', 'confirm-booking'),
+      trigger: typedScreenActionRef('reservation-confirm-screen', 'confirm-reservation'),
       condition: '予約枠が確保でき、予約番号が生成された',
     },
     {
@@ -52,5 +52,5 @@ export const reservationBookingFlow: ScreenFlow = {
       trigger: typedScreenActionRef('reservation-confirm-screen', 'no-available-slots'),
       condition: '予約枠がなくなった（他のユーザーが先に予約した）',
     },
-  ],  relatedUseCase: typedUseCaseRef('reservation-booking'),
+  ],  relatedUseCase: typedUseCaseRef('reservation-registration'),
 };

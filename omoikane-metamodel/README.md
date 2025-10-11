@@ -152,6 +152,38 @@ const metadata = deriveScreenFlowMetadata(flow);
 
 プロジェクトの設計品質を多角的に評価し、実用的な改善提案を生成します。
 
+#### 命名規約・整合性評価（新機能）
+
+プロジェクト全体の命名規約と画面フローの整合性を評価します：
+
+```bash
+# 基本実行（現在のディレクトリを評価）
+bun run assess-consistency
+
+# 特定のプロジェクトを評価
+bun run assess-consistency ./path/to/project
+```
+
+**評価内容**:
+- **命名規約の一貫性**:
+  - ID命名規則（ケバブケース推奨）
+  - stepId命名規則
+  - 用語の統一性（混在用語の検出）
+  
+- **ScreenFlow整合性**:
+  - 画面順序の一致（UseCase vs ScreenFlow）
+  - アクション定義の整合性
+  - 遷移トリガーの妥当性
+  - 遷移の完全性
+
+**推奨事項例**:
+```
+❌ ID命名規則: storeStaff → store-staff に統一してください
+❌ stepId混在: ユースケース「予約取消」内でスタイルが混在しています
+❌ アクション定義の欠落: 画面「form-screen」のアクション「submit」が未定義です
+❌ 遷移トリガー不整合: 遷移元画面とトリガーの画面が一致しません
+```
+
 #### コマンドライン使用
 
 ```bash

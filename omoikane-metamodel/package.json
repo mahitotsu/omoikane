@@ -8,7 +8,8 @@
     "omoikane-auto-build": "./scripts/auto-build.ts",
     "omoikane-generate-references": "./scripts/generate-typed-references.ts",
     "omoikane-convert-references": "./scripts/convert-references.ts",
-    "omoikane-quality-assessment": "./scripts/quality-assessment.ts"
+    "omoikane-quality-assessment": "./scripts/quality-assessment.ts",
+    "omoikane-assess-consistency": "./scripts/assess-consistency.ts"
   },
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node",
@@ -20,6 +21,7 @@
     "format:check": "prettier --check \"**/*.{ts,json,md}\" --ignore-path ../.gitignore",
     "code-quality": "bun run format && bun run lint:fix && bun run type-check",
     "quality-assessment": "bun scripts/quality-assessment.ts",
+    "assess-consistency": "bun scripts/assess-consistency.ts",
     "test": "bun test"
   },
   "keywords": [

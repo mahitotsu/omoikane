@@ -29,7 +29,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
     '来店者のセルフサービスによる予約と、店舗スタッフによる対面業務を両立させ、履歴管理と監査性を確保する',
   businessGoals: [
     {
-      id: 'goal-self-service-booking',
+      id: 'goal-self-service-reservation',
       description: '来店者が営業時間外でも自ら予約を確定できるようにする',
     },
     {
@@ -56,7 +56,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
   scope: {
     inScope: [
       {
-        id: 'scope-online-booking',
+        id: 'scope-online-reservation',
         description: '来店者が予約サイトから予約を新規登録する機能',
       },
       {
@@ -131,7 +131,7 @@ export const reservationBusinessRequirements: BusinessRequirementDefinition = {
   ],
   successMetrics: [
     {
-      id: 'metric-booking-completion-rate',
+      id: 'metric-reservation-completion-rate',
       description: '来店者が予約プロセスを完了できた割合',
     },
     {

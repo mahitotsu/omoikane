@@ -105,23 +105,23 @@ export * as Foundation from './foundation/index.js';
  * - RefArray<T>: 参照配列型
  */
 export type {
-  Approvable,
-  Categorizable,
-  ChangeLogEntry,
-  DateRange,
-  DocumentBase,
-  // 文書基底
-  Identifiable,
-  Metadata,
-  // プリミティブ型
-  PriorityLevel,
-  QualityLevel,
-  // 参照型
-  Ref,
-  RefArray,
-  SeverityLevel,
-  TraceableDocument,
-  Versionable,
+    Approvable,
+    Categorizable,
+    ChangeLogEntry,
+    DateRange,
+    DocumentBase,
+    // 文書基底
+    Identifiable,
+    Metadata,
+    // プリミティブ型
+    PriorityLevel,
+    QualityLevel,
+    // 参照型
+    Ref,
+    RefArray,
+    SeverityLevel,
+    TraceableDocument,
+    Versionable
 } from './foundation/index.js';
 
 /**
@@ -137,15 +137,15 @@ export type {
  * - isTraceableDocument(): トレース可能文書か判定
  */
 export {
-  // 参照ヘルパー
-  createRef,
-  extractRefIds,
-  isApprovable,
-  isCategorizable,
-  // 文書型判定
-  isTraceableDocument,
-  isValidRef,
-  isVersionable,
+    // 参照ヘルパー
+    createRef,
+    extractRefIds,
+    isApprovable,
+    isCategorizable,
+    // 文書型判定
+    isTraceableDocument,
+    isValidRef,
+    isVersionable
 } from './foundation/index.js';
 
 // ============================================================================
@@ -193,12 +193,12 @@ export * as Business from './business/index.js';
  * - SecurityPolicy: セキュリティポリシー
  */
 export type {
-  BusinessRequirementCoverage,
-  BusinessRequirementDefinition,
-  BusinessRequirementItem,
-  BusinessRequirementScope,
-  BusinessRule,
-  SecurityPolicy,
+    BusinessRequirementCoverage,
+    BusinessRequirementDefinition,
+    BusinessRequirementItem,
+    BusinessRequirementScope,
+    BusinessRule,
+    SecurityPolicy
 } from './business/index.js';
 
 // ============================================================================
@@ -262,16 +262,16 @@ export * as Functional from './functional/index.js';
  * - FlowImpact: フロー影響度
  */
 export type {
-  Actor,
-  ActorReference,
-  ActorRole,
-  AlternativeFlow,
-  FlowImpact,
-  FlowProbability,
-  UseCase,
-  UseCaseActors,
-  UseCaseComplexity,
-  UseCaseStep,
+    Actor,
+    ActorReference,
+    ActorRole,
+    AlternativeFlow,
+    FlowImpact,
+    FlowProbability,
+    UseCase,
+    UseCaseActors,
+    UseCaseComplexity,
+    UseCaseStep
 } from './functional/index.js';
 
 /**
@@ -332,6 +332,7 @@ export * as UI from './ui/index.js';
  * - ScreenType: 画面タイプ
  * - ScreenFlow: 画面遷移フロー
  * - ScreenTransition: 画面遷移
+ * - ScreenActionRef: 画面アクション参照
  * - ValidationRule: バリデーションルール
  * - ValidationRuleType: バリデーションルールタイプ
  * - InputField: 入力フィールド
@@ -343,19 +344,20 @@ export * as UI from './ui/index.js';
  * - ScreenActionType: 画面アクションタイプ
  */
 export type {
-  DisplayField,
-  DisplayFieldType,
-  FieldType,
-  InputField,
-  Screen,
-  ScreenAction,
-  ScreenActionType,
-  ScreenFlow,
-  ScreenTransition,
-  ScreenType,
-  SelectOption,
-  ValidationRule,
-  ValidationRuleType,
+    DisplayField,
+    DisplayFieldType,
+    FieldType,
+    InputField,
+    Screen,
+    ScreenAction,
+    ScreenActionRef,
+    ScreenActionType,
+    ScreenFlow,
+    ScreenTransition,
+    ScreenType,
+    SelectOption,
+    ValidationRule,
+    ValidationRuleType
 } from './ui/index.js';
 
 // ============================================================================
@@ -411,9 +413,10 @@ export { RelationType } from './cross-cutting/index.js';
  * - TraceabilityIssue: トレーサビリティ問題
  */
 export type {
-  DocumentRelationship,
-  TraceabilityAnalysis,
-  TraceabilityIssue,
-  TraceabilityMatrix,
-  TraceabilityValidation,
+    DocumentRelationship,
+    TraceabilityAnalysis,
+    TraceabilityIssue,
+    TraceabilityMatrix,
+    TraceabilityValidation
 } from './cross-cutting/index.js';
+

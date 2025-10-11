@@ -51,7 +51,7 @@ export const reservationUpdateFormScreen: Screen = {
       helpText: '新しい予約日を選択してください（変更しない場合は現在の日付のまま）',
       validationRules: [
         typedValidationRuleRef('validation-future-date'),
-        typedValidationRuleRef('validation-booking-window'),
+        typedValidationRuleRef('validation-reservation-window'),
       ],
     },
     {

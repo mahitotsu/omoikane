@@ -55,6 +55,13 @@ export * from './types.ts';
 export * from './maturity/index.js';
 
 // ============================================================================
+// バリデーターエクスポート（Validators Exports）
+// ============================================================================
+
+// 命名規約・整合性バリデーター
+export * from './validators/index.js';
+
+// ============================================================================
 // 関数エクスポート（Function Exports）
 // ============================================================================
 
@@ -89,8 +96,8 @@ import { assessQuality } from './assessor.ts';
 import { calculateBusinessRuleStats, summarizeBusinessRules } from './business-rules.ts';
 import { generateRecommendations } from './recommendation-engine.ts';
 import {
-  calculateSecurityPolicyStats,
-  summarizeSecurityPolicies,
+    calculateSecurityPolicyStats,
+    summarizeSecurityPolicies,
 } from './security-requirements.ts';
 
 /**

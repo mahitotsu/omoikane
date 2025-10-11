@@ -14,23 +14,23 @@
  */
 
 import {
-  ReservationUseCase,
-  assumptionRef,
-  businessGoalRef,
-  businessRequirementRef,
-  businessRuleRef,
-  businessScopeRef,
-  constraintRef,
-  reservationBusinessRequirementCoverage,
-  securityPolicyRef,
-  stakeholderRef,
-  successMetricRef,
-  typedActorRef,
-  typedScreenRef,
+    ReservationUseCase,
+    assumptionRef,
+    businessGoalRef,
+    businessRequirementRef,
+    businessRuleRef,
+    businessScopeRef,
+    constraintRef,
+    reservationBusinessRequirementCoverage,
+    securityPolicyRef,
+    stakeholderRef,
+    successMetricRef,
+    typedActorRef,
+    typedScreenRef,
 } from '../typed-references.js';
 
 export const reservationBooking: ReservationUseCase = {
-  id: 'reservation-booking',
+  id: 'reservation-registration',
   name: '予約登録',
   type: 'usecase',
   description:
@@ -42,16 +42,16 @@ export const reservationBooking: ReservationUseCase = {
   businessRequirementCoverage: reservationBusinessRequirementCoverage({
     requirement: businessRequirementRef('reservation-business-requirements'),
     businessGoals: [
-      businessGoalRef('goal-self-service-booking'),
+      businessGoalRef('goal-self-service-reservation'),
       businessGoalRef('goal-accurate-capacity'),
     ],
-    scopeItems: [businessScopeRef('scope-online-booking')],
+    scopeItems: [businessScopeRef('scope-online-reservation')],
     stakeholders: [
       stakeholderRef('stakeholder-visitor'),
       stakeholderRef('stakeholder-store-staff'),
       stakeholderRef('stakeholder-store-ops-manager'),
     ],
-    successMetrics: [successMetricRef('metric-booking-completion-rate')],
+    successMetrics: [successMetricRef('metric-reservation-completion-rate')],
     assumptions: [
       assumptionRef('assumption-manual-communications'),
       assumptionRef('assumption-standard-business-hours'),

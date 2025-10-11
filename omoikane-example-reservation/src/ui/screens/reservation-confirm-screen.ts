@@ -10,7 +10,7 @@
  * - 予約番号の自動生成はこのステップで実施
  *
  * 関連ユースケース:
- * - reservation-booking: 予約登録の確認ステップ
+ * - reservation-registration: 予約登録の確認ステップ
  */
 
 import type { Screen } from 'omoikane-metamodel';
@@ -76,7 +76,7 @@ export const reservationConfirmScreen: Screen = {
 
   actions: [
     {
-      id: 'confirm-booking',
+      id: 'confirm-reservation',
       label: 'この内容で予約する',
       actionType: 'submit',
       isPrimary: true,

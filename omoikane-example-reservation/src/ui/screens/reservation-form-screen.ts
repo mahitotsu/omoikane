@@ -10,7 +10,7 @@
  * - 特記事項は任意入力（アレルギー情報など）
  *
  * 関連ユースケース:
- * - reservation-booking: このフォームは予約登録の最初のステップ
+ * - reservation-registration: このフォームは予約登録の最初のステップ
  */
 
 import type { Screen } from 'omoikane-metamodel';
@@ -35,7 +35,7 @@ export const reservationFormScreen: Screen = {
       helpText: '本日から最大30日後まで予約可能です',
       validationRules: [
         typedValidationRuleRef('validation-future-date'),
-        typedValidationRuleRef('validation-booking-window'),
+        typedValidationRuleRef('validation-reservation-window'),
       ],
     },
     {

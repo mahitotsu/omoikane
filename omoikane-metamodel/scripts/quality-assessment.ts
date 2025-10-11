@@ -68,6 +68,10 @@ import {
     validatePrerequisiteUseCases,
     validateUseCaseScreenFlowCoherence,
 } from '../src/quality/maturity/index.js';
+import {
+    assessFlowConsistency,
+    assessNamingConsistency,
+} from '../src/quality/validators/index.js';
 
 // ============================================================================
 // プロジェクトファイル検索
@@ -87,11 +91,14 @@ import {
  * - scripts/ - スクリプトファイル（副作用のあるコードが含まれる可能性）
  * - .git/, .vscode/ 等の隠しディレクトリ
  * - index.ts（他ファイルの集約なので）
+ * - *.test.ts（テストファイルなので）
  *
  * **設計判断:**
  * scriptsディレクトリをスキップする理由は、スクリプトファイルのインポートが
  * 副作用（ファイル更新等）を引き起こす可能性があるため。品質評価は読み取り専用の
  * 操作であるべきで、ファイルを変更してはいけない。
+ * テストファイル（*.test.ts）もスキップする理由は、テストデータが評価対象として
+ * 誤検出されることを防ぐため。
  *
  * @param dir - 検索開始ディレクトリ
  * @returns TypeScriptファイルパスの配列
@@ -112,7 +119,8 @@ async function findProjectFiles(dir: string): Promise<string[]> {
       }
     } else if (entry.isFile() && extname(entry.name) === '.ts') {
       // index.ts は他のファイルの集約なのでスキップ
-      if (entry.name !== 'index.ts') {
+      // .test.ts はテストファイルなのでスキップ
+      if (entry.name !== 'index.ts' && !entry.name.endsWith('.test.ts')) {
         files.push(fullPath);
       }
     }
@@ -334,7 +342,9 @@ function displayV2Report(
   healthScore: any,
   maturityResult: any,
   graphAnalysis: any,
-  recommendations: any
+  recommendations: any,
+  namingConsistency: any,
+  flowConsistency: any
 ) {
   console.log('\n=== 📊 品質評価レポート v2.0 ===\n');
 
@@ -517,6 +527,87 @@ function displayV2Report(
         for (const msg of flowInfo.warnings) {
           console.log(`    ${msg}`);
         }
+      }
+    }
+  }
+
+  // 命名規約の評価結果を表示
+  console.log('\n【命名規約の一貫性】');
+  console.log(`  総合スコア: ${namingConsistency.overallScore.toFixed(1)}/100`);
+  console.log(`  ID命名規則: ${namingConsistency.idNaming.score.toFixed(1)}/100`);
+  console.log(`  stepId命名規則: ${namingConsistency.stepIdNaming.score.toFixed(1)}/100`);
+  console.log(`  用語の統一性: ${namingConsistency.terminology.score.toFixed(1)}/100`);
+
+  if (namingConsistency.recommendations.length > 0) {
+    const highPriorityNaming = namingConsistency.recommendations.filter(
+      (r: any) => r.priority === 'high'
+    );
+    const mediumPriorityNaming = namingConsistency.recommendations.filter(
+      (r: any) => r.priority === 'medium'
+    );
+
+    if (highPriorityNaming.length > 0) {
+      console.log(`\n  ⚠️ 命名規約の推奨事項 (High): ${highPriorityNaming.length}件`);
+      for (const rec of highPriorityNaming.slice(0, 3)) {
+        console.log(`    • ${rec.message}`);
+      }
+      if (highPriorityNaming.length > 3) {
+        console.log(`    ... 他${highPriorityNaming.length - 3}件`);
+      }
+    }
+
+    if (mediumPriorityNaming.length > 0 && highPriorityNaming.length === 0) {
+      console.log(`\n  ℹ️  命名規約の推奨事項 (Medium): ${mediumPriorityNaming.length}件`);
+      for (const rec of mediumPriorityNaming.slice(0, 3)) {
+        console.log(`    • ${rec.message}`);
+      }
+      if (mediumPriorityNaming.length > 3) {
+        console.log(`    ... 他${mediumPriorityNaming.length - 3}件`);
+      }
+    }
+  }
+
+  // フロー整合性の評価結果を表示
+  console.log('\n【フロー整合性】');
+  console.log(`  総合スコア: ${flowConsistency.overallScore.toFixed(1)}/100`);
+  console.log(
+    `  画面順序の整合性: ${flowConsistency.screenOrderConsistency.score.toFixed(1)}/100`
+  );
+  console.log(
+    `  アクションの整合性: ${flowConsistency.actionConsistency.score.toFixed(1)}/100`
+  );
+  console.log(
+    `  遷移トリガーの妥当性: ${flowConsistency.transitionTriggerValidity.score.toFixed(1)}/100`
+  );
+  console.log(
+    `  遷移の完全性: ${flowConsistency.transitionCompleteness.score.toFixed(1)}/100`
+  );
+
+  if (flowConsistency.recommendations.length > 0) {
+    const highPriorityFlow = flowConsistency.recommendations.filter(
+      (r: any) => r.priority === 'high'
+    );
+    const mediumPriorityFlow = flowConsistency.recommendations.filter(
+      (r: any) => r.priority === 'medium'
+    );
+
+    if (highPriorityFlow.length > 0) {
+      console.log(`\n  ⚠️ フロー整合性の推奨事項 (High): ${highPriorityFlow.length}件`);
+      for (const rec of highPriorityFlow.slice(0, 3)) {
+        console.log(`    • ${rec.message}`);
+      }
+      if (highPriorityFlow.length > 3) {
+        console.log(`    ... 他${highPriorityFlow.length - 3}件`);
+      }
+    }
+
+    if (mediumPriorityFlow.length > 0 && highPriorityFlow.length === 0) {
+      console.log(`\n  ℹ️  フロー整合性の推奨事項 (Medium): ${mediumPriorityFlow.length}件`);
+      for (const rec of mediumPriorityFlow.slice(0, 3)) {
+        console.log(`    • ${rec.message}`);
+      }
+      if (mediumPriorityFlow.length > 3) {
+        console.log(`    ... 他${mediumPriorityFlow.length - 3}件`);
       }
     }
   }
@@ -706,6 +797,17 @@ async function main() {
     const prerequisiteValidation = validatePrerequisiteUseCases(useCases);
     const flowDesignInfo = validateFlowDesign(useCases);
 
+    // 命名規約とフロー整合性の評価を実行
+    const namingConsistency = assessNamingConsistency(
+      actors,
+      useCases,
+      businessRequirements,
+      screens,
+      undefined,
+      screenFlows
+    );
+    const flowConsistency = assessFlowConsistency(useCases, screens, screenFlows);
+
     // 整合性検証結果を統合
     const allCoherenceIssues = [
       ...coherenceValidation.issues,
@@ -760,7 +862,14 @@ async function main() {
     const healthScore = dashboard.calculateHealthScore(snapshot);
     console.log(`  完了\n`);
 
-    displayV2Report(healthScore, maturityResult, graphAnalysis, recommendations);
+    displayV2Report(
+      healthScore,
+      maturityResult,
+      graphAnalysis,
+      recommendations,
+      namingConsistency,
+      flowConsistency
+    );
 
     if (process.argv.includes('--export')) {
       const format = process.argv.includes('--html')

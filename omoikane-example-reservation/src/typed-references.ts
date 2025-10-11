@@ -5,7 +5,7 @@
  * ⚠️ このファイルは自動生成されます
  * 手動編集は scripts/generate-typed-references.ts で行ってください
  *
- * 最終更新: 2025-10-11T12:44:03.521Z
+ * 最終更新: 2025-10-11T15:24:49.493Z
  */
 
 import type {
@@ -33,14 +33,14 @@ export type KnownBusinessGoalId = 'goal-accurate-capacity'
   | 'goal-admin-managed-accounts'
   | 'goal-auditable-operations'
   | 'goal-empower-store-staff'
-  | 'goal-self-service-booking'
+  | 'goal-self-service-reservation'
   | 'goal-visitor-self-service-flexibility';
 
 export type KnownScopeItemId = 'scope-account-administration'
   | 'scope-business-day-configuration'
   | 'scope-capacity-planning'
   | 'scope-history-oversight'
-  | 'scope-online-booking'
+  | 'scope-online-reservation'
   | 'scope-store-staff-console'
   | 'scope-visit-check-in'
   | 'scope-visitor-self-service-management';
@@ -53,8 +53,8 @@ export type KnownStakeholderId = 'stakeholder-capacity-planner'
 
 export type KnownSuccessMetricId = 'metric-admin-access-readiness'
   | 'metric-audit-confirmation-lag'
-  | 'metric-booking-completion-rate'
   | 'metric-manual-adjustment-time'
+  | 'metric-reservation-completion-rate'
   | 'metric-slot-utilization';
 
 export type KnownAssumptionId = 'assumption-holiday-manual-registration'
@@ -119,7 +119,7 @@ export type KnownUseCaseId = 'reservation-history-review'
   | 'reservation-check-in'
   | 'staff-authentication'
   | 'capacity-management'
-  | 'reservation-booking'
+  | 'reservation-registration'
   | 'reservation-cancel'
   | 'reservation-update';
 
@@ -149,8 +149,7 @@ export type KnownScreenId = 'reservation-cancel-complete-screen'
   | 'history-list-screen'
   | 'staff-search-screen';
 
-export type KnownValidationRuleId = 'validation-booking-window'
-  | 'validation-business-hours'
+export type KnownValidationRuleId = 'validation-business-hours'
   | 'validation-cancellation-deadline'
   | 'validation-email-format'
   | 'validation-future-date'
@@ -160,11 +159,12 @@ export type KnownValidationRuleId = 'validation-booking-window'
   | 'validation-phone-format'
   | 'validation-required-field'
   | 'validation-reservation-number-format'
+  | 'validation-reservation-window'
   | 'validation-slot-availability';
 
 export type KnownScreenFlowId = 'account-registration-flow'
   | 'capacity-management-flow'
-  | 'reservation-booking-flow'
+  | 'reservation-registration-flow'
   | 'reservation-cancel-flow'
   | 'reservation-update-flow'
   | 'account-deletion-flow'
@@ -194,7 +194,7 @@ export interface ScreenActionsMap {
   'reservation-complete-screen': 'back-to-home' | 'view-reservation' | 'print-confirmation';
   'staff-cancel-confirm-screen': 'confirm-staff-cancel' | 'back-to-detail';
   'staff-change-confirm-screen': 'confirm-staff-change' | 'back-to-form';
-  'reservation-confirm-screen': 'confirm-booking' | 'back-to-form' | 'no-available-slots';
+  'reservation-confirm-screen': 'confirm-reservation' | 'back-to-form' | 'no-available-slots';
   'capacity-slot-form-screen': 'validate-slot' | 'cancel';
   'reservation-detail-screen': 'update-reservation' | 'cancel-reservation' | 'back-to-lookup';
   'reservation-lookup-screen': 'lookup-reservation' | 'back-to-home';
@@ -343,6 +343,6 @@ export const generatedStats = {
   constraints: 7,
   securityPolicies: 11,
   businessRules: 19,
-  generatedAt: '2025-10-11T12:44:03.525Z',
+  generatedAt: '2025-10-11T15:24:49.494Z',
   sourceFiles: ['/home/akring/omoikane/omoikane-example-reservation/src/actors.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/account-administration.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/business-requirements.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/capacity-management.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-booking.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-check-in.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-history-review.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-cancel.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-change.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-staff-search.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/reservation-update.ts', '/home/akring/omoikane/omoikane-example-reservation/src/requirements/staff-authentication.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/account-deletion-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/account-registration-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/capacity-management-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/check-in-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/history-review-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/reservation-booking-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/reservation-cancel-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/reservation-update-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/staff-cancel-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/staff-change-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screen-flows/staff-search-flow.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-deletion-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-list-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-operation-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/account-registration-form-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/capacity-calendar-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/capacity-slot-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/capacity-slot-form-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/check-in-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/check-in-console-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/history-detail-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/history-list-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-cancel-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-cancel-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-detail-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-form-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-lookup-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-update-complete-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-update-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/reservation-update-form-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-cancel-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-change-confirm-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-reservation-list-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/screens/staff-search-screen.ts', '/home/akring/omoikane/omoikane-example-reservation/src/ui/validation-rules.ts'],
 } as const;
