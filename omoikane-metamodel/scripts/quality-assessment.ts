@@ -204,18 +204,10 @@ async function loadTsFile(filePath: string): Promise<any> {
  * - Actor: type === 'actor'
  * - UseCase: type === 'usecase'
  *
- * **フォールバック判定（type属性がない場合）:**
- * - BusinessRequirement: businessGoalsプロパティが配列
- * - ScreenFlow: transitionsプロパティが配列
- * - Screen: screenTypeプロパティが存在
- * - Actor: roleプロパティが存在
- * - UseCase: actorsとmainFlowプロパティが存在
- *
  * **設計原則:**
- * - type属性による統一的な型判定（推奨）
- * - プロパティベースはフォールバック（後方互換性）
+ * - すべての要素にtype属性が必須
+ * - type属性のない要素はスキップ（検出されない）
  * - 配列と単一オブジェクトの両方に対応
- * - 判定不能なオブジェクトはスキップ
  *
  * @param projectDir - プロジェクトディレクトリ
  * @returns 分類されたプロジェクトデータ
@@ -239,7 +231,7 @@ async function loadProjectData(projectDir: string) {
     for (const item of items) {
       if (!item || typeof item !== 'object') continue;
 
-      // type属性ベースの判定（推奨方式）
+      // type属性ベースの型判定
       if (item.type === 'business-requirement') {
         businessRequirements.push(item);
       } else if (item.type === 'screen-flow') {
@@ -251,18 +243,7 @@ async function loadProjectData(projectDir: string) {
       } else if (item.type === 'usecase') {
         useCases.push(item);
       }
-      // フォールバック: プロパティベースの判定（後方互換性のため）
-      else if (item.businessGoals && Array.isArray(item.businessGoals)) {
-        businessRequirements.push(item);
-      } else if (item.transitions && Array.isArray(item.transitions)) {
-        screenFlows.push(item);
-      } else if (item.screenType !== undefined) {
-        screens.push(item);
-      } else if (item.role !== undefined) {
-        actors.push(item);
-      } else if (item.actors && item.mainFlow) {
-        useCases.push(item);
-      }
+      // type属性がない要素はスキップ（警告なし）
     }
   }
 
