@@ -197,19 +197,23 @@ async function loadTsFile(filePath: string): Promise<any> {
  * 3. エクスポートされたオブジェクトを型検出
  * 4. BusinessRequirement/Actor/UseCase/Screen/ScreenFlowに分類
  *
- * **型検出ロジック:**
+ * **型検出ロジック（type属性ベース）:**
+ * - BusinessRequirement: type === 'business-requirement'
+ * - ScreenFlow: type === 'screen-flow'
+ * - Screen: type === 'screen'
+ * - Actor: type === 'actor'
+ * - UseCase: type === 'usecase'
+ *
+ * **フォールバック判定（type属性がない場合）:**
  * - BusinessRequirement: businessGoalsプロパティが配列
- * - ScreenFlow: transitionsプロパティが配列（UseCaseより先に判定）
+ * - ScreenFlow: transitionsプロパティが配列
  * - Screen: screenTypeプロパティが存在
  * - Actor: roleプロパティが存在
  * - UseCase: actorsとmainFlowプロパティが存在
  *
- * **判定順序の理由:**
- * - ScreenFlowをUseCaseより先に判定する必要がある
- * - 両方ともtransitionsを持つ可能性があるため、より特徴的なフィールドで判別
- *
- * **設計判断:**
- * - プロパティベースの型判定（typeフィールドに依存しない）
+ * **設計原則:**
+ * - type属性による統一的な型判定（推奨）
+ * - プロパティベースはフォールバック（後方互換性）
  * - 配列と単一オブジェクトの両方に対応
  * - 判定不能なオブジェクトはスキップ
  *
@@ -235,24 +239,28 @@ async function loadProjectData(projectDir: string) {
     for (const item of items) {
       if (!item || typeof item !== 'object') continue;
 
-      // ビジネス要件の判定（businessGoalsプロパティが配列として存在）
-      if (item.businessGoals && Array.isArray(item.businessGoals)) {
+      // type属性ベースの判定（推奨方式）
+      if (item.type === 'business-requirement') {
         businessRequirements.push(item);
-      }
-      // ScreenFlowの判定（transitionsが配列として存在、UseCaseと区別するため先に判定）
-      else if (item.transitions && Array.isArray(item.transitions)) {
+      } else if (item.type === 'screen-flow') {
         screenFlows.push(item);
-      }
-      // Screenの判定（screenTypeプロパティが存在）
-      else if (item.screenType !== undefined) {
+      } else if (item.type === 'screen') {
         screens.push(item);
-      }
-      // アクターの判定（roleプロパティが存在）
-      else if (item.role !== undefined) {
+      } else if (item.type === 'actor') {
         actors.push(item);
+      } else if (item.type === 'usecase') {
+        useCases.push(item);
       }
-      // ユースケースの判定（actorsプロパティとmainFlowが存在）
-      else if (item.actors && item.mainFlow) {
+      // フォールバック: プロパティベースの判定（後方互換性のため）
+      else if (item.businessGoals && Array.isArray(item.businessGoals)) {
+        businessRequirements.push(item);
+      } else if (item.transitions && Array.isArray(item.transitions)) {
+        screenFlows.push(item);
+      } else if (item.screenType !== undefined) {
+        screens.push(item);
+      } else if (item.role !== undefined) {
+        actors.push(item);
+      } else if (item.actors && item.mainFlow) {
         useCases.push(item);
       }
     }
