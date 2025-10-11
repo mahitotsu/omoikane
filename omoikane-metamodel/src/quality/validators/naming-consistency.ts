@@ -374,18 +374,30 @@ export function assessFileNaming(_filePaths: string[]): FileNamingAssessment {
 }
 
 // ============================================================================
-// 用語の統一性評価（簡易版）
+// 用語の統一性評価（改善版）
 // ============================================================================
 
 /**
  * 用語の統一性を評価
  *
- * **評価内容:**
- * - 類似する用語の混在を検出（例: 「予約」と「booking」）
- * - 名前、説明文から用語を抽出
+ * **改善内容:**
+ * - IDと表示テキストを分離して評価
+ * - 技術的な識別子（ID）は英語使用を許容
+ * - 表示テキスト（name、description）内での混在のみを検出
  *
- * **簡易版:**
- * 現在は基本的な類似語のみ検出。将来的にはNLP技術を使用した高度な検出を実装可能。
+ * **評価内容:**
+ * - 類似する用語の混在を検出（例: 同一文脈で「予約」と「ブッキング」）
+ * - IDは英語、表示テキストは日本語の使い分けは正常として扱う
+ *
+ * **例（正常）:**
+ * ```typescript
+ * { id: 'user-registration', name: 'ユーザー登録' } // ✅ OK
+ * ```
+ *
+ * **例（混在）:**
+ * ```typescript
+ * { id: 'user-registration', name: 'ユーザー登録とregistration' } // ❌ NG
+ * ```
  *
  * @param elements - 評価対象の要素
  * @returns 用語の統一性評価結果
@@ -393,13 +405,13 @@ export function assessFileNaming(_filePaths: string[]): FileNamingAssessment {
 export function assessTerminologyConsistency(
   elements: Array<{ id: string; name?: string; description?: string }>
 ): TerminologyConsistency {
-  // 簡易版: よく混在する用語ペアのリスト
+  // よく混在する用語ペアのリスト（日本語 vs 英語/カタカナ）
   const commonMixedTerms = [
-    { term1: '予約', term2: 'booking' },
-    { term1: '顧客', term2: 'customer' },
-    { term1: 'ユーザー', term2: 'user' },
-    { term1: '登録', term2: 'registration' },
-    { term1: '削除', term2: 'delete' },
+    { term1: '予約', term2: 'ブッキング' }, // カタカナ混在を検出
+    { term1: '顧客', term2: 'カスタマー' },
+    { term1: 'ユーザー', term2: '利用者' }, // 日本語内の表記ゆれ
+    { term1: '登録', term2: '記録' }, // 意味的に近い語の混在
+    { term1: '削除', term2: '消去' },
   ];
 
   const mixedTerms: TerminologyConsistency['mixedTerms'] = [];
@@ -409,28 +421,31 @@ export function assessTerminologyConsistency(
     const occurrences2: Array<{ location: string; context: string }> = [];
 
     for (const element of elements) {
-      const textToCheck = [
-        element.id,
+      // IDは評価対象外（技術的な識別子として英語使用は正常）
+      // name と description のみを評価対象とする
+      const displayTexts = [
         element.name || '',
         element.description || '',
-      ].join(' ');
+      ].filter(text => text.length > 0);
 
-      if (textToCheck.includes(term1)) {
-        occurrences1.push({
-          location: element.id,
-          context: element.name || element.id,
-        });
-      }
+      for (const text of displayTexts) {
+        if (text.includes(term1)) {
+          occurrences1.push({
+            location: element.id,
+            context: element.name || element.id,
+          });
+        }
 
-      if (textToCheck.toLowerCase().includes(term2.toLowerCase())) {
-        occurrences2.push({
-          location: element.id,
-          context: element.name || element.id,
-        });
+        if (text.includes(term2)) {
+          occurrences2.push({
+            location: element.id,
+            context: element.name || element.id,
+          });
+        }
       }
     }
 
-    // 両方の用語が使用されている場合は混在と判定
+    // 両方の用語が表示テキスト内で使用されている場合のみ混在と判定
     if (occurrences1.length > 0 && occurrences2.length > 0) {
       mixedTerms.push({
         term1,
@@ -443,6 +458,7 @@ export function assessTerminologyConsistency(
     }
   }
 
+  // スコア計算: 混在が少ないほど高スコア
   const score = mixedTerms.length === 0 ? 100 : Math.max(0, 100 - mixedTerms.length * 15);
 
   return {
@@ -575,12 +591,12 @@ export function assessNamingConsistency(
       recommendations.push({
         category: 'terminology',
         priority: 'medium',
-        message: `用語の不統一: 「${mixed.term1}」(${mixed.occurrences1.length}箇所)と「${mixed.term2}」(${mixed.occurrences2.length}箇所)が混在しています`,
+        message: `用語の不統一（表示テキスト内）: 「${mixed.term1}」(${mixed.occurrences1.length}箇所)と「${mixed.term2}」(${mixed.occurrences2.length}箇所)が混在しています`,
         affectedElements: [
           ...mixed.occurrences1.map((o) => o.location),
           ...mixed.occurrences2.map((o) => o.location),
         ],
-        suggestedAction: `「${mixed.suggestedUnifiedTerm}」に統一することを推奨します`,
+        suggestedAction: `表示テキスト（name、description）内で「${mixed.suggestedUnifiedTerm}」に統一することを推奨します。\n注意: ID内で英語を使用するのは正常です（例: id='user-registration', name='ユーザー登録' は適切）`,
       });
     }
   }

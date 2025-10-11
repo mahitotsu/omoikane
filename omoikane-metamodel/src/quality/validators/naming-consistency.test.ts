@@ -93,6 +93,46 @@ const testUseCases: UseCase[] = [
     ],
     priority: 'high',
   },
+  {
+    id: 'user-registration', // kebab-case ✅ (ID: 英語)
+    name: 'ユーザー登録', // 表示: 日本語 ✅
+    type: 'usecase',
+    description: '新しいユーザーアカウントを登録する', // 表示: 日本語 ✅
+    actors: {
+      primary: { id: 'system_admin' },
+    },
+    preconditions: [],
+    postconditions: [],
+    mainFlow: [
+      {
+        stepId: 'input-user-info',
+        actor: { id: 'system_admin' },
+        action: 'ユーザー情報を入力',
+        expectedResult: '入力フォームが表示される',
+      },
+    ],
+    priority: 'medium',
+  },
+  {
+    id: 'customer-management', // kebab-case ✅
+    name: '顧客管理とカスタマー対応', // 混在 ❌（表示テキスト内で日本語とカタカナ）
+    type: 'usecase',
+    description: '顧客情報を管理し、カスタマーサポートを提供する', // 混在 ❌
+    actors: {
+      primary: { id: 'storeStaff' },
+    },
+    preconditions: [],
+    postconditions: [],
+    mainFlow: [
+      {
+        stepId: 'view-customer',
+        actor: { id: 'storeStaff' },
+        action: 'カスタマー情報を表示',
+        expectedResult: '顧客情報が表示される',
+      },
+    ],
+    priority: 'low',
+  },
 ];
 
 const testBusinessRequirements: BusinessRequirementDefinition = {
