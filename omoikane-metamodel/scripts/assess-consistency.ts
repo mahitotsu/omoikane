@@ -217,6 +217,17 @@ async function main() {
   console.log('【用語の統一性】');
   console.log(`  スコア: ${namingResult.terminology.score.toFixed(1)}/100`);
   console.log(`  混在用語: ${namingResult.terminology.mixedTerms.length}組`);
+  
+  // 混在用語の詳細を表示
+  if (namingResult.terminology.mixedTerms.length > 0) {
+    console.log();
+    for (const mixed of namingResult.terminology.mixedTerms) {
+      console.log(`  • 「${mixed.term1}」と「${mixed.term2}」が混在`);
+      console.log(`    - ${mixed.term1}: ${mixed.occurrences1.length}箇所`);
+      console.log(`    - ${mixed.term2}: ${mixed.occurrences2.length}箇所`);
+      console.log(`    → 推奨統一用語: 「${mixed.suggestedUnifiedTerm}」`);
+    }
+  }
   console.log();
 
   if (namingResult.recommendations.length > 0) {

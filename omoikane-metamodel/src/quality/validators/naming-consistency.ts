@@ -374,95 +374,264 @@ export function assessFileNaming(_filePaths: string[]): FileNamingAssessment {
 }
 
 // ============================================================================
-// 用語の統一性評価（改善版）
+// 用語の統一性評価（動的検出版）
 // ============================================================================
 
 /**
- * 用語の統一性を評価
+ * Levenshtein距離を計算（Unicode対応）
+ *
+ * **用途:**
+ * 類似する用語を検出するために、2つの文字列の編集距離を計算します。
+ * 日本語などのマルチバイト文字にも対応しています。
+ *
+ * @param str1 - 比較する文字列1
+ * @param str2 - 比較する文字列2
+ * @returns 編集距離（0に近いほど類似）
+ */
+function levenshteinDistance(str1: string, str2: string): number {
+  // 文字配列に変換（マルチバイト文字対応）
+  const chars1 = Array.from(str1);
+  const chars2 = Array.from(str2);
+  const len1 = chars1.length;
+  const len2 = chars2.length;
+  const matrix: number[][] = [];
+
+  for (let i = 0; i <= len1; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= len2; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= len1; i++) {
+    for (let j = 1; j <= len2; j++) {
+      const cost = chars1[i - 1] === chars2[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1, // 削除
+        matrix[i][j - 1] + 1, // 挿入
+        matrix[i - 1][j - 1] + cost // 置換
+      );
+    }
+  }
+
+  return matrix[len1][len2];
+}
+
+/**
+ * 類似度を計算（0.0-1.0）
+ *
+ * @param str1 - 比較する文字列1
+ * @param str2 - 比較する文字列2
+ * @returns 類似度（1.0に近いほど類似）
+ */
+function calculateSimilarity(str1: string, str2: string): number {
+  const distance = levenshteinDistance(str1, str2);
+  const maxLen = Math.max(str1.length, str2.length);
+  return maxLen === 0 ? 1.0 : 1.0 - distance / maxLen;
+}
+
+/**
+ * テキストからトークン（単語）を抽出
+ *
+ * **処理内容:**
+ * - 漢字: 1文字以上の連続（名詞として扱う）
+ * - カタカナ: 2文字以上の連続（複合語を考慮）
+ * - ひらがな: 助詞・助動詞なので除外
+ * - 英語: 3文字以上の連続するアルファベット
+ * - 記号・数字は除外
+ *
+ * **例:**
+ * - "ユーザー管理" → ["ユーザー", "管理"]
+ * - "利用者の一覧" → ["利用", "者", "一覧"]
+ * - "サーバー設定" → ["サーバー", "設定"]
+ *
+ * @param text - 抽出元のテキスト
+ * @returns トークンの配列
+ */
+function extractTokens(text: string): string[] {
+  const tokens: string[] = [];
+
+  // 漢字トークン（1文字以上）
+  const kanjiTokens = text.match(/[\u4E00-\u9FFF]+/g) || [];
+  tokens.push(...kanjiTokens);
+
+  // カタカナトークン（2文字以上）
+  const katakanaTokens = text.match(/[\u30A0-\u30FF]{2,}/g) || [];
+  tokens.push(...katakanaTokens);
+
+  // 英語トークン（3文字以上のアルファベット）
+  const englishTokens = text.match(/[a-zA-Z]{3,}/gi) || [];
+  tokens.push(...englishTokens);
+
+  return tokens;
+}
+
+/**
+ * 用語の統一性を評価（動的検出版）
  *
  * **改善内容:**
+ * - プロジェクト内の用語を動的に抽出
+ * - カスタム用語ペアを優先（意味的に類似する用語を指定可能）
+ * - Levenshtein距離で表記ゆれを自動検出（補助的）
  * - IDと表示テキストを分離して評価
- * - 技術的な識別子（ID）は英語使用を許容
- * - 表示テキスト（name、description）内での混在のみを検出
  *
- * **評価内容:**
- * - 類似する用語の混在を検出（例: 同一文脈で「予約」と「ブッキング」）
- * - IDは英語、表示テキストは日本語の使い分けは正常として扱う
+ * **アルゴリズム:**
+ * 1. カスタム用語ペアをチェック（優先）
+ * 2. 表示テキスト（name, description）からトークンを抽出
+ * 3. トークンの出現頻度をカウント
+ * 4. 類似度が高い（≥0.70）トークンペアを検出（補助的）
+ * 5. 両方が使用されている場合のみ混在と判定
+ *
+ * **使用例（カスタム用語ペア指定）:**
+ * ```typescript
+ * const customPairs = [
+ *   { term1: 'ユーザー', term2: '利用者' },  // 意味的に類似
+ *   { term1: '予約', term2: 'ブッキング' },  // 日本語とカタカナの混在
+ *   { term1: '顧客', term2: 'カスタマー' },
+ * ];
+ *
+ * const result = assessTerminologyConsistency(elements, customPairs);
+ * ```
  *
  * **例（正常）:**
  * ```typescript
- * { id: 'user-registration', name: 'ユーザー登録' } // ✅ OK
+ * { id: 'user-registration', name: 'ユーザー登録' } // ✅ OK (IDは評価対象外)
  * ```
  *
- * **例（混在）:**
+ * **例（混在検出）:**
  * ```typescript
- * { id: 'user-registration', name: 'ユーザー登録とregistration' } // ❌ NG
+ * // カスタム用語ペアで指定された場合
+ * { name: 'ユーザー管理' }    // ユーザー
+ * { name: '利用者一覧' }      // 利用者
+ * // → カスタムペアで指定されているため混在と判定
+ *
+ * // 表記ゆれの自動検出
+ * { name: 'サーバー設定' }    // サーバー
+ * { name: 'サーバ管理' }      // サーバ（長音記号の有無）
+ * // → 類似度が高いため混在と判定
  * ```
  *
  * @param elements - 評価対象の要素
+ * @param customTermPairs - カスタム用語ペア（オプション）
  * @returns 用語の統一性評価結果
  */
 export function assessTerminologyConsistency(
-  elements: Array<{ id: string; name?: string; description?: string }>
+  elements: Array<{ id: string; name?: string; description?: string }>,
+  customTermPairs?: Array<{ term1: string; term2: string }>
 ): TerminologyConsistency {
-  // よく混在する用語ペアのリスト（日本語 vs 英語/カタカナ）
-  const commonMixedTerms = [
-    { term1: '予約', term2: 'ブッキング' }, // カタカナ混在を検出
-    { term1: '顧客', term2: 'カスタマー' },
-    { term1: 'ユーザー', term2: '利用者' }, // 日本語内の表記ゆれ
-    { term1: '登録', term2: '記録' }, // 意味的に近い語の混在
-    { term1: '削除', term2: '消去' },
-  ];
+  // 表示テキストから全トークンを抽出
+  const tokenOccurrences = new Map<
+    string,
+    Array<{ location: string; context: string }>
+  >();
 
-  const mixedTerms: TerminologyConsistency['mixedTerms'] = [];
+  for (const element of elements) {
+    // IDは評価対象外（技術的な識別子として英語使用は正常）
+    // name と description のみを評価対象とする
+    const displayTexts = [element.name || '', element.description || ''].filter(
+      (text) => text.length > 0
+    );
 
-  for (const { term1, term2 } of commonMixedTerms) {
-    const occurrences1: Array<{ location: string; context: string }> = [];
-    const occurrences2: Array<{ location: string; context: string }> = [];
-
-    for (const element of elements) {
-      // IDは評価対象外（技術的な識別子として英語使用は正常）
-      // name と description のみを評価対象とする
-      const displayTexts = [
-        element.name || '',
-        element.description || '',
-      ].filter(text => text.length > 0);
-
-      for (const text of displayTexts) {
-        if (text.includes(term1)) {
-          occurrences1.push({
-            location: element.id,
-            context: element.name || element.id,
-          });
+    for (const text of displayTexts) {
+      const tokens = extractTokens(text);
+      for (const token of tokens) {
+        if (!tokenOccurrences.has(token)) {
+          tokenOccurrences.set(token, []);
         }
-
-        if (text.includes(term2)) {
-          occurrences2.push({
-            location: element.id,
-            context: element.name || element.id,
-          });
-        }
+        tokenOccurrences.get(token)!.push({
+          location: element.id,
+          context: element.name || element.id,
+        });
       }
     }
+  }
 
-    // 両方の用語が表示テキスト内で使用されている場合のみ混在と判定
-    if (occurrences1.length > 0 && occurrences2.length > 0) {
-      mixedTerms.push({
-        term1,
-        term2,
-        occurrences1,
-        occurrences2,
-        suggestedUnifiedTerm:
-          occurrences1.length >= occurrences2.length ? term1 : term2,
-      });
+  // トークンリストを取得（出現頻度1回以上）
+  const frequentTokens = Array.from(tokenOccurrences.entries())
+    .filter(([_, occurrences]) => occurrences.length >= 1)
+    .map(([token]) => token);
+
+  const mixedTerms: TerminologyConsistency['mixedTerms'] = [];
+  const checkedPairs = new Set<string>();
+
+  // カスタム用語ペアをチェック（優先）
+  if (customTermPairs && customTermPairs.length > 0) {
+    for (const { term1, term2 } of customTermPairs) {
+      const occurrences1 = tokenOccurrences.get(term1) || [];
+      const occurrences2 = tokenOccurrences.get(term2) || [];
+
+      if (occurrences1.length > 0 && occurrences2.length > 0) {
+        mixedTerms.push({
+          term1,
+          term2,
+          occurrences1,
+          occurrences2,
+          suggestedUnifiedTerm:
+            occurrences1.length >= occurrences2.length ? term1 : term2,
+        });
+        checkedPairs.add(`${term1}-${term2}`);
+        checkedPairs.add(`${term2}-${term1}`);
+      }
+    }
+  }
+
+  // 表記ゆれの自動検出（補助的）
+  // 類似度が高い（≥0.70）トークンペアを検出
+  for (let i = 0; i < frequentTokens.length; i++) {
+    for (let j = i + 1; j < frequentTokens.length; j++) {
+      const token1 = frequentTokens[i];
+      const token2 = frequentTokens[j];
+
+      // 既にチェック済みのペアはスキップ
+      const pairKey = `${token1}-${token2}`;
+      if (checkedPairs.has(pairKey)) continue;
+
+      // 同一トークンはスキップ
+      if (token1 === token2) continue;
+
+      // 部分文字列チェック（活用形を除外）
+      // ただし、長さの差が小さい場合（≤2文字）は表記ゆれの可能性があるので検出対象とする
+      const lengthDiff = Math.abs(
+        Array.from(token1).length - Array.from(token2).length
+      );
+      if (lengthDiff > 2) {
+        // 長さの差が大きい場合のみ部分文字列チェック
+        if (token1.includes(token2) || token2.includes(token1)) {
+          continue; // 活用形や複合語の関係と判断してスキップ
+        }
+      }
+
+      // 類似度を計算（Levenshtein距離ベース）
+      const similarity = calculateSimilarity(token1, token2);
+
+      // 類似度が0.70以上の場合、表記ゆれと判定
+      // （例: 「サーバー」vs「サーバ」、「データベース」vs「DB」等）
+      if (similarity >= 0.70) {
+        const occurrences1 = tokenOccurrences.get(token1)!;
+        const occurrences2 = tokenOccurrences.get(token2)!;
+
+        mixedTerms.push({
+          term1: token1,
+          term2: token2,
+          occurrences1,
+          occurrences2,
+          suggestedUnifiedTerm:
+            occurrences1.length >= occurrences2.length ? token1 : token2,
+        });
+
+        checkedPairs.add(pairKey);
+        checkedPairs.add(`${token2}-${token1}`);
+      }
     }
   }
 
   // スコア計算: 混在が少ないほど高スコア
-  const score = mixedTerms.length === 0 ? 100 : Math.max(0, 100 - mixedTerms.length * 15);
+  const score =
+    mixedTerms.length === 0 ? 100 : Math.max(0, 100 - mixedTerms.length * 15);
 
   return {
-    totalTerms: commonMixedTerms.length,
+    totalTerms: frequentTokens.length,
     mixedTerms,
     score,
   };
