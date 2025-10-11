@@ -79,13 +79,19 @@ import {
  * **処理内容:**
  * 1. ディレクトリを再帰的に走査
  * 2. .ts拡張子のファイルを収集
- * 3. node_modulesや隠しディレクトリをスキップ
+ * 3. 除外対象をスキップ
  * 4. index.tsは集約ファイルなのでスキップ（重複防止）
  *
  * **スキップ対象:**
- * - node_modules/
+ * - node_modules/ - 依存パッケージ
+ * - scripts/ - スクリプトファイル（副作用のあるコードが含まれる可能性）
  * - .git/, .vscode/ 等の隠しディレクトリ
  * - index.ts（他ファイルの集約なので）
+ *
+ * **設計判断:**
+ * scriptsディレクトリをスキップする理由は、スクリプトファイルのインポートが
+ * 副作用（ファイル更新等）を引き起こす可能性があるため。品質評価は読み取り専用の
+ * 操作であるべきで、ファイルを変更してはいけない。
  *
  * @param dir - 検索開始ディレクトリ
  * @returns TypeScriptファイルパスの配列
@@ -96,7 +102,12 @@ async function findProjectFiles(dir: string): Promise<string[]> {
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
+      // scripts, node_modules, 隠しディレクトリをスキップ
+      if (
+        !entry.name.startsWith('.') &&
+        entry.name !== 'node_modules' &&
+        entry.name !== 'scripts'
+      ) {
         files.push(...(await findProjectFiles(fullPath)));
       }
     } else if (entry.isFile() && extname(entry.name) === '.ts') {
