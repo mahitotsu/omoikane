@@ -3,7 +3,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const capacityManagementFlow: ScreenFlow = {
   id: 'capacity-management-flow',
@@ -19,32 +20,32 @@ export const capacityManagementFlow: ScreenFlow = {
     {
       from: typedScreenRef('capacity-calendar-screen'),
       to: typedScreenRef('capacity-slot-form-screen'),
-      trigger: 'add-slot',
+      trigger: typedScreenActionRef('capacity-calendar-screen', 'add-slot'),
     },
     {
       from: typedScreenRef('capacity-slot-form-screen'),
       to: typedScreenRef('capacity-slot-confirm-screen'),
-      trigger: 'validate-slot',
+      trigger: typedScreenActionRef('capacity-slot-form-screen', 'validate-slot'),
     },
     {
       from: typedScreenRef('capacity-slot-confirm-screen'),
       to: typedScreenRef('capacity-calendar-screen'),
-      trigger: 'confirm-registration',
+      trigger: typedScreenActionRef('capacity-slot-confirm-screen', 'confirm-registration'),
     },
     {
       from: typedScreenRef('capacity-slot-form-screen'),
       to: typedScreenRef('capacity-calendar-screen'),
-      trigger: 'cancel',
+      trigger: typedScreenActionRef('capacity-slot-form-screen', 'cancel'),
     },
     {
       from: typedScreenRef('capacity-slot-confirm-screen'),
       to: typedScreenRef('capacity-slot-form-screen'),
-      trigger: 'back-to-form',
+      trigger: typedScreenActionRef('capacity-slot-confirm-screen', 'back-to-form'),
     },
     {
       from: typedScreenRef('capacity-slot-confirm-screen'),
       to: typedScreenRef('capacity-calendar-screen'),
-      trigger: 'cancel',
+      trigger: typedScreenActionRef('capacity-slot-confirm-screen', 'cancel'),
     },
   ],
   startScreen: typedScreenRef('capacity-calendar-screen'),

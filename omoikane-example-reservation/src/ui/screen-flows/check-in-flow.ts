@@ -19,7 +19,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const checkInFlow: ScreenFlow = {
   id: 'check-in-flow',
@@ -38,31 +39,31 @@ export const checkInFlow: ScreenFlow = {
     {
       from: typedScreenRef('staff-reservation-list-screen'),
       to: typedScreenRef('check-in-console-screen'),
-      trigger: 'check-in',
+      trigger: typedScreenActionRef('staff-reservation-list-screen', 'check-in'),
       condition: '予約が確定状態である',
     },
     {
       from: typedScreenRef('check-in-console-screen'),
       to: typedScreenRef('check-in-complete-screen'),
-      trigger: 'confirm-checkin',
+      trigger: typedScreenActionRef('check-in-console-screen', 'confirm-checkin'),
       condition: 'チェックイン情報が有効である',
     },
     {
       from: typedScreenRef('check-in-console-screen'),
       to: typedScreenRef('staff-reservation-list-screen'),
-      trigger: 'cancel-checkin',
+      trigger: typedScreenActionRef('check-in-console-screen', 'cancel-checkin'),
       condition: 'ユーザーがキャンセルした',
     },
     {
       from: typedScreenRef('check-in-complete-screen'),
       to: typedScreenRef('staff-reservation-list-screen'),
-      trigger: 'back-to-list',
+      trigger: typedScreenActionRef('check-in-complete-screen', 'back-to-list'),
       condition: '一覧に戻る',
     },
     {
       from: typedScreenRef('check-in-complete-screen'),
       to: typedScreenRef('check-in-console-screen'),
-      trigger: 'next-checkin',
+      trigger: typedScreenActionRef('check-in-complete-screen', 'next-checkin'),
       condition: '次のチェックインを続ける',
     },
   ],

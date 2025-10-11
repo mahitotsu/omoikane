@@ -57,16 +57,16 @@
 import { readdir } from 'fs/promises';
 import { extname, join, resolve } from 'path';
 import {
-  AIRecommendationEngine,
-  analyzeGraph,
-  applyContext,
-  assessProjectMaturity,
-  buildDependencyGraph,
-  inferContext,
-  MetricsDashboard,
-  validateFlowDesign,
-  validatePrerequisiteUseCases,
-  validateUseCaseScreenFlowCoherence,
+    AIRecommendationEngine,
+    analyzeGraph,
+    applyContext,
+    assessProjectMaturity,
+    buildDependencyGraph,
+    inferContext,
+    MetricsDashboard,
+    validateFlowDesign,
+    validatePrerequisiteUseCases,
+    validateUseCaseScreenFlowCoherence,
 } from '../src/quality/maturity/index.js';
 
 // ============================================================================
@@ -705,7 +705,10 @@ async function main() {
     const flowDesignInfo = validateFlowDesign(useCases);
 
     // 整合性検証結果を統合
-    const allCoherenceIssues = [...coherenceValidation.issues, ...prerequisiteValidation.issues];
+    const allCoherenceIssues = [
+      ...coherenceValidation.issues,
+      ...prerequisiteValidation.issues,
+    ];
     const totalCoherenceIssues = {
       high:
         coherenceValidation.issuesBySeverity.high + prerequisiteValidation.issuesBySeverity.high,

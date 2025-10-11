@@ -100,5 +100,10 @@ export const reservationUpdateConfirmScreen: Screen = {
       actionType: 'navigate',
       isPrimary: false,
     },
+    {
+      id: 'no-available-slots',
+      label: '予約枠なし',
+      actionType: 'custom',
+    },
   ],
 };

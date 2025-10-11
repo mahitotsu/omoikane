@@ -3,7 +3,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const accountRegistrationFlow: ScreenFlow = {
   id: 'account-registration-flow',
@@ -19,27 +20,27 @@ export const accountRegistrationFlow: ScreenFlow = {
     {
       from: typedScreenRef('account-list-screen'),
       to: typedScreenRef('account-registration-form-screen'),
-      trigger: 'register-account',
+      trigger: typedScreenActionRef('account-list-screen', 'register-account'),
     },
     {
       from: typedScreenRef('account-registration-form-screen'),
       to: typedScreenRef('account-operation-complete-screen'),
-      trigger: 'create-account',
+      trigger: typedScreenActionRef('account-registration-form-screen', 'create-account'),
     },
     {
       from: typedScreenRef('account-operation-complete-screen'),
       to: typedScreenRef('account-list-screen'),
-      trigger: 'back-to-list',
+      trigger: typedScreenActionRef('account-operation-complete-screen', 'back-to-list'),
     },
     {
       from: typedScreenRef('account-operation-complete-screen'),
       to: typedScreenRef('account-registration-form-screen'),
-      trigger: 'register-another',
+      trigger: typedScreenActionRef('account-operation-complete-screen', 'register-another'),
     },
     {
       from: typedScreenRef('account-registration-form-screen'),
       to: typedScreenRef('account-list-screen'),
-      trigger: 'cancel',
+      trigger: typedScreenActionRef('account-registration-form-screen', 'cancel'),
     },
   ],
   startScreen: typedScreenRef('account-list-screen'),

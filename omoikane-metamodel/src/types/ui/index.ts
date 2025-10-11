@@ -76,19 +76,19 @@ export type { ValidationRule, ValidationRuleType, ValidationTrigger } from './va
 // ============================================================================
 
 export type {
-  DisplayField,
-  DisplayFieldType,
-  FieldType,
-  InputField,
-  Screen,
-  ScreenAction,
-  ScreenActionType,
-  ScreenType,
-  SelectOption,
+    DisplayField,
+    DisplayFieldType,
+    FieldType,
+    InputField,
+    Screen,
+    ScreenAction,
+    ScreenActionType,
+    ScreenType,
+    SelectOption
 } from './screen.js';
 
 // ============================================================================
 // 画面遷移
 // ============================================================================
 
-export type { ScreenFlow, ScreenTransition } from './screen-flow.js';
+export type { ScreenActionRef, ScreenFlow, ScreenTransition } from './screen-flow.js';

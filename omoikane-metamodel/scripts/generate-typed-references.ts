@@ -80,6 +80,8 @@ interface ScreenInfo {
   id: string;
   /** 定義ファイルの絶対パス */
   file: string;
+  /** 画面内で定義されているアクションIDのリスト */
+  actionIds: string[];
 }
 
 /**
@@ -379,7 +381,13 @@ async function extractElements(): Promise<{
       }
 
       if (!screens.find(screen => screen.id === typedValue.id)) {
-        screens.push({ id: typedValue.id, file });
+        // アクションIDを抽出
+        const screenDef = value as { actions?: { id?: string }[] };
+        const actionIds = (screenDef.actions ?? [])
+          .map(action => action?.id)
+          .filter((id): id is string => Boolean(id));
+        
+        screens.push({ id: typedValue.id, file, actionIds });
       }
     }
   }
@@ -567,6 +575,22 @@ export type KnownValidationRuleId = ${toUnionLiteral(validationRules.map(v => v.
 
 export type KnownScreenFlowId = ${toUnionLiteral(screenFlows.map(f => f.id))};
 
+/**
+ * 画面とアクションのマッピング
+ * 
+ * 各画面で定義されているアクションIDの型を定義します。
+ * これにより、画面ごとに異なるアクション名を型安全に扱えます。
+ */
+export interface ScreenActionsMap {
+${screens.map(screen => {
+  if (screen.actionIds.length === 0) {
+    return `  '${screen.id}': never;`;
+  }
+  const actionIds = screen.actionIds.map(id => `'${id}'`).join(' | ');
+  return `  '${screen.id}': ${actionIds};`;
+}).join('\n')}
+}
+
 export function businessRequirementRef<T extends KnownBusinessRequirementId>(
   id: T
 ): BusinessRequirementDefinitionRef<T> {
@@ -625,6 +649,38 @@ export function typedUseCaseRef<T extends KnownUseCaseId>(id: T): Ref<UseCase> &
 
 export function typedScreenRef<T extends KnownScreenId>(id: T): Ref<Screen> {
   return { id };
+}
+
+/**
+ * 画面アクションへの型安全な参照
+ * 
+ * 画面IDとアクションIDの組み合わせで、特定の画面の特定のアクションを参照します。
+ * IDEの補完が効き、存在しない画面やアクションを参照するとコンパイルエラーになります。
+ * 
+ * @param screenId - 画面ID（KnownScreenId型）
+ * @param actionId - アクションID（その画面で定義されているアクションID）
+ * @returns 画面アクション参照オブジェクト
+ * 
+ * @example
+ * \`\`\`typescript
+ * // 型安全な参照（IDE補完が効く）
+ * const ref = typedScreenActionRef('account-list-screen', 'delete');
+ * 
+ * // コンパイルエラー: 存在しない画面
+ * typedScreenActionRef('non-existent-screen', 'delete');
+ * 
+ * // コンパイルエラー: その画面に存在しないアクション
+ * typedScreenActionRef('account-list-screen', 'submit');
+ * \`\`\`
+ */
+export function typedScreenActionRef<
+  S extends KnownScreenId,
+  A extends ScreenActionsMap[S]
+>(
+  screenId: S,
+  actionId: A
+): { screenId: S; actionId: A } {
+  return { screenId, actionId };
 }
 
 export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): Ref<ValidationRule> {

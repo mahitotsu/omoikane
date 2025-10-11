@@ -20,7 +20,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const reservationUpdateFlow: ScreenFlow = {
   id: 'reservation-update-flow',
@@ -41,37 +42,37 @@ export const reservationUpdateFlow: ScreenFlow = {
     {
       from: typedScreenRef('reservation-lookup-screen'),
       to: typedScreenRef('reservation-detail-screen'),
-      trigger: 'lookup-reservation',
+      trigger: typedScreenActionRef('reservation-lookup-screen', 'lookup-reservation'),
       condition: '予約番号と連絡先が一致した',
     },
     {
       from: typedScreenRef('reservation-detail-screen'),
       to: typedScreenRef('reservation-update-form-screen'),
-      trigger: 'update-reservation',
+      trigger: typedScreenActionRef('reservation-detail-screen', 'update-reservation'),
       condition: 'キャンセル期限内である',
     },
     {
       from: typedScreenRef('reservation-update-form-screen'),
       to: typedScreenRef('reservation-update-confirm-screen'),
-      trigger: 'submit-update',
+      trigger: typedScreenActionRef('reservation-update-form-screen', 'submit-update'),
       condition: 'すべてのバリデーションが通過している',
     },
     {
       from: typedScreenRef('reservation-update-confirm-screen'),
       to: typedScreenRef('reservation-update-complete-screen'),
-      trigger: 'confirm-update',
+      trigger: typedScreenActionRef('reservation-update-confirm-screen', 'confirm-update'),
       condition: '変更後の予約枠が確保できた',
     },
     {
       from: typedScreenRef('reservation-update-confirm-screen'),
       to: typedScreenRef('reservation-update-form-screen'),
-      trigger: 'back-to-form',
+      trigger: typedScreenActionRef('reservation-update-confirm-screen', 'back-to-form'),
       condition: 'ユーザーが修正を希望した',
     },
     {
       from: typedScreenRef('reservation-update-confirm-screen'),
       to: typedScreenRef('reservation-update-form-screen'),
-      trigger: 'no-available-slots',
+      trigger: typedScreenActionRef('reservation-update-confirm-screen', 'no-available-slots'),
       condition: '変更後の予約枠がなくなった',
     },
   ],

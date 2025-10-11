@@ -22,7 +22,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const staffCancelFlow: ScreenFlow = {
   id: 'staff-cancel-flow',
@@ -41,19 +42,19 @@ export const staffCancelFlow: ScreenFlow = {
     {
       from: typedScreenRef('staff-reservation-list-screen'),
       to: typedScreenRef('staff-cancel-confirm-screen'),
-      trigger: 'staff-cancel',
+      trigger: typedScreenActionRef('staff-reservation-list-screen', 'staff-cancel'),
       condition: '取消可能な予約である',
     },
     {
       from: typedScreenRef('staff-cancel-confirm-screen'),
       to: typedScreenRef('staff-reservation-list-screen'),
-      trigger: 'confirm-staff-cancel',
+      trigger: typedScreenActionRef('staff-cancel-confirm-screen', 'confirm-staff-cancel'),
       condition: '取消理由が記録され、ユーザーが最終確認した',
     },
     {
       from: typedScreenRef('staff-cancel-confirm-screen'),
       to: typedScreenRef('staff-reservation-list-screen'),
-      trigger: 'back-to-detail',
+      trigger: typedScreenActionRef('staff-cancel-confirm-screen', 'back-to-detail'),
       condition: 'ユーザーが取消をキャンセルした',
     },
   ],

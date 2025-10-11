@@ -50,9 +50,39 @@ import type { UseCase } from '../functional/use-case.js';
 import type { Screen } from './screen.js';
 
 /**
+ * 画面アクションへの参照
+ *
+ * 画面IDとその画面内のアクションIDの組み合わせで、
+ * 特定の画面の特定のアクションを一意に参照します。
+ *
+ * **設計判断:**
+ * - アクションは画面に属する概念であり、画面内でローカルに定義
+ * - 異なる画面で同じアクション名（例: 'submit', 'cancel'）を使用可能
+ * - 画面IDとアクションIDの組み合わせで型安全な参照を実現
+ *
+ * **使用例:**
+ * ```typescript
+ * // typed-references.ts で自動生成される型安全な参照関数を使用
+ * trigger: typedScreenActionRef('account-list-screen', 'delete')
+ * ```
+ */
+export type ScreenActionRef = {
+  /** 画面ID */
+  screenId: string;
+
+  /** 画面内のアクションID */
+  actionId: string;
+};
+
+/**
  * 画面遷移
  *
  * 2つの画面間の遷移を定義します。
+ *
+ * **型安全性:**
+ * - trigger: 画面IDとアクションIDの組み合わせで参照
+ * - typed-references.ts で生成される型安全な参照関数を使用
+ * - コンパイル時に画面とアクションの存在をチェック
  */
 export type ScreenTransition = {
   /** 遷移元画面 */
@@ -62,17 +92,19 @@ export type ScreenTransition = {
   to: Ref<Screen>;
 
   /**
-   * トリガー
+   * トリガー（画面アクションへの参照）
    *
-   * 遷移を引き起こす操作を記述します。
+   * 遷移を引き起こす画面アクションを、画面IDとアクションIDで指定します。
    *
-   * 例:
-   * - 'submit': フォーム送信
-   * - 'cancel': キャンセルボタン
-   * - 'click-button-confirm': 確認ボタンクリック
-   * - 'click-link-detail': 詳細リンククリック
+   * **型安全な使用例:**
+   * ```typescript
+   * // typedScreenActionRef を使用（IDE補完が効く）
+   * trigger: typedScreenActionRef('account-list-screen', 'delete')
+   * trigger: typedScreenActionRef('form-screen', 'submit')
+   * trigger: typedScreenActionRef('confirm-screen', 'cancel')
+   * ```
    */
-  trigger: string;
+  trigger: ScreenActionRef;
 
   /**
    * 遷移条件（任意）
@@ -85,6 +117,13 @@ export type ScreenTransition = {
    * - 'ユーザーがログイン済み'
    */
   condition?: string;
+
+  /**
+   * ラベル（任意）
+   *
+   * 画面遷移図での表示用ラベルです。
+   */
+  label?: string;
 };
 
 /**

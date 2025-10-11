@@ -21,7 +21,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const reservationCancelFlow: ScreenFlow = {
   id: 'reservation-cancel-flow',
@@ -41,25 +42,25 @@ export const reservationCancelFlow: ScreenFlow = {
     {
       from: typedScreenRef('reservation-lookup-screen'),
       to: typedScreenRef('reservation-detail-screen'),
-      trigger: 'lookup-reservation',
+      trigger: typedScreenActionRef('reservation-lookup-screen', 'lookup-reservation'),
       condition: '予約番号と連絡先が一致した',
     },
     {
       from: typedScreenRef('reservation-detail-screen'),
       to: typedScreenRef('reservation-cancel-confirm-screen'),
-      trigger: 'cancel-reservation',
+      trigger: typedScreenActionRef('reservation-detail-screen', 'cancel-reservation'),
       condition: 'キャンセル期限内である',
     },
     {
       from: typedScreenRef('reservation-cancel-confirm-screen'),
       to: typedScreenRef('reservation-cancel-complete-screen'),
-      trigger: 'confirm-cancel',
+      trigger: typedScreenActionRef('reservation-cancel-confirm-screen', 'confirm-cancel'),
       condition: 'ユーザーが最終確認した',
     },
     {
       from: typedScreenRef('reservation-cancel-confirm-screen'),
       to: typedScreenRef('reservation-detail-screen'),
-      trigger: 'back-to-detail',
+      trigger: typedScreenActionRef('reservation-cancel-confirm-screen', 'back-to-detail'),
       condition: 'ユーザーが取消をキャンセルした',
     },
   ],

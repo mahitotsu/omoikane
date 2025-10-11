@@ -3,7 +3,7 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenActionRef, typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
 
 export const accountDeletionFlow: ScreenFlow = {
   id: 'account-deletion-flow',
@@ -19,22 +19,22 @@ export const accountDeletionFlow: ScreenFlow = {
     {
       from: typedScreenRef('account-list-screen'),
       to: typedScreenRef('account-deletion-confirm-screen'),
-      trigger: 'delete-account',
+      trigger: typedScreenActionRef('account-list-screen', 'delete-account'),
     },
     {
       from: typedScreenRef('account-deletion-confirm-screen'),
       to: typedScreenRef('account-operation-complete-screen'),
-      trigger: 'confirm-deletion',
+      trigger: typedScreenActionRef('account-deletion-confirm-screen', 'confirm-deletion'),
     },
     {
       from: typedScreenRef('account-operation-complete-screen'),
       to: typedScreenRef('account-list-screen'),
-      trigger: 'back-to-list',
+      trigger: typedScreenActionRef('account-operation-complete-screen', 'back-to-list'),
     },
     {
       from: typedScreenRef('account-deletion-confirm-screen'),
       to: typedScreenRef('account-list-screen'),
-      trigger: 'cancel',
+      trigger: typedScreenActionRef('account-deletion-confirm-screen', 'cancel'),
     },
   ],
   startScreen: typedScreenRef('account-list-screen'),

@@ -18,7 +18,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const reservationBookingFlow: ScreenFlow = {
   id: 'reservation-booking-flow',
@@ -37,25 +38,25 @@ export const reservationBookingFlow: ScreenFlow = {
     {
       from: typedScreenRef('reservation-form-screen'),
       to: typedScreenRef('reservation-confirm-screen'),
-      trigger: 'submit-reservation',
+      trigger: typedScreenActionRef('reservation-form-screen', 'submit-reservation'),
       condition: 'すべての入力バリデーションが通過している',
     },
     {
       from: typedScreenRef('reservation-confirm-screen'),
       to: typedScreenRef('reservation-complete-screen'),
-      trigger: 'confirm-booking',
+      trigger: typedScreenActionRef('reservation-confirm-screen', 'confirm-booking'),
       condition: '予約枠が確保でき、予約番号が生成された',
     },
     {
       from: typedScreenRef('reservation-confirm-screen'),
       to: typedScreenRef('reservation-form-screen'),
-      trigger: 'back-to-form',
+      trigger: typedScreenActionRef('reservation-confirm-screen', 'back-to-form'),
       condition: 'ユーザーが修正を希望した',
     },
     {
       from: typedScreenRef('reservation-confirm-screen'),
       to: typedScreenRef('reservation-form-screen'),
-      trigger: 'no-available-slots',
+      trigger: typedScreenActionRef('reservation-confirm-screen', 'no-available-slots'),
       condition: '予約枠がなくなった（他のユーザーが先に予約した）',
     },
   ],

@@ -18,7 +18,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const staffSearchFlow: ScreenFlow = {
   id: 'staff-search-flow',
@@ -32,13 +33,13 @@ export const staffSearchFlow: ScreenFlow = {
     {
       from: typedScreenRef('staff-search-screen'),
       to: typedScreenRef('staff-reservation-list-screen'),
-      trigger: 'search-reservations',
+      trigger: typedScreenActionRef('staff-search-screen', 'search-reservations'),
       condition: '検索条件が有効である',
     },
     {
       from: typedScreenRef('staff-reservation-list-screen'),
       to: typedScreenRef('staff-search-screen'),
-      trigger: 'back-to-search',
+      trigger: typedScreenActionRef('staff-reservation-list-screen', 'back-to-search'),
       condition: 'ユーザーが検索条件を変更したい',
     },
   ],

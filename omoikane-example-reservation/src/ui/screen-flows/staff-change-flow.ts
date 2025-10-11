@@ -20,7 +20,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const staffChangeFlow: ScreenFlow = {
   id: 'staff-change-flow',
@@ -40,25 +41,25 @@ export const staffChangeFlow: ScreenFlow = {
     {
       from: typedScreenRef('staff-reservation-list-screen'),
       to: typedScreenRef('reservation-update-form-screen'),
-      trigger: 'staff-change',
+      trigger: typedScreenActionRef('staff-reservation-list-screen', 'staff-change'),
       condition: '変更可能な予約である',
     },
     {
       from: typedScreenRef('reservation-update-form-screen'),
       to: typedScreenRef('staff-change-confirm-screen'),
-      trigger: 'submit-update',
+      trigger: typedScreenActionRef('reservation-update-form-screen', 'submit-update'),
       condition: 'すべてのバリデーションが通過している',
     },
     {
       from: typedScreenRef('staff-change-confirm-screen'),
       to: typedScreenRef('staff-reservation-list-screen'),
-      trigger: 'confirm-staff-change',
+      trigger: typedScreenActionRef('staff-change-confirm-screen', 'confirm-staff-change'),
       condition: '変更理由が記録され、変更後の予約枠が確保できた',
     },
     {
       from: typedScreenRef('staff-change-confirm-screen'),
       to: typedScreenRef('reservation-update-form-screen'),
-      trigger: 'back-to-form',
+      trigger: typedScreenActionRef('staff-change-confirm-screen', 'back-to-form'),
       condition: 'ユーザーが修正を希望した',
     },
   ],

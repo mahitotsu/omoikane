@@ -3,7 +3,8 @@
  */
 
 import type { ScreenFlow } from 'omoikane-metamodel';
-import { typedScreenRef, typedUseCaseRef } from '../../typed-references.js';
+import { typedScreenRef, typedUseCaseRef, typedScreenActionRef } from '../../typed-references.js';
+// typedScreenActionRef を追加しました
 
 export const historyReviewFlow: ScreenFlow = {
   id: 'history-review-flow',
@@ -19,17 +20,17 @@ export const historyReviewFlow: ScreenFlow = {
     {
       from: typedScreenRef('history-list-screen'),
       to: typedScreenRef('history-detail-screen'),
-      trigger: 'view-detail',
+      trigger: typedScreenActionRef('history-list-screen', 'view-detail'),
     },
     {
       from: typedScreenRef('history-detail-screen'),
       to: typedScreenRef('history-list-screen'),
-      trigger: 'back-to-list',
+      trigger: typedScreenActionRef('history-detail-screen', 'back-to-list'),
     },
     {
       from: typedScreenRef('history-detail-screen'),
       to: typedScreenRef('history-list-screen'),
-      trigger: 'mark-reviewed',
+      trigger: typedScreenActionRef('history-detail-screen', 'mark-reviewed'),
     },
   ],
   startScreen: typedScreenRef('history-list-screen'),
