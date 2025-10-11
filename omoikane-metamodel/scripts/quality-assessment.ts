@@ -255,7 +255,7 @@ async function loadProjectData(projectDir: string) {
     }
   }
 
-  return { businessRequirements, actors, useCases, screens, screenFlows };
+  return { businessRequirements, actors, useCases, screens, screenFlows, filePaths: files };
 }
 
 // ============================================================================
@@ -536,6 +536,7 @@ function displayV2Report(
   console.log(`  総合スコア: ${namingConsistency.overallScore.toFixed(1)}/100`);
   console.log(`  ID命名規則: ${namingConsistency.idNaming.score.toFixed(1)}/100`);
   console.log(`  stepId命名規則: ${namingConsistency.stepIdNaming.score.toFixed(1)}/100`);
+  console.log(`  ファイル名命名規則: ${namingConsistency.fileNaming.score.toFixed(1)}/100`);
 
   if (namingConsistency.recommendations.length > 0) {
     const highPriorityNaming = namingConsistency.recommendations.filter(
@@ -752,7 +753,7 @@ async function main() {
 
   try {
     console.log('📁 プロジェクトデータを読み込んでいます...');
-    const { businessRequirements, actors, useCases, screens, screenFlows } =
+    const { businessRequirements, actors, useCases, screens, screenFlows, filePaths } =
       await loadProjectData(projectDir);
     console.log(`  要件定義: ${businessRequirements.length}件`);
     console.log(`  アクター: ${actors.length}件`);
@@ -803,7 +804,8 @@ async function main() {
       businessRequirements,
       screens,
       undefined,
-      screenFlows
+      screenFlows,
+      filePaths
     );
     const flowConsistency = assessFlowConsistency(useCases, screens, screenFlows);
 

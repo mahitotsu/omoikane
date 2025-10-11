@@ -3,12 +3,12 @@
  */
 
 import { describe, expect, test } from 'bun:test';
-import { assessNamingConsistency } from './naming-consistency.js';
 import type {
-  Actor,
-  BusinessRequirementDefinition,
-  UseCase,
+    Actor,
+    BusinessRequirementDefinition,
+    UseCase,
 } from '../../types/index.js';
+import { assessNamingConsistency } from './naming-consistency.js';
 
 describe('assessNamingConsistency - ファイル名推奨', () => {
   test('キャメルケースのファイル名で推奨事項が生成される', () => {
