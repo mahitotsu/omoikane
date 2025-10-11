@@ -40,6 +40,7 @@ import type {
   ScreenFlow,
   UseCase,
 } from '../../types/index.js';
+import { deriveScreenFlowMetadata } from '../../types/ui/screen-flow-utils.js';
 import type {
   ChangeImpactAnalysis,
   CircularDependency,
@@ -213,9 +214,9 @@ export function buildDependencyGraph(
   screenFlows.forEach(flow => {
     addNode(nodes, flow.id, flow.name, NodeType.SCREEN_FLOW);
 
-    // フローが含む画面との関係
-    flow.screens?.forEach(screen => {
-      const screenId = typeof screen === 'string' ? screen : screen.id;
+    // フローが含む画面との関係（transitionsから導出）
+    const metadata = deriveScreenFlowMetadata(flow);
+    metadata.screens.forEach(screenId => {
       addEdge(edges, adjacencyList, reverseAdjacencyList, flow.id, screenId, EdgeType.CONTAINS);
     });
 

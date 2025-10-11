@@ -31,13 +31,6 @@ export const staffCancelFlow: ScreenFlow = {
   type: 'screen-flow',
   description:
     '店舗スタッフによる予約取消の画面遷移フロー。一覧→取消確認→完了（一覧）の3ステップ。不可逆操作。',
-
-  screens: [
-    typedScreenRef('staff-reservation-list-screen'),
-    typedScreenRef('staff-cancel-confirm-screen'),
-    typedScreenRef('staff-reservation-list-screen'),
-  ],
-
   transitions: [
     {
       from: typedScreenRef('staff-reservation-list-screen'),
@@ -57,9 +50,5 @@ export const staffCancelFlow: ScreenFlow = {
       trigger: typedScreenActionRef('staff-cancel-confirm-screen', 'back-to-detail'),
       condition: 'ユーザーが取消をキャンセルした',
     },
-  ],
-
-  startScreen: typedScreenRef('staff-reservation-list-screen'),
-  endScreens: [typedScreenRef('staff-reservation-list-screen')],
-  relatedUseCase: typedUseCaseRef('reservation-staff-cancel'),
+  ],  relatedUseCase: typedUseCaseRef('reservation-staff-cancel'),
 };

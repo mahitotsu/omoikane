@@ -27,13 +27,6 @@ export const reservationBookingFlow: ScreenFlow = {
   type: 'screen-flow',
   description:
     '来店者による予約登録の画面遷移フロー。入力→確認→完了の3ステップで、確認画面からは入力画面への戻りも可能。',
-
-  screens: [
-    typedScreenRef('reservation-form-screen'),
-    typedScreenRef('reservation-confirm-screen'),
-    typedScreenRef('reservation-complete-screen'),
-  ],
-
   transitions: [
     {
       from: typedScreenRef('reservation-form-screen'),
@@ -59,9 +52,5 @@ export const reservationBookingFlow: ScreenFlow = {
       trigger: typedScreenActionRef('reservation-confirm-screen', 'no-available-slots'),
       condition: '予約枠がなくなった（他のユーザーが先に予約した）',
     },
-  ],
-
-  startScreen: typedScreenRef('reservation-form-screen'),
-  endScreens: [typedScreenRef('reservation-complete-screen')],
-  relatedUseCase: typedUseCaseRef('reservation-booking'),
+  ],  relatedUseCase: typedUseCaseRef('reservation-booking'),
 };

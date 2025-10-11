@@ -92,3 +92,11 @@ export type {
 // ============================================================================
 
 export type { ScreenActionRef, ScreenFlow, ScreenTransition } from './screen-flow.js';
+
+export type { ScreenFlowMetadata } from './screen-flow-utils.js';
+export {
+  deriveEndScreens,
+  deriveScreenFlowMetadata,
+  deriveScreens,
+  deriveStartScreens,
+} from './screen-flow-utils.js';

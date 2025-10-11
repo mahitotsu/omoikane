@@ -98,16 +98,45 @@ const userRegistration: Functional.UseCase = {
 
 - `Screen`: 画面定義
 - `ValidationRule`: バリデーションルール
-- `ScreenFlow`: 画面遷移フロー
+- `ScreenFlow`: 画面遷移フロー（transitionsのみを定義、画面リスト等は自動導出）
+- `ScreenActionRef`: 画面アクション参照（screenId + actionId）
 - `InputField`: 入力フィールド
 - `DisplayField`: 表示フィールド
 - `ScreenAction`: 画面アクション
+
+**UI層の自動導出機能**:
+
+画面フロー（`ScreenFlow`）は`transitions`のみを定義し、以下の情報は自動導出されます：
+
+```typescript
+import { deriveScreenFlowMetadata } from 'omoikane-metamodel';
+
+const flow: ScreenFlow = {
+  id: 'booking-flow',
+  transitions: [
+    { from: { id: 'form' }, to: { id: 'confirm' }, trigger: {...} },
+    { from: { id: 'confirm' }, to: { id: 'complete' }, trigger: {...} },
+  ],
+};
+
+// 自動導出
+const metadata = deriveScreenFlowMetadata(flow);
+// metadata.screens: ['form', 'confirm', 'complete']
+// metadata.startScreens: ['form']  // 入次数0の画面
+// metadata.endScreens: ['complete']  // 出次数0の画面
+```
+
+これにより、DRY原則が守られ、`screens`/`startScreen`/`endScreens`の手動管理が不要になります。
 
 ### ユーティリティ
 
 - `Foundation.createRef<T>(id)`: 型安全な参照作成
 - `enrichStepsWithNumbers()`: stepIdから自動でstepNumberを生成
 - `findStepByIdOrNumber()`: stepIdまたはstepNumberでステップを検索
+- `deriveScreenFlowMetadata()`: 画面フローから画面リスト・開始画面・終了画面を導出
+- `deriveScreens()`: 画面フローから全画面を導出
+- `deriveStartScreens()`: 画面フローから開始画面を導出（入次数0）
+- `deriveEndScreens()`: 画面フローから終了画面を導出（出次数0）
 
 ### 品質評価フレームワーク v2.0
 

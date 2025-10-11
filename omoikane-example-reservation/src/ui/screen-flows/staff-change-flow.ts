@@ -29,14 +29,6 @@ export const staffChangeFlow: ScreenFlow = {
   type: 'screen-flow',
   description:
     '店舗スタッフによる予約変更の画面遷移フロー。一覧→変更フォーム→確認→完了（一覧）の4ステップ。',
-
-  screens: [
-    typedScreenRef('staff-reservation-list-screen'),
-    typedScreenRef('reservation-update-form-screen'),
-    typedScreenRef('staff-change-confirm-screen'),
-    typedScreenRef('staff-reservation-list-screen'),
-  ],
-
   transitions: [
     {
       from: typedScreenRef('staff-reservation-list-screen'),
@@ -62,9 +54,5 @@ export const staffChangeFlow: ScreenFlow = {
       trigger: typedScreenActionRef('staff-change-confirm-screen', 'back-to-form'),
       condition: 'ユーザーが修正を希望した',
     },
-  ],
-
-  startScreen: typedScreenRef('staff-reservation-list-screen'),
-  endScreens: [typedScreenRef('staff-reservation-list-screen')],
-  relatedUseCase: typedUseCaseRef('reservation-staff-change'),
+  ],  relatedUseCase: typedUseCaseRef('reservation-staff-change'),
 };

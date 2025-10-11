@@ -26,9 +26,6 @@ export const staffSearchFlow: ScreenFlow = {
   name: 'スタッフ予約検索フロー',
   type: 'screen-flow',
   description: '店舗スタッフによる予約検索の画面遷移フロー。検索→一覧表示の2ステップ。',
-
-  screens: [typedScreenRef('staff-search-screen'), typedScreenRef('staff-reservation-list-screen')],
-
   transitions: [
     {
       from: typedScreenRef('staff-search-screen'),
@@ -42,9 +39,5 @@ export const staffSearchFlow: ScreenFlow = {
       trigger: typedScreenActionRef('staff-reservation-list-screen', 'back-to-search'),
       condition: 'ユーザーが検索条件を変更したい',
     },
-  ],
-
-  startScreen: typedScreenRef('staff-search-screen'),
-  endScreens: [typedScreenRef('staff-reservation-list-screen')],
-  relatedUseCase: typedUseCaseRef('reservation-staff-search'),
+  ],  relatedUseCase: typedUseCaseRef('reservation-staff-search'),
 };

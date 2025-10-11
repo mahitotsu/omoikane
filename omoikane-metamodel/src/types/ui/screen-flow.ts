@@ -133,42 +133,41 @@ export type ScreenTransition = {
  * ユースケースの実現に必要な画面遷移の全体像を表現します。
  *
  * **設計原則:**
- * - 完全性: フロー内の全画面と全遷移を定義
+ * - 単一の真実の源: transitionsのみが画面遷移の定義
+ * - DRY原則: screens, startScreen, endScreensは自動導出（screen-flow-utils.tsを参照）
  * - トレーサビリティ: ユースケースとの対応関係を明示
- * - 可視化: 開始画面と終了画面を明確に
+ *
+ * **導出可能な情報:**
+ * - screens: transitionsから全画面IDを抽出
+ * - startScreens: 入次数が0の画面（遷移の起点）
+ * - endScreens: 出次数が0の画面（遷移の終点）
+ *
+ * **ユーティリティ関数:**
+ * ```typescript
+ * import { deriveScreenFlowMetadata } from 'omoikane-metamodel';
+ *
+ * const metadata = deriveScreenFlowMetadata(flow);
+ * // metadata.screens: string[]
+ * // metadata.startScreens: string[]
+ * // metadata.endScreens: string[]
+ * ```
  */
 export type ScreenFlow = DocumentBase & {
   /** 文書型識別子（固定値: 'screen-flow'） */
   type?: 'screen-flow';
 
   /**
-   * 含まれる画面
-   *
-   * このフロー内で使用される全ての画面のリストです。
-   */
-  screens: Ref<Screen>[];
-
-  /**
    * 画面遷移
    *
    * 画面間の遷移関係を定義します。
+   * これが唯一の真実の源（Single Source of Truth）です。
+   *
+   * **導出情報:**
+   * - 含まれる画面: transitionsから全画面を抽出
+   * - 開始画面: 入次数が0の画面
+   * - 終了画面: 出次数が0の画面
    */
   transitions: ScreenTransition[];
-
-  /**
-   * 開始画面
-   *
-   * フローの起点となる画面を指定します。
-   */
-  startScreen?: Ref<Screen>;
-
-  /**
-   * 終了画面
-   *
-   * フローの終点となる画面を指定します。
-   * 複数の終了パターンがある場合は配列で指定します。
-   */
-  endScreens?: Ref<Screen>[];
 
   /**
    * 関連するユースケース

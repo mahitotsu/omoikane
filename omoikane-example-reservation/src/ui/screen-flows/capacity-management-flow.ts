@@ -10,13 +10,7 @@ export const capacityManagementFlow: ScreenFlow = {
   id: 'capacity-management-flow',
   name: 'キャパシティ管理フロー',
   type: 'screen-flow',
-  description: 'キャパシティプランナーが予約枠を登録・削除するフロー',
-  screens: [
-    typedScreenRef('capacity-calendar-screen'),
-    typedScreenRef('capacity-slot-form-screen'),
-    typedScreenRef('capacity-slot-confirm-screen'),
-  ],
-  transitions: [
+  description: 'キャパシティプランナーが予約枠を登録・削除するフロー',  transitions: [
     {
       from: typedScreenRef('capacity-calendar-screen'),
       to: typedScreenRef('capacity-slot-form-screen'),
@@ -47,11 +41,5 @@ export const capacityManagementFlow: ScreenFlow = {
       to: typedScreenRef('capacity-calendar-screen'),
       trigger: typedScreenActionRef('capacity-slot-confirm-screen', 'cancel'),
     },
-  ],
-  startScreen: typedScreenRef('capacity-calendar-screen'),
-  endScreens: [
-    typedScreenRef('capacity-calendar-screen'),
-    typedScreenRef('capacity-slot-confirm-screen'),
-  ],
-  relatedUseCase: typedUseCaseRef('capacity-management'),
+  ],  relatedUseCase: typedUseCaseRef('capacity-management'),
 };

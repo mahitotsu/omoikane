@@ -29,15 +29,6 @@ export const reservationUpdateFlow: ScreenFlow = {
   type: 'screen-flow',
   description:
     '来店者による予約変更の画面遷移フロー。照会→詳細→変更フォーム→確認→完了の5ステップ。',
-
-  screens: [
-    typedScreenRef('reservation-lookup-screen'),
-    typedScreenRef('reservation-detail-screen'),
-    typedScreenRef('reservation-update-form-screen'),
-    typedScreenRef('reservation-update-confirm-screen'),
-    typedScreenRef('reservation-update-complete-screen'),
-  ],
-
   transitions: [
     {
       from: typedScreenRef('reservation-lookup-screen'),
@@ -75,9 +66,5 @@ export const reservationUpdateFlow: ScreenFlow = {
       trigger: typedScreenActionRef('reservation-update-confirm-screen', 'no-available-slots'),
       condition: '変更後の予約枠がなくなった',
     },
-  ],
-
-  startScreen: typedScreenRef('reservation-lookup-screen'),
-  endScreens: [typedScreenRef('reservation-update-complete-screen')],
-  relatedUseCase: typedUseCaseRef('reservation-update'),
+  ],  relatedUseCase: typedUseCaseRef('reservation-update'),
 };

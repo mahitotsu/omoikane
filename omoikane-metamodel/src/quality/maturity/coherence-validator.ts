@@ -19,8 +19,13 @@
  * @module quality/maturity/coherence-validator
  */
 
-import type { ScreenFlow, UseCase } from '../../types/index.js';
-import type { CoherenceIssue, CoherenceValidationResult } from './dependency-graph-model.js';
+import type {
+  CoherenceIssue,
+  CoherenceValidationResult,
+} from './dependency-graph-model.js';
+import type { UseCase } from '../../types/functional/use-case.js';
+import type { ScreenFlow } from '../../types/ui/screen-flow.js';
+import { deriveScreenFlowMetadata } from '../../types/ui/screen-flow-utils.js';
 
 // ============================================================================
 // 公開API: 整合性検証
@@ -109,8 +114,9 @@ function validateScreenSequence(useCase: UseCase, screenFlow: ScreenFlow): Coher
   // UseCaseから画面順序を抽出
   const useCaseScreens = extractScreenSequence(useCase);
 
-  // ScreenFlowから画面順序を抽出
-  const flowScreens = screenFlow.screens.map(s => s.id);
+  // ScreenFlowから画面順序を導出（transitionsから自動計算）
+  const metadata = deriveScreenFlowMetadata(screenFlow);
+  const flowScreens = metadata.screens;
 
   // 順序が完全に一致するかチェック
   if (!arraysEqual(useCaseScreens, flowScreens)) {
@@ -195,28 +201,42 @@ function validateTransitions(useCase: UseCase, screenFlow: ScreenFlow): Coherenc
 function validateBoundaryScreens(useCase: UseCase, screenFlow: ScreenFlow): CoherenceIssue[] {
   const issues: CoherenceIssue[] = [];
 
+  // メタデータを導出
+  const metadata = deriveScreenFlowMetadata(screenFlow);
+
   // 開始画面の検証
   const firstScreen = useCase.mainFlow[0]?.screen;
-  if (firstScreen && screenFlow.startScreen) {
-    if (firstScreen.id !== screenFlow.startScreen.id) {
+  if (firstScreen && metadata.startScreens.length > 0) {
+    // 開始画面が1つでない場合は警告
+    if (metadata.startScreens.length !== 1) {
       issues.push({
         type: 'start-screen-mismatch',
         severity: 'medium',
-        description: `開始画面が不一致です: UseCase=${firstScreen.id}、ScreenFlow=${screenFlow.startScreen.id}`,
+        description: `開始画面が${metadata.startScreens.length}個検出されました。通常は1個であるべきです: [${metadata.startScreens.join(', ')}]`,
         useCaseId: useCase.id,
         screenFlowId: screenFlow.id,
         expected: firstScreen.id,
-        actual: screenFlow.startScreen.id,
-        affectedScreenIds: [firstScreen.id, screenFlow.startScreen.id],
+        actual: metadata.startScreens.join(', '),
+        affectedScreenIds: [firstScreen.id, ...metadata.startScreens],
+      });
+    } else if (firstScreen.id !== metadata.startScreens[0]) {
+      issues.push({
+        type: 'start-screen-mismatch',
+        severity: 'medium',
+        description: `開始画面が不一致です: UseCase=${firstScreen.id}、ScreenFlow=${metadata.startScreens[0]}`,
+        useCaseId: useCase.id,
+        screenFlowId: screenFlow.id,
+        expected: firstScreen.id,
+        actual: metadata.startScreens[0],
+        affectedScreenIds: [firstScreen.id, metadata.startScreens[0]],
       });
     }
   }
 
   // 終了画面の検証
   const lastScreen = useCase.mainFlow[useCase.mainFlow.length - 1]?.screen;
-  if (lastScreen && screenFlow.endScreens && screenFlow.endScreens.length > 0) {
-    const endScreenIds = screenFlow.endScreens.map(s => s.id);
-    if (!endScreenIds.includes(lastScreen.id)) {
+  if (lastScreen && metadata.endScreens.length > 0) {
+    if (!metadata.endScreens.includes(lastScreen.id)) {
       issues.push({
         type: 'end-screen-mismatch',
         severity: 'medium',
@@ -224,8 +244,8 @@ function validateBoundaryScreens(useCase: UseCase, screenFlow: ScreenFlow): Cohe
         useCaseId: useCase.id,
         screenFlowId: screenFlow.id,
         expected: lastScreen.id,
-        actual: endScreenIds.join(', '),
-        affectedScreenIds: [lastScreen.id, ...endScreenIds],
+        actual: metadata.endScreens.join(', '),
+        affectedScreenIds: [lastScreen.id, ...metadata.endScreens],
       });
     }
   }

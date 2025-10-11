@@ -28,13 +28,6 @@ export const checkInFlow: ScreenFlow = {
   type: 'screen-flow',
   description:
     '来店顧客のチェックイン処理の画面遷移フロー。一覧→チェックインコンソール→完了の3ステップ。',
-
-  screens: [
-    typedScreenRef('staff-reservation-list-screen'),
-    typedScreenRef('check-in-console-screen'),
-    typedScreenRef('check-in-complete-screen'),
-  ],
-
   transitions: [
     {
       from: typedScreenRef('staff-reservation-list-screen'),
@@ -66,12 +59,5 @@ export const checkInFlow: ScreenFlow = {
       trigger: typedScreenActionRef('check-in-complete-screen', 'next-checkin'),
       condition: '次のチェックインを続ける',
     },
-  ],
-
-  startScreen: typedScreenRef('staff-reservation-list-screen'),
-  endScreens: [
-    typedScreenRef('check-in-complete-screen'),
-    typedScreenRef('staff-reservation-list-screen'),
-  ],
-  relatedUseCase: typedUseCaseRef('reservation-check-in'),
+  ],  relatedUseCase: typedUseCaseRef('reservation-check-in'),
 };

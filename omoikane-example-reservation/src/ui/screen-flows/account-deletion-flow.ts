@@ -9,13 +9,7 @@ export const accountDeletionFlow: ScreenFlow = {
   id: 'account-deletion-flow',
   name: 'アカウント削除フロー',
   type: 'screen-flow',
-  description: 'システム管理者がアカウントを削除するフロー',
-  screens: [
-    typedScreenRef('account-list-screen'),
-    typedScreenRef('account-deletion-confirm-screen'),
-    typedScreenRef('account-operation-complete-screen'),
-  ],
-  transitions: [
+  description: 'システム管理者がアカウントを削除するフロー',  transitions: [
     {
       from: typedScreenRef('account-list-screen'),
       to: typedScreenRef('account-deletion-confirm-screen'),
@@ -36,11 +30,5 @@ export const accountDeletionFlow: ScreenFlow = {
       to: typedScreenRef('account-list-screen'),
       trigger: typedScreenActionRef('account-deletion-confirm-screen', 'cancel'),
     },
-  ],
-  startScreen: typedScreenRef('account-list-screen'),
-  endScreens: [
-    typedScreenRef('account-list-screen'),
-    typedScreenRef('account-operation-complete-screen'),
-  ],
-  relatedUseCase: typedUseCaseRef('user-account-deletion'),
+  ],  relatedUseCase: typedUseCaseRef('user-account-deletion'),
 };

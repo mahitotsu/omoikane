@@ -10,13 +10,7 @@ export const accountRegistrationFlow: ScreenFlow = {
   id: 'account-registration-flow',
   name: 'アカウント登録フロー',
   type: 'screen-flow',
-  description: 'システム管理者が新規アカウントを登録するフロー',
-  screens: [
-    typedScreenRef('account-list-screen'),
-    typedScreenRef('account-registration-form-screen'),
-    typedScreenRef('account-operation-complete-screen'),
-  ],
-  transitions: [
+  description: 'システム管理者が新規アカウントを登録するフロー',  transitions: [
     {
       from: typedScreenRef('account-list-screen'),
       to: typedScreenRef('account-registration-form-screen'),
@@ -42,11 +36,5 @@ export const accountRegistrationFlow: ScreenFlow = {
       to: typedScreenRef('account-list-screen'),
       trigger: typedScreenActionRef('account-registration-form-screen', 'cancel'),
     },
-  ],
-  startScreen: typedScreenRef('account-list-screen'),
-  endScreens: [
-    typedScreenRef('account-list-screen'),
-    typedScreenRef('account-operation-complete-screen'),
-  ],
-  relatedUseCase: typedUseCaseRef('user-account-registration'),
+  ],  relatedUseCase: typedUseCaseRef('user-account-registration'),
 };
