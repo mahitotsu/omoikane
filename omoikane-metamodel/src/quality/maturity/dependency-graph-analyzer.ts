@@ -34,23 +34,23 @@
  */
 
 import type {
-  Actor,
-  BusinessRequirementDefinition,
-  Screen,
-  ScreenFlow,
-  UseCase,
+    Actor,
+    BusinessRequirementDefinition,
+    Screen,
+    ScreenFlow,
+    UseCase,
 } from '../../types/index.js';
 import { deriveScreenFlowMetadata } from '../../types/ui/screen-flow-utils.js';
 import type {
-  ChangeImpactAnalysis,
-  CircularDependency,
-  DependencyGraph,
-  GraphAnalysisResult,
-  GraphEdge,
-  GraphNode,
-  GraphStatistics,
-  LayerAnalysis,
-  NodeImportance,
+    ChangeImpactAnalysis,
+    CircularDependency,
+    DependencyGraph,
+    GraphAnalysisResult,
+    GraphEdge,
+    GraphNode,
+    GraphStatistics,
+    LayerAnalysis,
+    NodeImportance,
 } from './dependency-graph-model.js';
 import { EdgeType, NodeType } from './dependency-graph-model.js';
 

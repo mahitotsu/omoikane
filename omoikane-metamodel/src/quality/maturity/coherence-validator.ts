@@ -19,13 +19,13 @@
  * @module quality/maturity/coherence-validator
  */
 
-import type {
-  CoherenceIssue,
-  CoherenceValidationResult,
-} from './dependency-graph-model.js';
 import type { UseCase } from '../../types/functional/use-case.js';
-import type { ScreenFlow } from '../../types/ui/screen-flow.js';
 import { deriveScreenFlowMetadata } from '../../types/ui/screen-flow-utils.js';
+import type { ScreenFlow } from '../../types/ui/screen-flow.js';
+import type {
+    CoherenceIssue,
+    CoherenceValidationResult,
+} from './dependency-graph-model.js';
 
 // ============================================================================
 // 公開API: 整合性検証
