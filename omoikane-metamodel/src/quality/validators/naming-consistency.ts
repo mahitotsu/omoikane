@@ -324,29 +324,90 @@ export function assessStepIdNaming(
 }
 
 // ============================================================================
-// ファイル名命名規則の評価（仮実装）
+// ファイル名命名規則の評価
 // ============================================================================
+
+/**
+ * ファイル名からベース名を抽出（拡張子を除く）
+ *
+ * @param filePath - ファイルパス
+ * @returns ベース名
+ */
+function extractBasename(filePath: string): string {
+  const parts = filePath.split('/');
+  const filename = parts[parts.length - 1];
+  return filename.replace(/\.(ts|js|tsx|jsx)$/, '');
+}
 
 /**
  * ファイル名命名規則を評価
  *
- * **注意:**
- * この関数は要素のソースファイル情報を必要としますが、
- * 現在のメタモデルにはその情報がありません。
- * 将来的にファイルパス情報を追加する場合に備えて、インターフェースのみ提供します。
+ * **評価内容:**
+ * 1. ファイル名のスタイル（kebab-case推奨）
+ * 2. 特殊ファイル名は除外（index, typed-references, actors等）
  *
- * @param _filePaths - ファイルパス配列（未実装）
+ * @param filePaths - ファイルパス配列
  * @returns ファイル名命名規則の評価結果
  */
-export function assessFileNaming(_filePaths: string[]): FileNamingAssessment {
-  // TODO: ファイルパス情報が利用可能になった場合に実装
+export function assessFileNaming(filePaths: string[]): FileNamingAssessment {
+  // 評価対象外のファイル名パターン
+  const excludePatterns = [
+    'index',
+    'typed-references',
+    'actors',
+    'business-requirements',
+    'validation-rules',
+  ];
+
+  // ベース名を抽出し、除外パターンをフィルタ
+  const basenames = filePaths
+    .map(extractBasename)
+    .filter((name) => !excludePatterns.includes(name));
+
+  if (basenames.length === 0) {
+    // 評価対象がない場合は100点
+    return {
+      total: 0,
+      kebabCase: [],
+      camelCase: [],
+      pascalCase: [],
+      inconsistent: [],
+      score: 100,
+    };
+  }
+
+  const kebabCase: string[] = [];
+  const camelCase: string[] = [];
+  const pascalCase: string[] = [];
+  const inconsistent: string[] = [];
+
+  for (const name of basenames) {
+    const style = detectNamingStyle(name);
+    switch (style) {
+      case 'kebab-case':
+        kebabCase.push(name);
+        break;
+      case 'camel-case':
+        camelCase.push(name);
+        break;
+      case 'pascal-case':
+        pascalCase.push(name);
+        break;
+      default:
+        inconsistent.push(name);
+    }
+  }
+
+  // スコア計算（kebab-caseの割合）
+  const score = (kebabCase.length / basenames.length) * 100;
+
   return {
-    total: 0,
-    kebabCase: [],
-    camelCase: [],
-    pascalCase: [],
-    inconsistent: [],
-    score: 100, // デフォルトで満点（評価不可のため）
+    total: basenames.length,
+    kebabCase,
+    camelCase,
+    pascalCase,
+    inconsistent,
+    score,
   };
 }
 
@@ -371,6 +432,7 @@ export function assessFileNaming(_filePaths: string[]): FileNamingAssessment {
  * @param screens - 画面配列（オプション）
  * @param validationRules - バリデーションルール配列（オプション）
  * @param screenFlows - 画面フロー配列（オプション）
+ * @param filePaths - 評価対象のファイルパス配列（オプション）
  * @returns 命名規約の一貫性評価結果
  */
 export function assessNamingConsistency(
@@ -379,7 +441,8 @@ export function assessNamingConsistency(
   businessRequirements: BusinessRequirementDefinition[],
   screens?: Screen[],
   validationRules?: ValidationRule[],
-  screenFlows?: ScreenFlow[]
+  screenFlows?: ScreenFlow[],
+  filePaths?: string[]
 ): NamingConsistencyAssessment {
   // 全要素を統合
   const allElements = [
@@ -394,7 +457,7 @@ export function assessNamingConsistency(
   // 各評価を実行
   const idNaming = assessIdNaming(allElements);
   const stepIdNaming = assessStepIdNaming(useCases);
-  const fileNaming = assessFileNaming([]); // 未実装
+  const fileNaming = assessFileNaming(filePaths || []);
 
   // 総合スコア計算（重み付け平均）
   const overallScore =
@@ -459,6 +522,39 @@ export function assessNamingConsistency(
           suggestedAction: `ユースケース内でケバブケースに統一してください:\n${uc.stepIds.map((id) => `  - ${id}${detectNamingStyle(id) !== 'kebab-case' ? ` → ${toKebabCase(id)}` : ''}`).join('\n')}`,
         });
       }
+    }
+  }
+
+  // ファイル名命名規則の推奨
+  if (fileNaming.score < 80 && fileNaming.total > 0) {
+    if (fileNaming.camelCase.length > 0) {
+      recommendations.push({
+        category: 'file',
+        priority: 'medium',
+        message: `ファイル名命名規則: ${fileNaming.camelCase.length}個のファイルでキャメルケースが使用されています。ケバブケースに統一してください`,
+        affectedElements: fileNaming.camelCase,
+        suggestedAction: `以下のファイル名をケバブケースに変更してください:\n${fileNaming.camelCase.map((name) => `  - ${name}.ts → ${toKebabCase(name)}.ts`).join('\n')}`,
+      });
+    }
+
+    if (fileNaming.pascalCase.length > 0) {
+      recommendations.push({
+        category: 'file',
+        priority: 'medium',
+        message: `ファイル名命名規則: ${fileNaming.pascalCase.length}個のファイルでパスカルケースが使用されています。ケバブケースに統一してください`,
+        affectedElements: fileNaming.pascalCase,
+        suggestedAction: `以下のファイル名をケバブケースに変更してください:\n${fileNaming.pascalCase.map((name) => `  - ${name}.ts → ${toKebabCase(name)}.ts`).join('\n')}`,
+      });
+    }
+
+    if (fileNaming.inconsistent.length > 0) {
+      recommendations.push({
+        category: 'file',
+        priority: 'low',
+        message: `ファイル名命名規則: ${fileNaming.inconsistent.length}個のファイルで一貫性のない命名が使用されています`,
+        affectedElements: fileNaming.inconsistent,
+        suggestedAction: `ファイル名をケバブケースに統一してください`,
+      });
     }
   }
 

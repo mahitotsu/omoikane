@@ -172,6 +172,11 @@ async function main() {
   console.log(`  業務要件: ${data.businessRequirements.length}個`);
   console.log(`  画面: ${data.screens.length}個`);
   console.log(`  画面フロー: ${data.screenFlows.length}個`);
+
+  // ファイルパスを収集
+  const srcDir = join(resolve(projectPath), 'src');
+  const filePaths = await findProjectFiles(srcDir);
+  console.log(`  ファイル: ${filePaths.length}個`);
   console.log();
 
   // ============================================================================
@@ -189,7 +194,8 @@ async function main() {
     data.businessRequirements,
     data.screens,
     undefined,
-    data.screenFlows
+    data.screenFlows,
+    filePaths
   );
 
   console.log(`📊 総合スコア: ${namingResult.overallScore.toFixed(1)}/100`);
@@ -212,6 +218,15 @@ async function main() {
   console.log(
     `  混在ユースケース: ${namingResult.stepIdNaming.inconsistentUseCases.length}個`
   );
+  console.log();
+
+  console.log('【ファイル名命名規則】');
+  console.log(`  スコア: ${namingResult.fileNaming.score.toFixed(1)}/100`);
+  console.log(`  評価対象: ${namingResult.fileNaming.total}個`);
+  console.log(`  ケバブケース: ${namingResult.fileNaming.kebabCase.length}個`);
+  console.log(`  キャメルケース: ${namingResult.fileNaming.camelCase.length}個`);
+  console.log(`  パスカルケース: ${namingResult.fileNaming.pascalCase.length}個`);
+  console.log(`  その他: ${namingResult.fileNaming.inconsistent.length}個`);
   console.log();
 
   if (namingResult.recommendations.length > 0) {
