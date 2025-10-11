@@ -156,6 +156,11 @@ export function findStepByIdOrNumber(
 
 全てのドキュメント型に`type`フィールドを持たせ、実行時に型を識別できるようにします。これにより、インスタンスプロジェクトで型安全な参照関数を自動生成できます。
 
+**重要な原則:**
+- **type属性のみで判定**: プロパティの有無による判定は使用しない
+- **一貫性**: すべての要素が統一された方法で検出される
+- **シンプル**: フォールバックロジック不要
+
 #### 型フィールドの定義
 
 各ドキュメント型に`type?: 'type-literal'`を追加：
@@ -181,6 +186,12 @@ export interface ValidationRule extends DocumentBase {
   ruleType: ValidationRuleType;
   errorMessage: string;
   // ...
+}
+
+export interface ScreenFlow extends DocumentBase {
+  type?: 'screen-flow'; // 型識別子
+  transitions: ScreenTransition[];
+  relatedUseCase: Ref<UseCase>; // 必須（トレーサビリティ）
 }
 ```
 
@@ -218,7 +229,10 @@ export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): 
 
 - **凝集度**: 入力フィールドは画面定義内にインライン定義
 - **再利用性**: バリデーションルールは独立した型として定義し参照で再利用
-- **トレーサビリティ**: UseCaseStepから画面への参照
+- **トレーサビリティ**: 
+  - UseCaseStepから画面への参照
+  - ScreenFlowからUseCaseへの必須参照（relatedUseCase）
+- **循環UIパターン**: 「一覧 → 詳細 → 一覧」のような循環を正しく表現
 
 #### 提供型
 
@@ -243,11 +257,28 @@ export interface ValidationRule extends DocumentBase {
 // 画面遷移フロー
 export interface ScreenFlow extends DocumentBase {
   type?: 'screen-flow';
-  screens: Ref<Screen>[];
-  transitions: ScreenTransition[];
-  startScreen?: Ref<Screen>;
-  endScreens?: Ref<Screen>[];
-  relatedUseCase?: Ref<UseCase>;
+  transitions: ScreenTransition[]; // 単一の情報源
+  relatedUseCase: Ref<UseCase>; // 必須（トレーサビリティ）
+}
+```
+
+**重要な変更点:**
+- `relatedUseCase`は**必須フィールド**になりました
+- `screens`, `startScreen`, `endScreens`は自動導出されるため定義不要（DRY原則）
+- 循環パターン（A → B → C → A）を正しくサポート
+
+#### UseCaseStepとの統合
+
+```typescript
+export interface UseCaseStep {
+  stepId: string;
+  actor: Ref<Actor>;
+  action: string;
+  expectedResult: string;
+
+  // UI関連（画面との関連付け）
+  screen?: Ref<Screen>;
+  inputFields?: string[]; // 画面内のフィールドID
 }
 ```
 
@@ -301,6 +332,38 @@ export interface UseCaseStep {
 詳細な基準と設計判断は `docs/maturity-criteria-evolution.md`
 を参照してください。
 
+#### 整合性検証（Coherence Validation）
+
+**循環UIパターンのサポート:**
+
+品質評価の整合性チェックは、「一覧 → 詳細 → 一覧」のような循環パターンを正しく認識します。
+
+```typescript
+// UseCaseの画面順序: [list, form, confirm, list]
+// ScreenFlowの画面集合: [list, form, confirm]
+// → 循環部分を除去して比較、整合性OK
+```
+
+**検証内容:**
+- 画面順序の一致性（循環を考慮）
+- 遷移の完全性（すべての遷移が定義されているか）
+- 開始・終了画面の一致性
+
+**設計判断:**
+- ScreenFlowはグラフ構造なので循環は遷移で表現される
+- UseCaseの最後に「一覧に戻る」ステップがあっても正常
+
+#### コンテキスト推論
+
+成熟度レベルに基づいたステージ推論：
+
+```typescript
+// レベル4-5: production ステージ（適切な推奨事項）
+// レベル1-3: poc/mvp ステージ（初期段階向け推奨）
+```
+
+これにより、高成熟度プロジェクトに不適切な「簡略化推奨」を防ぎます。
+
 #### 推奨事項の種類
 
 ```typescript
@@ -313,7 +376,43 @@ export type RecommendationCategory =
   | 'maturity';
 ```
 
-### 5. コメント規約
+### 7. 型安全性の原則
+
+**「型システムで保証できることは、ランタイムで検証しない」**
+
+TypeScriptの型システムを最大限活用し、冗長なランタイム検証を排除します。
+
+#### 適用例
+
+**❌ 冗長なランタイム検証（削除済み）:**
+```typescript
+// relatedUseCaseは必須フィールドなので存在チェック不要
+if (!screenFlow.relatedUseCase) {
+  // エラー
+}
+
+// prerequisiteUseCasesは配列型なので存在チェック不要
+if (useCase.prerequisiteUseCases) {
+  // 処理
+}
+```
+
+**✅ 型システムによる保証:**
+```typescript
+// relatedUseCaseは必須、非null表明で明示
+const relatedUseCase = useCaseMap.get(screenFlow.relatedUseCase.id)!;
+
+// prerequisiteUseCasesは配列（undefinedの可能性あり）、オプショナルチェーン使用
+useCase.prerequisiteUseCases?.forEach(...);
+```
+
+#### メリット
+
+1. **コードの簡潔性**: 不要なチェックを排除
+2. **意図の明確化**: 非null表明で型システムへの信頼を表明
+3. **保守性向上**: 型定義と実装の一致
+
+### 8. コメント規約
 
 #### JSDocの必須項目
 

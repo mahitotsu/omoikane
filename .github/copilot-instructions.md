@@ -195,6 +195,11 @@ const validationRef = typedValidationRuleRef('validation-email-format');
 
 全てのドキュメント型に`type`フィールドを持たせ、実行時に型を識別できるようにします。これにより、インスタンスプロジェクトで型安全な参照関数を自動生成できます。
 
+**重要な原則:**
+- **type属性のみで判定**: プロパティの有無による判定は使用しない
+- **一貫性**: すべての要素が統一された方法で検出される
+- **シンプル**: フォールバックロジック不要
+
 ### メタモデル側での定義
 
 ```typescript
@@ -209,6 +214,12 @@ export interface ValidationRule extends DocumentBase {
   type?: 'validation-rule'; // 型識別子
   ruleType: ValidationRuleType;
   // ...
+}
+
+export interface ScreenFlow extends DocumentBase {
+  type?: 'screen-flow'; // 型識別子
+  transitions: ScreenTransition[];
+  relatedUseCase: Ref<UseCase>; // 必須（トレーサビリティ）
 }
 ```
 
@@ -231,6 +242,14 @@ export const emailValidation: ValidationRule = {
   ruleType: 'email',
   errorMessage: '有効なメールアドレスを入力してください',
 };
+
+export const bookingFlow: ScreenFlow = {
+  id: 'booking-flow',
+  name: '予約登録フロー',
+  type: 'screen-flow', // ← これで自動検出される
+  transitions: [/* ... */],
+  relatedUseCase: typedUseCaseRef('reservation-booking'), // 必須
+};
 ```
 
 ### 自動生成される型定義
@@ -239,6 +258,7 @@ export const emailValidation: ValidationRule = {
 // 自動生成されるtyped-references.ts
 export type KnownActorId = 'visitor' | 'store-staff' | ...;
 export type KnownValidationRuleId = 'validation-email-format' | ...;
+export type KnownScreenFlowId = 'booking-flow' | ...;
 
 export function typedActorRef<T extends KnownActorId>(id: T): Ref<Actor> & { id: T } {
   return { id };
@@ -255,7 +275,41 @@ export function typedValidationRuleRef<T extends KnownValidationRuleId>(id: T): 
 
 - **凝集度**: 入力フィールドは画面定義内にインライン定義
 - **再利用性**: バリデーションルールは独立した型として定義し参照で再利用
-- **トレーサビリティ**: UseCaseStepから画面への参照
+- **トレーサビリティ**: 
+  - UseCaseStepから画面への参照
+  - ScreenFlowからUseCaseへの必須参照（relatedUseCase）
+- **循環UIパターン**: 「一覧 → 詳細 → 一覧」のような循環を正しく表現
+
+### ScreenFlowの定義
+
+```typescript
+// 画面遷移フロー（transitionsが単一の情報源）
+export const bookingFlow: ScreenFlow = {
+  id: 'booking-flow',
+  name: '予約登録フロー',
+  type: 'screen-flow',
+  description: '来店者による予約登録の画面遷移',
+  transitions: [
+    {
+      from: typedScreenRef('form-screen'),
+      to: typedScreenRef('confirm-screen'),
+      trigger: typedScreenActionRef('form-screen', 'submit'),
+      condition: 'すべてのバリデーションが通過している',
+    },
+    {
+      from: typedScreenRef('confirm-screen'),
+      to: typedScreenRef('complete-screen'),
+      trigger: typedScreenActionRef('confirm-screen', 'confirm'),
+      condition: '予約枠が確保できた',
+    },
+  ],
+  relatedUseCase: typedUseCaseRef('reservation-booking'), // 必須
+};
+```
+
+**重要な変更点:**
+- `relatedUseCase`は**必須フィールド**になりました（型安全性とトレーサビリティの向上）
+- `screens`, `startScreen`, `endScreens`は自動導出されるため定義不要（DRY原則）
 
 ### バリデーションルールの定義
 
@@ -306,8 +360,59 @@ mainFlow: [
     screen: typedScreenRef('form-screen'),
     inputFields: ['email', 'phone', 'date'], // 画面内のフィールドID
   },
+  {
+    stepId: 'confirm-booking',
+    actor: typedActorRef('visitor'),
+    action: '内容を確認して予約を確定する',
+    expectedResult: '予約が完了し予約番号が表示される',
+    screen: typedScreenRef('confirm-screen'),
+  },
 ];
 ```
+
+### 循環UIパターンのサポート
+
+多くの実世界のUIフローは「一覧 → 詳細 → 一覧」のように最初の画面に戻ります。これは正常な設計パターンです：
+
+```typescript
+// UseCaseでの循環フロー定義（推奨）
+mainFlow: [
+  {
+    stepId: 'view-list',
+    screen: typedScreenRef('list-screen'),
+    action: '一覧を表示',
+    expectedResult: '予約一覧が表示される',
+  },
+  {
+    stepId: 'view-detail',
+    screen: typedScreenRef('detail-screen'),
+    action: '詳細を確認',
+    expectedResult: '予約詳細が表示される',
+  },
+  {
+    stepId: 'return-to-list',
+    screen: typedScreenRef('list-screen'), // 最初の画面に戻る
+    action: '一覧に戻る',
+    expectedResult: '一覧画面が表示される',
+  },
+];
+
+// ScreenFlowでの遷移定義（循環を明示）
+transitions: [
+  {
+    from: typedScreenRef('list-screen'),
+    to: typedScreenRef('detail-screen'),
+    trigger: typedScreenActionRef('list-screen', 'view-detail'),
+  },
+  {
+    from: typedScreenRef('detail-screen'),
+    to: typedScreenRef('list-screen'),
+    trigger: typedScreenActionRef('detail-screen', 'back'),
+  },
+];
+```
+
+品質評価の整合性チェックは、循環パターンを正しく認識・検証します。
 
 ## stepNumber 自動管理
 

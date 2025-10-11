@@ -25,6 +25,8 @@ Metamodel は、ITデリバリプロジェクトにおけるユースケース�
 - **段階的詳細化対応**: シンプルから複雑まで段階的に詳細化可能
 - **品質評価フレームワーク**: 設計品質の自動評価とAI Agent向け改善提案
 - **UI層の統合**: 画面定義、バリデーションルール、画面遷移フローの型安全な管理
+- **循環UIパターンのサポート**: 「一覧 → 詳細 → 一覧」のような循環フローを正しく評価
+- **型システムによる保証**: ランタイム検証を最小化し、型安全性を最大化
 
 ## インストール
 
@@ -98,25 +100,33 @@ const userRegistration: Functional.UseCase = {
 
 - `Screen`: 画面定義
 - `ValidationRule`: バリデーションルール
-- `ScreenFlow`: 画面遷移フロー（transitionsのみを定義、画面リスト等は自動導出）
+- `ScreenFlow`: 画面遷移フロー（transitionsとrelatedUseCaseのみ定義、画面リスト等は自動導出）
 - `ScreenActionRef`: 画面アクション参照（screenId + actionId）
 - `InputField`: 入力フィールド
 - `DisplayField`: 表示フィールド
 - `ScreenAction`: 画面アクション
 
+**UI層の重要な変更点**:
+
+- **ScreenFlow.relatedUseCase**: 必須フィールドになりました（トレーサビリティ向上）
+- **自動導出**: `screens`、`startScreen`、`endScreens`は`transitions`から自動計算（DRY原則）
+- **循環パターン**: 「一覧 → 詳細 → 一覧」のような循環を正しくサポート
+
 **UI層の自動導出機能**:
 
-画面フロー（`ScreenFlow`）は`transitions`のみを定義し、以下の情報は自動導出されます：
+画面フロー（`ScreenFlow`）は`transitions`と`relatedUseCase`のみを定義し、以下の情報は自動導出されます：
 
 ```typescript
 import { deriveScreenFlowMetadata } from 'omoikane-metamodel';
 
 const flow: ScreenFlow = {
   id: 'booking-flow',
+  type: 'screen-flow',
   transitions: [
     { from: { id: 'form' }, to: { id: 'confirm' }, trigger: {...} },
     { from: { id: 'confirm' }, to: { id: 'complete' }, trigger: {...} },
   ],
+  relatedUseCase: { id: 'reservation-booking' }, // 必須
 };
 
 // 自動導出
@@ -126,7 +136,7 @@ const metadata = deriveScreenFlowMetadata(flow);
 // metadata.endScreens: ['complete']  // 出次数0の画面
 ```
 
-これにより、DRY原則が守られ、`screens`/`startScreen`/`endScreens`の手動管理が不要になります。
+これにより、DRY原則が守られ、冗長なフィールドの手動管理が不要になります。
 
 ### ユーティリティ
 
