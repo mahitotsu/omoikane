@@ -7,38 +7,46 @@
  *
  * **主要機能:**
  * 1. 画面遷移の定義（from → to）
- * 2. 遷移トリガーの指定（ボタンクリック、送信等）
+ * 2. 遷移トリガーの指定（画面アクションへの参照）
  * 3. 遷移条件の記述
- * 4. ユースケースとの関連付け
+ * 4. ユースケースとの関連付け（必須）
+ *
+ * **設計原則:**
+ * - transitionsのみが真実の源（screens等は自動導出）
+ * - 全ての画面フローは必ずユースケースに紐づく
+ * - 型安全な画面アクション参照（ScreenActionRef）
  *
  * **使用例:**
  * ```typescript
+ * import { typedScreenRef, typedScreenActionRef, typedUseCaseRef } from './typed-references.js';
+ *
  * const reservationFlow: ScreenFlow = {
  *   id: 'reservation-booking-flow',
  *   name: '予約登録フロー',
+ *   type: 'screen-flow',
  *   description: '来店予約の画面遷移フロー',
- *   screens: [
- *     { id: 'reservation-form-screen' },
- *     { id: 'reservation-confirm-screen' },
- *     { id: 'reservation-complete-screen' }
- *   ],
  *   transitions: [
  *     {
- *       from: { id: 'reservation-form-screen' },
- *       to: { id: 'reservation-confirm-screen' },
- *       trigger: 'submit',
+ *       from: typedScreenRef('reservation-form-screen'),
+ *       to: typedScreenRef('reservation-confirm-screen'),
+ *       trigger: typedScreenActionRef('reservation-form-screen', 'submit'),
  *       condition: 'バリデーションが全て通過'
  *     },
  *     {
- *       from: { id: 'reservation-confirm-screen' },
- *       to: { id: 'reservation-complete-screen' },
- *       trigger: 'click-button-confirm'
+ *       from: typedScreenRef('reservation-confirm-screen'),
+ *       to: typedScreenRef('reservation-complete-screen'),
+ *       trigger: typedScreenActionRef('reservation-confirm-screen', 'confirm')
  *     }
  *   ],
- *   startScreen: { id: 'reservation-form-screen' },
- *   endScreens: [{ id: 'reservation-complete-screen' }],
- *   relatedUseCase: { id: 'reservation-booking' }
+ *   relatedUseCase: typedUseCaseRef('reservation-booking')  // 必須
  * };
+ *
+ * // 画面リスト等は自動導出
+ * import { deriveScreenFlowMetadata } from './screen-flow-utils.js';
+ * const metadata = deriveScreenFlowMetadata(reservationFlow);
+ * // metadata.screens: ['reservation-form-screen', 'reservation-confirm-screen', 'reservation-complete-screen']
+ * // metadata.startScreens: ['reservation-form-screen']
+ * // metadata.endScreens: ['reservation-complete-screen']
  * ```
  *
  * @module types/ui/screen-flow
@@ -135,7 +143,7 @@ export type ScreenTransition = {
  * **設計原則:**
  * - 単一の真実の源: transitionsのみが画面遷移の定義
  * - DRY原則: screens, startScreen, endScreensは自動導出（screen-flow-utils.tsを参照）
- * - トレーサビリティ: ユースケースとの対応関係を明示
+ * - トレーサビリティ: 全ての画面フローは必ずユースケースに紐づく（必須）
  *
  * **導出可能な情報:**
  * - screens: transitionsから全画面IDを抽出
@@ -151,6 +159,10 @@ export type ScreenTransition = {
  * // metadata.startScreens: string[]
  * // metadata.endScreens: string[]
  * ```
+ *
+ * **命名規則:**
+ * - ID: `{usecase-id}-flow` の形式を推奨
+ * - 例: ユースケースID `user-registration` → フローID `user-registration-flow`
  */
 export type ScreenFlow = DocumentBase & {
   /** 文書型識別子（固定値: 'screen-flow'） */
@@ -170,9 +182,21 @@ export type ScreenFlow = DocumentBase & {
   transitions: ScreenTransition[];
 
   /**
-   * 関連するユースケース
+   * 関連するユースケース（必須）
    *
    * この画面遷移フローが実現するユースケースを関連付けます。
+   *
+   * **設計判断:**
+   * すべての画面フローは必ずビジネス目的（ユースケース）と紐づけます。
+   * これにより以下のメリットが得られます：
+   * - トレーサビリティ: 画面フローの存在理由が明確
+   * - 変更影響分析: ユースケース変更時の影響範囲を特定可能
+   * - 不要な画面の防止: ビジネス価値のない画面フローの作成を抑制
+   *
+   * **例:**
+   * ```typescript
+   * relatedUseCase: typedUseCaseRef('user-registration')
+   * ```
    */
-  relatedUseCase?: Ref<UseCase>;
+  relatedUseCase: Ref<UseCase>;
 };
