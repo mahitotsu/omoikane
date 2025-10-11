@@ -199,10 +199,14 @@ async function loadTsFile(filePath: string): Promise<any> {
  *
  * **型検出ロジック:**
  * - BusinessRequirement: businessGoalsプロパティが配列
+ * - ScreenFlow: transitionsプロパティが配列（UseCaseより先に判定）
+ * - Screen: screenTypeプロパティが存在
  * - Actor: roleプロパティが存在
  * - UseCase: actorsとmainFlowプロパティが存在
- * - Screen: screenTypeプロパティが存在
- * - ScreenFlow: screensプロパティが配列でtransitionsが存在
+ *
+ * **判定順序の理由:**
+ * - ScreenFlowをUseCaseより先に判定する必要がある
+ * - 両方ともtransitionsを持つ可能性があるため、より特徴的なフィールドで判別
  *
  * **設計判断:**
  * - プロパティベースの型判定（typeフィールドに依存しない）
@@ -235,13 +239,8 @@ async function loadProjectData(projectDir: string) {
       if (item.businessGoals && Array.isArray(item.businessGoals)) {
         businessRequirements.push(item);
       }
-      // ScreenFlowの判定（screensとtransitionsが存在、UseCaseと区別するため先に判定）
-      else if (
-        item.screens &&
-        Array.isArray(item.screens) &&
-        item.transitions &&
-        Array.isArray(item.transitions)
-      ) {
+      // ScreenFlowの判定（transitionsが配列として存在、UseCaseと区別するため先に判定）
+      else if (item.transitions && Array.isArray(item.transitions)) {
         screenFlows.push(item);
       }
       // Screenの判定（screenTypeプロパティが存在）
